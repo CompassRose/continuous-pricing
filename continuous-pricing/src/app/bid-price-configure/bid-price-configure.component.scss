@@ -1,0 +1,77 @@
+@import 'src/styles/configuration';
+@import 'src/styles/fonts';
+
+
+.bidprice-influence-size {
+  display: flex;
+  flex-direction: column;
+  margin-left: 4px;
+  margin-right: 4px;
+  background-color: $brand-component-background;
+
+  .bp-inf-layout {
+
+    &.bp-inf-column {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+
+      .bp-inf-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 4px;
+        height: 60px;
+        width: 100%;
+        border: 1px solid rgb(236, 236, 236);
+
+        .title-block {
+          display: flex;
+          min-width: 25%;
+          align-items: center;
+          margin: auto;
+          padding-right: 3px;
+
+          &:hover {
+            color: 'rgb(230, 230, 256)' !important;
+          }
+
+          .bpi-header {
+            padding-left: 4px;
+            flex: 1 1 auto;
+            text-decoration: none;
+
+            &:hover {
+              color: blue !important;
+            }
+          }
+        }
+
+        .bp-inf-value-group {
+          width: 100%;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          height: 100% !important;
+          background-color: $brand-chart-background;
+
+
+          .centered-group {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: column;
+
+            .center-input {
+              text-align: center !important;
+              max-height: 20px !important;
+              max-width: 60px !important;
+            }
+          }
+
+        }
+      }
+    }
+  }
+}
