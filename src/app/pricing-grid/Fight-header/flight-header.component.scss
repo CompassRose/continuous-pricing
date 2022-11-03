@@ -1,0 +1,33 @@
+@import 'src/styles/configuration';
+@import 'src/styles/fonts';
+
+.tail-img-sm {
+  width: 44px;
+  height: 38px;
+}
+
+.flight-header-main {
+  // margin: 0 auto;
+  color: white;
+}
+
+
+.flight-frame {
+  //padding-top: 9px;
+  min-width: 300px;
+  padding: 2px 10px;
+  // border-right: 1px solid rgba(47, 94, 235, 0.35);
+  // border-left: 1px solid rgba(47, 94, 235, 0.35);
+  // border-bottom: 1px solid rgba(47, 94, 235, 0.35);
+  // border-top: 1px solid rgba(47, 94, 235, 0.35);
+}
+
+
+.logo-circle {
+  padding: 2px 7px;
+  display: flex;
+
+  @media(max-width: 400px) {
+    display: none;
+  }
+}
