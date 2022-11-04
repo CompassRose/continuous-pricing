@@ -4,7 +4,6 @@ import * as echarts from 'echarts';
 import { Subscription } from 'rxjs'
 import { BucketDetails, BidPriceInfluencers } from '../models/dashboard.model';
 import { SharedDatasetService } from '../shared-datasets.service';
-import { getCurvePoints } from 'cardinal-spline-js';
 import { KeyBoardService } from '../keyboard.service';
 
 
@@ -32,6 +31,8 @@ export class ContinousBidPricingComponent implements OnInit {
     public curveControlPoints: any[] = [];
     public modifierCollection = [];
     public barSeriesValuesColors: any[] = [];
+
+    public selectedElement = [];
 
     public pieces: any[] = [];
 
@@ -74,7 +75,7 @@ export class ContinousBidPricingComponent implements OnInit {
             .subscribe(([buckets, state]) => {
 
                 if (this.myChart) {
-                    //console.log(' $$$$ CONTINUOUS ', buckets)
+                    //console.log(' $$$$ CONTINUOUS ', buckets, ' state ', state)
                     if (state) {
                         this.adjustPieceRegions();
                     } else {
@@ -115,7 +116,7 @@ export class ContinousBidPricingComponent implements OnInit {
                     console.log('modifierCollection. ', this.modifierCollection)
 
 
-                    this.interpolatedCurvePoints.forEach((ip, i) => {
+                    this.interpolateCurvePointsFromPieces.forEach((ip, i) => {
                         // console.log('ip ', ip)
                         this.adjustedCurvePoints.push(ip.y)
                     })
@@ -142,7 +143,7 @@ export class ContinousBidPricingComponent implements OnInit {
         }, 330);
     }
 
-
+    public updatePosition: () => void;
 
     public applyAllInfluences(bpVector: number[], args: any[]): number[] {
 
@@ -255,14 +256,13 @@ export class ContinousBidPricingComponent implements OnInit {
                 //console.log('fareMod ', fareMod)
                 this.sharedDatasetService.dynamicBidPrices.push(fareMod)
             }
-
-
         })
 
         //console.log('this.pieces ', this.pieces, ' bucketDetails ', this.sharedDatasetService.bucketDetails)
         this.adjustPieceColorForBookingUpdates();
         this.generateInterpolatedCurvePoints();
     }
+
 
     public generateInterpolatedCurvePoints() {
 
@@ -291,7 +291,9 @@ export class ContinousBidPricingComponent implements OnInit {
 
         this.pieces.map((p, i) => {
             if (i === 0) {
-                rangeArray = [300, 300, 300, 300, 300, 300, 300, 300, 300, 300]
+                for (let m = 0; m < this.pieces[0].max; m++) {
+                    rangeArray.push(this.pieces[0].value)
+                }
             } else {
                 stepper = (this.pieces[i - 1].value - p.value) / this.sharedDatasetService.bucketDetails[i].protections;
                 rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, this.sharedDatasetService.bucketDetails[i].fare, stepper, 2)
@@ -300,7 +302,7 @@ export class ContinousBidPricingComponent implements OnInit {
             result.push(...rangeArray)
         })
         this.interpolateCurvePointsFromPieces = result;
-        //console.log(' this.interpolateCurvePointsFromPieces ', this.interpolateCurvePointsFromPieces)
+
     }
 
 
@@ -335,11 +337,96 @@ export class ContinousBidPricingComponent implements OnInit {
         const self = this;
 
         const updatePosition = () => {
+            setChartInstance();
             setTimeout(() => {
-                setChartInstance();
+                setChartDragPoints()
             }, 100);
         };
 
+
+        const onPointDragging = function (dataIndex) {
+
+            let yValue = 0;
+            let dragPosition: any = [0, 0];
+            const test = dataIndex + 1;
+            dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
+
+            yValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
+
+            //console.log('dragPosition ', yValue, ' dataIndex ', test, ' Letter ', self.sharedDatasetService.bucketDetails[test].letter)
+
+            if (yValue < 1) { yValue = 1; }
+            if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
+
+            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[test], test, yValue);
+            self.sharedDatasetService.applyDataChanges();
+            self.sharedDatasetService.generateBucketValues();
+            updatePosition();
+        }
+
+
+        const setChartDragPoints = function () {
+
+            const symbolSize = 24;
+
+            self.myChart.setOption({
+
+                //graphic: echarts.util.map(self.pieces, (item, dataIndex) => {
+
+                graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, (item, dataIndex) => {
+                    const xPlace = self.pieces[dataIndex].max
+                    //console.log('setChartDragPoints ', item.Aus, ' bookings ', item.letter, ' pieces ', self.pieces[dataIndex], ' xPlace ', xPlace)
+
+                    const handles = (item.bookings < item.protections) ? [item.Aus, item.fare] : [];
+                    const scaleHandles = [xPlace, item.fare]
+                    let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;
+
+                    //const handles = (item.bookings < item.protections) ? [item.Aus, item.letter] : [];
+                    //const scaleHandles = [item.max, item.value]
+                    //let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;;
+
+                    const fillColor = doesInclude ? 'Red' : 'white';
+                    const strokeColor = 'Blue';
+                    const lineWidth = doesInclude ? 4 : 2;
+
+                    return {
+                        type: 'circle',
+                        position: self.myChart.convertToPixel('grid', scaleHandles),
+                        shape: {
+                            cx: 0,
+                            cy: 0,
+                            r: symbolSize / 3
+                        },
+                        style: {
+                            fill: fillColor,
+                            stroke: strokeColor,
+                            lineWidth: lineWidth
+                        },
+                        invisible: false,
+                        draggable: true,
+                        ondrag: echarts.util.curry(onPointDragging, dataIndex),
+
+                        //},
+                        //onmouseover: echarts.util.curry(selectElement, dataIndex),
+                        onclick: echarts.util.curry(selectElement, dataIndex),
+                        // onmouseover: function (ev) {
+                        //     console.log('onmouseover onmouseover ', ev)
+                        //     // showTooltip(dataIndex);
+                        // },
+                        // onmouseout: function () {
+                        //     //hideTooltip(dataIndex);
+                        // },
+                        z: 100
+                    };
+                })
+            })
+        }
+
+        const selectElement = (dataIndex) => {
+            //console.log('selectElement ', dataIndex)
+            //self.selectBars(dataIndex)
+            setChartDragPoints();
+        };
 
         const setChartInstance = () => {
 
@@ -400,8 +487,8 @@ export class ContinousBidPricingComponent implements OnInit {
                     },
 
                     formatter: (params) => {
-                        //console.log('params ', params)
-                        return `Seat: ${self.sharedDatasetService.maxAuValue - params[0].data.value[0]}<br>Fare: ${params[0].data.value[1]}`
+                        console.log('params ', params[1])
+                        return `Seat: ${params[1].axisValue}<br>Fare: ${params[1].data}`
                     }
                 },
 
@@ -422,54 +509,69 @@ export class ContinousBidPricingComponent implements OnInit {
                 },
 
                 series: [
-                    // {
-                    //     id: 'b',
-                    //     type: 'line',
-                    //     silent: false,
-                    //     smooth: true,
-                    //     animation: false,
-                    //     showSymbol: false,
-                    //     selectedMode: false,
-                    //     symbolSize: 0,
-                    //     z: 3,
-                    //     lineStyle: {
-                    //         type: 'solid',
-                    //         color: 'Blue',
-                    //         width: 0
-                    //     },
-                    //     itemStyle: {
-                    //         normal: {
-                    //             color: 'white',
-                    //             borderColor: 'Blue',
-                    //             borderWidth: 0
-                    //         },
-                    //         // emphasis: {
-                    //         //     color: 'white',
-                    //         //     borderColor: 'Blue',
-                    //         //     borderWidth: 2
-                    //         // }
-                    //     },
-                    //     // areaStyle: {
-                    //     //   color: {
-                    //     //     type: 'linear',
-                    //     //     x: 0,
-                    //     //     y: 0,
-                    //     //     x2: 0,
-                    //     //     y2: 1,
-                    //     //     colorStops: [{
-                    //     //       offset: 0, color: 'rgba(152, 29, 151, 0.5)'
-                    //     //     }, {
-                    //     //       offset: 1, color: 'rgba(152, 29, 151, 0.5)'
-                    //     //     }],
-                    //     //     global: false
-                    //     //   }
-                    //     // },
-                    //     data: self.interpolatedCurvePoints.map((point, i) => {
-                    //         return {
-                    //             value: [point.x, point.y],
-                    //         }
-                    //     })
-                    // },
+                    {
+                        id: 'b',
+                        type: 'line',
+                        silent: false,
+                        smooth: true,
+                        animation: false,
+                        showSymbol: true,
+                        selectedMode: false,
+                        symbolSize: 10,
+                        z: 3,
+                        lineStyle: {
+                            type: 'solid',
+                            color: 'Blue',
+                            width: 0
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: 'white',
+                                borderColor: 'Blue',
+                                borderWidth: 10
+                            },
+                            // emphasis: {
+                            //     color: 'white',
+                            //     borderColor: 'Blue',
+                            //     borderWidth: 2
+                            // }
+                        },
+                        label: {
+                            show: false,
+                            backgroundColor: 'white',
+                            padding: [3, 5, 0, 3],
+                            fontSize: 13,
+                            fontWeight: 'bold',
+                            color: '#001871',
+                            position: 'insideTop',
+                            offset: [0, -25],
+                            // formatter: (params) => {
+                            //     //console.log('params ', params)
+                            //     return self.sharedDatasetService.bucketDetails[params.dataIndex].letter
+
+                            // },
+                        },
+                        // areaStyle: {
+                        //   color: {
+                        //     type: 'linear',
+                        //     x: 0,
+                        //     y: 0,
+                        //     x2: 0,
+                        //     y2: 1,
+                        //     colorStops: [{
+                        //       offset: 0, color: 'rgba(152, 29, 151, 0.5)'
+                        //     }, {
+                        //       offset: 1, color: 'rgba(152, 29, 151, 0.5)'
+                        //     }],
+                        //     global: false
+                        //   }
+                        // },
+                        data: self.pieces.map((point, i) => {
+                            return {
+                                value: [point.max, point.value],
+                            }
+                        })
+                    },
                     {
                         type: 'bar',
                         animation: false,
@@ -534,18 +636,33 @@ export class ContinousBidPricingComponent implements OnInit {
                         showSymbol: false,
                         selectedMode: false,
                         symbolSize: 15,
+                        z: 2,
                         lineStyle: {
                             type: 'solid',
-                            color: 'purple',
-                            width: 4
+                            color: 'blue',
+                            width: 3
                         },
+                        // areaStyle: {
+                        //     color: {
+                        //         type: 'linear',
+                        //         x: 0,
+                        //         y: 0,
+                        //         x2: 0,
+                        //         y2: 1,
+                        //         colorStops: [{
+                        //             offset: 0, color: 'rgba(25, 42, 243, 0.0)'
+                        //         }, {
+                        //             offset: 1, color: 'rgba(25, 42, 243, 0.25)'
+                        //         }],
+                        //         global: false
+                        //     }
+                        // },
                         data: self.interpolateCurvePointsFromPieces
-
                     },
                     {
                         id: 'c',
                         type: 'line',
-                        animation: true,
+                        //animation: true,
                         silent: true,
                         showSymbol: false,
                         selectedMode: false,
@@ -553,40 +670,40 @@ export class ContinousBidPricingComponent implements OnInit {
                         lineStyle: {
                             type: 'solid',
                             color: 'red',
-                            width: 4
+                            width: 0
                         },
                         data: self.adjustedCurvePoints,
-                        markArea: {
-                            silent: true,
-                            itemStyle: {
-                                borderColor: 'white',
-                                borderWidth: 1
-                            },
-                            label: {
-                                show: true,
-                                backgroundColor: 'white',
-                                padding: [3, 5, 0, 3],
-                                fontSize: 13,
-                                fontWeight: 'bold',
-                                color: '#001871',
-                                position: 'right',
-                                offset: [0, -25],
-                            },
-                            data: self.pieces.map((item, i) => {
-                                //console.log('item ', item)
-                                return [{
-                                    name: self.sharedDatasetService.bucketDetails[i].letter,
-                                    yAxis: item.value,
-                                }, {
-                                    itemStyle: {
-                                        borderColor: 'rgba(100,100,100,0.5)',
-                                        borderWidth: 1,
-                                        color: 'rgba(0,0,100,0)'
-                                    },
-                                    yAxis: item.value - item.min
-                                }];
-                            }),
-                        },
+                        // markArea: {
+                        //     silent: true,
+                        //     itemStyle: {
+                        //         borderColor: 'white',
+                        //         borderWidth: 1
+                        //     },
+                        //     label: {
+                        //         show: true,
+                        //         backgroundColor: 'white',
+                        //         padding: [3, 5, 0, 3],
+                        //         fontSize: 13,
+                        //         fontWeight: 'bold',
+                        //         color: '#001871',
+                        //         position: 'right',
+                        //         offset: [0, -25],
+                        //     },
+                        //     data: self.pieces.map((item, i) => {
+                        //         //console.log('item ', item)
+                        //         return [{
+                        //             name: self.sharedDatasetService.bucketDetails[i].letter,
+                        //             yAxis: item.value,
+                        //         }, {
+                        //             itemStyle: {
+                        //                 borderColor: 'rgba(100,100,100,0.5)',
+                        //                 borderWidth: 1,
+                        //                 color: 'rgba(0,0,100,0)'
+                        //             },
+                        //             yAxis: item.value - item.min
+                        //         }];
+                        //     }),
+                        // },
 
                     }
                 ]
@@ -601,7 +718,7 @@ export class ContinousBidPricingComponent implements OnInit {
         let currData: BucketDetails = null;
         for (const bucketInfo of this.sharedDatasetService.bucketDetails) {
             const fareValue = this.sharedDatasetService.currFareValue(bucketInfo)
-            console.log('bidPrice ', bidPrice, ' fareValue ', fareValue)
+            //  console.log('bidPrice ', bidPrice, ' fareValue ', fareValue)
 
             if ((currData === null) || (fareValue >= bidPrice)) {
                 currData = bucketInfo;

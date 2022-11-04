@@ -44,22 +44,26 @@
         <div class="d-flex justify-content-between text-header-area">
           <div class="fw-600 dark-gray-text">Continuous Pricing</div>
         </div>
+
         <div class='pricing-chart'>
           <continuous-bid-pricing></continuous-bid-pricing>
         </div>
+
+        <div class="slider mt-2">
+          <mat-slider thumbLabel
+            class="example-margin"
+            dir="rtl"
+            [max]="max"
+            [min]="min"
+            [step]="1"
+            [(ngModel)]="value"
+            (input)="onSliderChange($event)">
+          </mat-slider>
+        </div>
+
       </div>
     </div>
-    <div class="slider mx-2 mt-2">
-      <div class="fw-600 dark-gray-text ms-4">Bookings</div>
-      <mat-slider thumbLabel
-        class="example-margin"
-        [max]="max"
-        [min]="min"
-        [step]="1"
-        [(ngModel)]="value"
-        (input)="onSliderChange($event)">
-      </mat-slider>
-    </div>
+
     <div class="row-to-column-wrap mt-2">
       <div class="value-entry mx-2">
         <div class="chart-container"
@@ -77,9 +81,11 @@
           style="height: 450px">
           <div class="d-flex justify-content-between text-header-area">
             <div class="fw-600 dark-gray-text">Seat Availability / Aus</div>
-            <div class="font-16 fw-600 dark-gray-text"
-              *ngIf="sharedDatasetService.totalLoadFactor">Load
-              Factor:&nbsp;<span class="me-5">{{sharedDatasetService.totalLoadFactor}}%</span>
+            <div class="d-flex me-5">
+              <div class="font-14 fw-600 dark-gray-text me-2">Load Factor:</div>
+              <div id="myProgress">
+                <div id="myBar">0%</div>
+              </div>
             </div>
           </div>
           <div class='metric-group'>

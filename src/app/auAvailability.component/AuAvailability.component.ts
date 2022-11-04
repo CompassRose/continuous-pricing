@@ -134,11 +134,13 @@ export class AuAvailabilityComponent implements AfterViewInit {
             if (yValue < 1) { yValue = 1; }
             if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
 
+            //console.log('AVAIL  dragPosition ', dragPosition, ' Letter ', self.sharedDatasetService.bucketDetails[dataIndex].letter)
             self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[dataIndex], dataIndex, yValue);
 
             self.sharedDatasetService.applyDataChanges();
             self.sharedDatasetService.generateBucketValues();
             updatePosition();
+
         }
 
 
@@ -154,7 +156,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
                     const handles = (item.bookings < item.protections) ? [item.Aus, item.letter] : [];
                     const scaleHandles = [item.Aus, item.letter]
-                    let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;;
+                    let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;
 
                     const fillColor = doesInclude ? 'Red' : 'white';
                     const strokeColor = 'Blue';

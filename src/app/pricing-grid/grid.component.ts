@@ -100,11 +100,42 @@ export class ContinousPricingComponent implements AfterViewInit {
     this.sliderCounter = ev.value;
 
     this.sharedDatasetService.bucketDetailsBehaviorSubject$.next([this.sharedDatasetService.bucketDetails, false])
+
+    var i = 0;
+
+    this.loadFactorFillPercent(this.sliderCounter)
+
+  }
+
+  public loadFactorFillPercent(value: number) {
+    const percent = Math.round((value / this.sharedDatasetService.maxAuValue) * 100);
+    var elem = document.getElementById("myBar");
+    //console.log('Move ', value, ' percent ', percent, ' elem ', elem)
+    elem.style.width = percent + "%";
+    elem.innerHTML = percent + "%";
   }
 
 
   public setActiveBucket() {
-
+    var i = 0;
+    const move = function () {
+      if (i == 0) {
+        i = 1;
+        var elem = document.getElementById("myBar");
+        var width = 10;
+        var id = setInterval(frame, 10);
+        function frame() {
+          if (width >= 100) {
+            clearInterval(id);
+            i = 0;
+          } else {
+            width++;
+            elem.style.width = width + "%";
+            elem.innerHTML = width + "%";
+          }
+        }
+      }
+    }
   }
 
 

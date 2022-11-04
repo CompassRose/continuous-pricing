@@ -160,7 +160,7 @@ export class SharedDatasetService {
             const bidPrice = this.dynamicBidPrices[i];
             for (let bucketIdx = 1; bucketIdx < this.bucketDetails.length; bucketIdx++) {
                 const bucketInfo = this.bucketDetails[bucketIdx];
-                console.log('bucketInfo ', bucketInfo)
+                //console.log('bucketInfo ', bucketInfo)
                 const fareValue = (bucketInfo.modifiedFare !== null) ? bucketInfo.modifiedFare : bucketInfo.fare;
                 if (fareValue >= bidPrice) {
                     arr[bucketIdx]++;
@@ -176,7 +176,7 @@ export class SharedDatasetService {
 
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
-
+        //console.log('           currAu ', currAu, ' bucketIdx ', bucketIdx, ' targetAu ', targetAu)
         let targetBp: number;
         if (targetAu === 0) {
             targetBp = 0;
