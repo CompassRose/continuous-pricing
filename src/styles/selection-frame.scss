@@ -1,0 +1,81 @@
+@import 'src/styles/configuration';
+@import 'src/styles/flexbox';
+
+
+.static-widget {
+  //width: 100% !important;
+  //background-color: #eee;
+  @include flexbox();
+
+  //border: 1px solid rgb(110, 109, 109);
+  .static-widget-header {
+    background-color: $accelya-blue;
+    min-width: 0;
+    padding: 0px 20px;
+    @include flexbox();
+    @include justify-content(center);
+    @include align-items(center);
+    @include flex-grow(0);
+    @include flex-shrink(0);
+    @include flex-basis(10%);
+  }
+
+  .static-widget-header>span {
+    color: #fff;
+    font-size: 16px;
+    transform: rotate(-90deg);
+    white-space: nowrap;
+  }
+}
+
+.category-frame {
+  //height: 100%;
+  //width: 10% !important;
+  // @include flexbox();
+  // @include flex-direction(column);
+
+
+
+  .widget {
+    //width: 100% !important;
+    //background-color: #eee;
+    @include flexbox();
+    @include flex-basis(10%);
+    //border: 1px solid rgb(110, 109, 109);
+
+    .widget-header {
+      background-color: $accelya-blue;
+      min-width: 0;
+      padding: 0px 20px;
+      @include flexbox();
+      @include justify-content(center);
+      @include align-items(center);
+      @include flex-grow(0);
+      @include flex-shrink(0);
+      @include flex-basis(10%);
+    }
+
+    .widget-header>span {
+      color: #fff;
+      font-size: 16px;
+      transform: rotate(-90deg);
+      white-space: nowrap;
+    }
+
+    .widget-content {
+      border: 1px solid $brand-primary-background-50;
+      background-color: red;
+      flex: 1;
+      @include flex-basis(90%);
+
+      &.collapsed {
+        display: none;
+      }
+
+      &.open {
+        display: block;
+      }
+    }
+  }
+
+}

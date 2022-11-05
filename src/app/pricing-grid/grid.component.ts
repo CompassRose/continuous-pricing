@@ -24,6 +24,7 @@ export class ContinousPricingComponent implements AfterViewInit {
 
   public colorCollections: ColorObject[] = ContinousColors;
   private subscription = new Subscription();
+  public collapsePanel = true;
 
   autoTicks = false;
   disabled = false;
@@ -42,6 +43,10 @@ export class ContinousPricingComponent implements AfterViewInit {
     public sharedDatasetService: SharedDatasetService,
     public keyBoardService: KeyBoardService) { }
 
+
+  public togglePanaelState() {
+    this.collapsePanel = !this.collapsePanel;
+  }
 
   // Bookings Slider
   public onSliderChange(ev) {

@@ -116,10 +116,11 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
         const updatePosition = () => {
             setChartOptions();
-            setTimeout(() => {
-                setChartDragPoints();
-            }, 100);
+            // setTimeout(() => {
+            //     setChartDragPoints();
+            // }, 100);
         };
+
 
 
 
@@ -198,7 +199,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
         const selectElement = (dataIndex) => {
             //console.log('selectElement ', dataIndex)
             self.selectBars(dataIndex)
-            setChartDragPoints();
+            //setChartDragPoints();
         };
 
 
@@ -213,31 +214,28 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         fontSize: 11,
                         fontWeight: 'bold'
                     },
-                    text: '   Class      DF       AU      SA         LF       Book'
+                    text: '             DF       AU      SA         LF       Book'
                 },
                 backgroundColor: 'rgba(205,225,245,0.05)',
                 grid: {
                     show: false,
                     left: 265,
-                    right: 40,
-                    top: 40,
-                    bottom: 30
+                    right: 0,
+                    top: 20,
+                    bottom: 10
                 },
                 legend: {
                     show: true,
                     selectedMode: true,
                     textStyle: {
-                        fontSize: 14
+                        fontSize: 13
                     },
                     top: -5,
                     itemWidth: 18,
                     itemHeight: 12,
                     right: 80,
                     data: [
-                        {
-                            name: 'Seat Availability',
-                            icon: 'roundRect'
-                        },
+
                         {
                             name: 'Protections',
                             icon: 'roundRect'
@@ -395,7 +393,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     {
                         type: 'bar',
                         barGap: '-100%',
-                        barWidth: 7,
+                        barWidth: 0,
                         showBackground: false,
                         roundCap: true,
                         name: 'Seat Availability',
@@ -411,53 +409,53 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             }
                         },
                         label: {
-                            show: true,
+                            show: false,
                             formatter: (params) => {
-                                return self.sharedDatasetService.bucketDetails[params.dataIndex].Sa
+                                return self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.bucketDetails[params.dataIndex].Sa > 10 ? self.sharedDatasetService.bucketDetails[params.dataIndex].Sa : ''
                             },
                             color: 'Yellow',
                             fontSize: 11,
                             fontWeight: 'bold',
-                            offset: [-10, 10],
+                            offset: [10, 10],
                             position: 'insideRight',
                         }
                     },
-                    {
-                        type: 'bar',
-                        showBackground: false,
-                        name: 'Bookings',
-                        barWidth: 26,
-                        z: 8,
-                        animation: false,
-                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            return item.bookings > 0 ? item.bookings : 0;
-                        }),
+                    // {
+                    //     type: 'bar',
+                    //     showBackground: false,
+                    //     name: 'Bookings',
+                    //     barWidth: 26,
+                    //     z: 8,
+                    //     animation: false,
+                    //     data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                    //         return item.bookings > 0 ? item.bookings : 0;
+                    //     }),
 
-                        itemStyle: {
-                            color: 'Blue',
-                            shadowColor: 'Purple',
-                            shadowOffsetX: 0,
-                            shadowOffsetY: 0,
-                            shadowBlur: 2,
-                            opacity: 1
-                        },
-                        // label: {
-                        //     show: false,
-                        //     formatter: (params) => {
-                        //         if (self.sharedDatasetService.bucketDetails[params.dataIndex].bookings > 0) {
-                        //             return self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
-                        //         } else {
-                        //             return ''
-                        //         }
-                        //     },
-                        //     //z: 12,
-                        //     //fontSize: 12,
-                        //     //rotate: -90,
-                        //     //fontWeight: 'bold',
-                        //     //position: 'insideRight',
-                        //     //offset: [5, 13]
-                        // }
-                    },
+                    //     itemStyle: {
+                    //         color: 'Blue',
+                    //         shadowColor: 'Purple',
+                    //         shadowOffsetX: 0,
+                    //         shadowOffsetY: 0,
+                    //         shadowBlur: 2,
+                    //         opacity: 1
+                    //     },
+                    //     // label: {
+                    //     //     show: false,
+                    //     //     formatter: (params) => {
+                    //     //         if (self.sharedDatasetService.bucketDetails[params.dataIndex].bookings > 0) {
+                    //     //             return self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
+                    //     //         } else {
+                    //     //             return ''
+                    //     //         }
+                    //     //     },
+                    //     //     //z: 12,
+                    //     //     //fontSize: 12,
+                    //     //     //rotate: -90,
+                    //     //     //fontWeight: 'bold',
+                    //     //     //position: 'insideRight',
+                    //     //     //offset: [5, 13]
+                    //     // }
+                    // },
                     {
                         type: 'bar',
                         stack: 'total',
@@ -468,11 +466,12 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
                         animation: false,
                         data: self.sharedDatasetService.currAus.map((item, i) => {
-                            return self.protectionYValue(i) > 0 ? self.protectionYValue(i) : 0;
+
+                            return self.protectionYValue(i) > 0 ? self.protectionYValue(i) - self.sharedDatasetService.bucketDetails[i].bookings : 0;
                         }),
 
                         itemStyle: {
-                            color: '#4f36aa',
+                            color: 'rgba(0,10,190,0.63',
                             shadowColor: 'Purple',
                             shadowOffsetX: 0,
                             shadowOffsetY: 0,
@@ -492,7 +491,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             color: 'white',
                             formatter: (params) => {
                                 if (self.protectionYValue(params.dataIndex) > 0 && self.protectionYValue(params.dataIndex) !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
-                                    return self.protectionYValue(params.dataIndex)
+                                    return self.protectionYValue(params.dataIndex) - self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
                                 } else {
                                     return ''
                                 }
@@ -552,13 +551,13 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             rich: {
                                 a: {
                                     color: 'black',
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     fontWeight: 'bold',
                                     padding: [10, 5, 0, 5]
                                 },
                             },
                             position: 'right',
-                            offset: [10, -4]
+                            offset: [2, -4]
                         }
                     }
                 ]

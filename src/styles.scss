@@ -6,6 +6,7 @@
 
 $font-family: "OpenSans-Semibold";
 $body-background: rgb(227, 231, 235);
+$chart-corner-radius: 6px;
 
 html,
 body {
@@ -13,7 +14,7 @@ body {
 }
 
 body {
-  background: $body-background !important;
+  background: rgb(188, 208, 255) !important;
 }
 
 .mat-slider-horizontal {
@@ -76,7 +77,6 @@ mat-slider {
 
 
 
-
 .grid-placement {
   display: flex;
   justify-content: center;
@@ -94,7 +94,7 @@ mat-slider {
 
 .navy-background {
 
-  background-color: $brand-primary-background;
+  background-color: $accelya-blue;
   color: $brand-off-white-lt;
 
   &.corner-radius {
@@ -102,8 +102,8 @@ mat-slider {
   }
 
   &.top-corner-radius {
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
+    border-top-right-radius: $chart-corner-radius;
+    border-top-left-radius: $chart-corner-radius;
   }
 }
 
@@ -124,14 +124,20 @@ mat-slider {
   height: 100%;
   background-color: white;
   border: 1px solid rgb(71, 71, 71);
+  border-top-right-radius: $chart-corner-radius;
+  border-top-left-radius: $chart-corner-radius;
 
   .text-header-area {
     display: flex;
     align-items: center;
     font-size: 0.95rem;
+    border-top-right-radius: $chart-corner-radius;
+    border-top-left-radius: $chart-corner-radius;
     padding: 8px 8px;
     margin-bottom: 4px;
-    background-color: rgb(221, 226, 233);
+    color: white !important;
+    background-color: $accelya-blue;
+    //background-color: rgb(221, 226, 233);
     border-bottom: 1px solid rgb(163, 163, 163);
   }
 
@@ -209,24 +215,6 @@ mat-slider {
   border-radius: 0 4px 4px 0;
 }
 
-
-// input[type=number]::-webkit-inner-spin-button,
-// input[type=number]::-webkit-outer-spin-button {
-//   opacity: 1;
-// }
-
-
-// input[type=number] {
-//   color: $brand-dark-gray-text;
-//   background-color: $brand-off-white-lt;
-//   border: solid 1px $brand-light-gray-text;
-//   width: 40px;
-//   min-height: 1rem !important;
-//   max-height: 1rem !important;
-//   padding: 2px 8px;
-//   margin: 0px 0;
-//   box-sizing: border-box;
-// }
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

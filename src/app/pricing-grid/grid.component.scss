@@ -1,5 +1,6 @@
 // Global screen width adjuster
 @import '../../styles/configuration.scss';
+@import 'src/styles/selection-frame';
 
 $screen-width-modifier: 100%;
 
@@ -8,7 +9,7 @@ $screen-width-modifier: 100%;
   width: 140px;
   border-radius: 4px;
   border: 1px solid rgb(150, 150, 150);
-  background-color: rgb(213, 217, 255);
+  background-color: rgb(16, 16, 17);
 }
 
 #myBar {
@@ -145,6 +146,7 @@ textarea {
     min-height: calc(100vh * 0.04);
     display: flex;
     align-items: center;
+    border-top: 3px solid $accelya-pink;
 
     .header-body {
       width: 100%;
@@ -197,11 +199,9 @@ textarea {
     .slider {
       display: flex;
       align-items: center;
-      //margin: 6px;
-      //width: 100%;
-      padding: 2px;
+      //padding: 2px;
       background-color: rgb(247, 247, 247) !important;
-      border: 1px solid grey;
+      //border: 1px solid grey;
 
       .example-margin {
         width: 97%;
@@ -213,10 +213,18 @@ textarea {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
-      min-width: 100% !important;
+      width: 100% !important;
 
       .value-entry {
-        flex-basis: 20% //margin-right: auto;
+        width: 25% !important;
+
+        .collapsed {
+          width: 25% !important;
+        }
+
+        .open {
+          width: 25% !important;
+        }
       }
 
       .pricing-window {
@@ -224,8 +232,17 @@ textarea {
       }
 
       .sa-au-window {
-        width: 80%;
+        z-index: 100;
+        width: 75% !important;
         margin-left: auto;
+
+        .collapsed {
+          width: 75% !important;
+        }
+
+        .open {
+          width: 90% !important;
+        }
       }
     }
 
