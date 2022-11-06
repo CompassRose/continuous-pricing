@@ -49,14 +49,6 @@ export class BipPriceConfigureComponent {
 
     public activeCabinInfluences: IFlightInfluencesByCabin = {};
 
-    // From Save Influences Button Press
-    // @Input()
-    // set updateModifiedCurve(val: boolean) {
-    //     if (val) {
-    //         this.setConstraintOrderForSave();
-    //     }
-    // }
-
 
     constructor(
         public sharedDatasetService: SharedDatasetService,
@@ -73,10 +65,10 @@ export class BipPriceConfigureComponent {
             tap(([event, item, id]) => {
 
                 Object.entries(this.modifierObj).forEach((d: any, i) => {
-                    console.log('       d ', d)
+                    // console.log('       d ', d)
                 })
 
-                console.log('\n\ninfluenceInput ', event, ' item ', item, ' row ', id)
+                //console.log('\n\ninfluenceInput ', event, ' item ', item, ' row ', id)
                 this.sharedDatasetService.influenceInput$.next([event, item, id])
 
             })

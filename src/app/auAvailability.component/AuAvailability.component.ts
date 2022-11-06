@@ -390,36 +390,36 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             width: 0
                         }
                     },
-                    {
-                        type: 'bar',
-                        barGap: '-100%',
-                        barWidth: 0,
-                        showBackground: false,
-                        roundCap: true,
-                        name: 'Seat Availability',
-                        z: 9,
-                        animation: false,
-                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            return item.Sa;
-                        }),
-                        itemStyle: {
-                            normal: {
-                                color: '#fae529',
-                                opacity: 1
-                            }
-                        },
-                        label: {
-                            show: false,
-                            formatter: (params) => {
-                                return self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.bucketDetails[params.dataIndex].Sa > 10 ? self.sharedDatasetService.bucketDetails[params.dataIndex].Sa : ''
-                            },
-                            color: 'Yellow',
-                            fontSize: 11,
-                            fontWeight: 'bold',
-                            offset: [10, 10],
-                            position: 'insideRight',
-                        }
-                    },
+                    // {
+                    //     type: 'bar',
+                    //     barGap: '-100%',
+                    //     //barWidth: 0,
+                    //     showBackground: false,
+                    //     roundCap: true,
+                    //     name: 'Seat Availability',
+                    //     z: 9,
+                    //     animation: false,
+                    //     data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                    //         return item.Sa;
+                    //     }),
+                    //     itemStyle: {
+                    //         normal: {
+                    //             color: '#fae529',
+                    //             opacity: 1
+                    //         }
+                    //     },
+                    //     label: {
+                    //         show: false,
+                    //         formatter: (params) => {
+                    //             return self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.bucketDetails[params.dataIndex].Sa > 10 ? self.sharedDatasetService.bucketDetails[params.dataIndex].Sa : ''
+                    //         },
+                    //         color: 'Yellow',
+                    //         fontSize: 11,
+                    //         fontWeight: 'bold',
+                    //         offset: [10, 10],
+                    //         position: 'insideRight',
+                    //     }
+                    // },
                     // {
                     //     type: 'bar',
                     //     showBackground: false,
@@ -460,13 +460,11 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         type: 'bar',
                         stack: 'total',
                         name: 'Protections',
-                        barWidth: 26,
+                        //barWidth: 26,
                         barGap: '-100%',
                         z: 6,
-
                         animation: false,
                         data: self.sharedDatasetService.currAus.map((item, i) => {
-
                             return self.protectionYValue(i) > 0 ? self.protectionYValue(i) - self.sharedDatasetService.bucketDetails[i].bookings : 0;
                         }),
 
@@ -498,7 +496,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             },
                             fontSize: 11,
                             fontWeight: 'bold',
-                            offset: [-14, 10],
+                            offset: [26, 2],
                             position: 'insideRight',
                         }
                     },
@@ -507,35 +505,49 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         type: 'bar',
                         stack: 'total',
                         name: 'AUs',
-                        barWidth: 30,
+                        //barWidth: 30,
                         showBackground: true,
-                        selectedMode: 'multiple',
+                        //selectedMode: 'multiple',
                         //roundCap: true,
                         z: 1,
                         animation: false,
                         data: self.sharedDatasetService.currAus.map((item, i) => {
                             return item - self.protectionYValue(i)
                         }),
-
                         itemStyle: {
-                            color: '#7B46E3',
-                            shadowColor: 'Purple',
-                            shadowOffsetX: 0,
-                            shadowOffsetY: 0,
-                            shadowBlur: 2,
-                            opacity: 1,
-                            borderColor: 'yellow',
-                            borderWidth: 0,
-                            borderStyle: 'solid',
+                            color: (params) => {
+                                return 'Purple'
+                                //return self.colorRange.value[0];
+
+                            },
                             decal: {
                                 symbol: 'rect',
-                                color: 'rgba(0, 0, 0, 0.12)',
+                                color: 'rgba(0, 0, 0, 0.32)',
                                 dashArrayX: [1, 0],
                                 dashArrayY: [4, 4],
                                 symbolSize: 1,
                                 rotation: Math.PI / 6
                             }
                         },
+                        // itemStyle: {
+                        //     color: '#7B46E3',
+                        //     shadowColor: 'Purple',
+                        //     shadowOffsetX: 0,
+                        //     shadowOffsetY: 0,
+                        //     shadowBlur: 2,
+                        //     opacity: 1,
+                        //     borderColor: 'yellow',
+                        //     borderWidth: 0,
+                        //     borderStyle: 'solid',
+                        //     decal: {
+                        //         symbol: 'rect',
+                        //         color: 'rgba(0, 0, 0, 0.12)',
+                        //         dashArrayX: [1, 0],
+                        //         dashArrayY: [4, 4],
+                        //         symbolSize: 1,
+                        //         rotation: Math.PI / 6
+                        //     }
+                        // },
                         select: {
                             itemStyle: {
                                 borderWidth: 3,
