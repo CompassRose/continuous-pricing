@@ -16,14 +16,17 @@ export class SharedDatasetService {
 
     public bucketDetails: BucketDetails[] = [
         { letter: 'Y', fare: 300, modifiedFare: null, protections: 0, multiplier: 1, Aus: 150, Sa: 150, bookings: 0, active: true },
-        { letter: 'B', fare: 280, modifiedFare: null, protections: 0, multiplier: 1, Aus: 140, Sa: 140, bookings: 0, active: true },
+        { letter: 'C', fare: 290, modifiedFare: null, protections: 0, multiplier: 1, Aus: 140, Sa: 140, bookings: 0, active: true },
+        { letter: 'B', fare: 280, modifiedFare: null, protections: 0, multiplier: 1, Aus: 135, Sa: 135, bookings: 0, active: true },
         { letter: 'M', fare: 250, modifiedFare: null, protections: 0, multiplier: 1, Aus: 130, Sa: 130, bookings: 0, active: true },
+        { letter: 'Q', fare: 230, modifiedFare: null, protections: 0, multiplier: 1, Aus: 120, Sa: 120, bookings: 0, active: true },
         { letter: 'H', fare: 200, modifiedFare: null, protections: 0, multiplier: 1, Aus: 110, Sa: 110, bookings: 0, active: true },
         { letter: 'K', fare: 150, modifiedFare: null, protections: 0, multiplier: 1, Aus: 90, Sa: 90, bookings: 0, active: true },
         { letter: 'L', fare: 130, modifiedFare: null, protections: 0, multiplier: 1, Aus: 65, Sa: 65, bookings: 0, active: true },
         { letter: 'V', fare: 120, modifiedFare: null, protections: 0, multiplier: 1, Aus: 50, Sa: 50, bookings: 0, active: true },
         { letter: 'A', fare: 90, modifiedFare: null, protections: 0, multiplier: 1, Aus: 30, Sa: 30, bookings: 0, active: true },
-        { letter: 'T', fare: 60, modifiedFare: null, protections: 0, multiplier: 1, Aus: 25, Sa: 25, bookings: 0, active: true },
+        { letter: 'T', fare: 80, modifiedFare: null, protections: 0, multiplier: 1, Aus: 25, Sa: 25, bookings: 0, active: true },
+        { letter: 'U', fare: 60, modifiedFare: null, protections: 0, multiplier: 1, Aus: 15, Sa: 15, bookings: 0, active: true },
         { letter: 'X', fare: 50, modifiedFare: null, protections: 0, multiplier: 1, Aus: 10, Sa: 10, bookings: 0, active: true }
     ];
 
