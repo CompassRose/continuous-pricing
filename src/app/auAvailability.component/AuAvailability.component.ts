@@ -25,11 +25,11 @@ export class AuAvailabilityComponent implements AfterViewInit {
     constructor(public sharedDatasetService: SharedDatasetService, private host: ElementRef) {
 
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
-            .subscribe(([buckets, state]) => {
+            .subscribe((state) => {
                 if (this.myChart) {
-                    this.sharedDatasetService.totalProtections = this.sharedDatasetService.generateBookingCounts('protections');
-                    this.sharedDatasetService.totalBookingsCollector = this.sharedDatasetService.generateBookingCounts('bookings');
-                    // console.log('dataIndex ', this.sharedDatasetService.totalBookingsCollector)
+                    //this.sharedDatasetService.totalProtections = this.sharedDatasetService.generateBookingCounts('protections');
+                    // this.sharedDatasetService.totalBookingsCollector = this.sharedDatasetService.generateBookingCounts('bookings');
+                    //console.log('dataIndex ', this.sharedDatasetService.totalBookingsCollector)
                     this.sharedDatasetService.totalLoadFactor = ((this.sharedDatasetService.totalBookingsCollector / this.sharedDatasetService.totalProtections) * 100).toFixed(0);
                     this.createChartElement();
                 }
@@ -65,6 +65,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
     public ngAfterViewInit(): void {
         this.sharedDatasetService.applyDataChanges();
+
         this.createSvg('draggable-available')
     }
 
@@ -116,91 +117,8 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
         const updatePosition = () => {
             setChartOptions();
-            // setTimeout(() => {
-            //     setChartDragPoints();
-            // }, 100);
         };
 
-
-
-
-        const onPointDragging = function (dataIndex) {
-
-            let yValue = 0;
-            let dragPosition: any = [0, 0];
-
-            dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
-            yValue = Math.round(Math.floor(dragPosition[0]));
-
-            if (yValue < 1) { yValue = 1; }
-            if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
-
-            //console.log('AVAIL  dragPosition ', dragPosition, ' Letter ', self.sharedDatasetService.bucketDetails[dataIndex].letter)
-            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[dataIndex], dataIndex, yValue);
-
-            self.sharedDatasetService.applyDataChanges();
-            self.sharedDatasetService.generateBucketValues();
-            updatePosition();
-
-        }
-
-
-
-        const setChartDragPoints = function () {
-
-            const symbolSize = 32;
-
-            self.myChart.setOption({
-
-                graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, (item, dataIndex) => {
-                    // console.log('setChartDragPoints ', item.protections, ' bookings ', item.bookings)
-
-                    const handles = (item.bookings < item.protections) ? [item.Aus, item.letter] : [];
-                    const scaleHandles = [item.Aus, item.letter]
-                    let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;
-
-                    const fillColor = doesInclude ? 'Red' : 'white';
-                    const strokeColor = 'Blue';
-                    const lineWidth = doesInclude ? 4 : 2;
-
-                    return {
-                        type: 'circle',
-                        position: self.myChart.convertToPixel('grid', scaleHandles),
-                        shape: {
-                            cx: 0,
-                            cy: 2,
-                            r: symbolSize / 3
-                        },
-                        style: {
-                            fill: fillColor,
-                            stroke: strokeColor,
-                            lineWidth: lineWidth
-                        },
-                        invisible: false,
-                        draggable: true,
-                        ondrag: echarts.util.curry(onPointDragging, dataIndex),
-
-                        //},
-                        //onmouseover: echarts.util.curry(selectElement, dataIndex),
-                        onclick: echarts.util.curry(selectElement, dataIndex),
-                        // onmouseover: function (ev) {
-                        //     console.log('onmouseover onmouseover ', ev)
-                        //     // showTooltip(dataIndex);
-                        // },
-                        // onmouseout: function () {
-                        //     //hideTooltip(dataIndex);
-                        // },
-                        z: 100
-                    };
-                })
-            })
-        }
-
-        const selectElement = (dataIndex) => {
-            //console.log('selectElement ', dataIndex)
-            self.selectBars(dataIndex)
-            //setChartDragPoints();
-        };
 
 
         const setChartOptions = function () {
@@ -214,15 +132,15 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         fontSize: 11,
                         fontWeight: 'bold'
                     },
-                    text: '              DF       AU      SA         LF       Book'
+                    text: '            DF       AU       SA     Book'
                 },
                 backgroundColor: 'rgba(205,225,245,0.05)',
                 grid: {
                     show: false,
-                    left: 265,
+                    left: 205,
                     right: 10,
                     top: 20,
-                    bottom: 20
+                    bottom: 30
                 },
                 legend: {
                     show: true,
@@ -260,7 +178,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         show: false
                     },
                     axisLabel: {
-                        fontSize: 10
+                        fontSize: 0
                     },
                 },
                 // tooltip: {
@@ -300,16 +218,16 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             const fare = self.sharedDatasetService.bucketDetails[i].fare;
                             const sa = self.sharedDatasetService.bucketDetails[i].Sa;
                             const au = self.sharedDatasetService.bucketDetails[i].Aus;
-                            const loadFactor = (self.sharedDatasetService.bucketDetails[i].bookings / self.sharedDatasetService.bucketDetails[i].protections) * 100;
-                            return '{f|' + letter + '}{a|' + fare + '}{h|' + au + '}{d|' + sa + '}{l|' + loadFactor.toFixed(0) + '%' + '}{i|' + bookings + '}';
+                            // const loadFactor = (self.sharedDatasetService.bucketDetails[i].bookings / self.sharedDatasetService.bucketDetails[i].protections) * 100;
+                            return '{f|' + letter + '}{a|' + fare + '}{h|' + au + '}{d|' + sa + '}{i|' + bookings + '}';
                         },
                         margin: 20,
                         verticalAlign: 'middle',
                         rich: {
                             f: {
                                 align: 'center',
-                                width: 40,
-                                fontSize: 13,
+                                width: 30,
+                                fontSize: 12,
                                 padding: [4, 0, 4, 0],
                                 borderColor: 'rgba(0,0,0,0.2)',
                                 backgroundColor: 'rgba(255,255,255,1)',
@@ -324,7 +242,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 borderWidth: 1,
                                 align: 'center',
                                 width: 40,
-                                fontSize: 13,
+                                fontSize: 12,
                                 padding: [4, 0, 4, 0],
                             },
                             d: {
@@ -333,7 +251,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 borderWidth: 1,
                                 align: 'center',
                                 width: 40,
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: 'black',
                                 padding: [4, 0, 4, 0],
                             },
@@ -343,7 +261,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 borderWidth: 1,
                                 align: 'center',
                                 width: 50,
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: '#313F4A',
                                 padding: [4, 0, 4, 0],
                             },
@@ -353,7 +271,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 borderWidth: 1,
                                 align: 'center',
                                 width: 35,
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: '#313F4A',
                                 padding: [4, 0, 4, 0],
                             },
@@ -362,10 +280,10 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 backgroundColor: 'rgba(255,255,255,1)',
                                 borderWidth: 2,
                                 align: 'center',
-                                fontWeight: 'bold',
+                                //fontWeight: 'bold',
                                 width: 35,
-                                fontSize: 13,
-                                color: 'black',
+                                fontSize: 12,
+                                color: '#313F4A',
                                 padding: [4, 0, 4, 0],
                             },
                         },
@@ -373,28 +291,28 @@ export class AuAvailabilityComponent implements AfterViewInit {
                 },
 
                 series: [
-                    {
-                        type: 'line',
-                        name: 'AU Line',
-                        showSymbol: false,
-                        symbolSize: 0,
-                        data: self.sharedDatasetService.currAus.map((item, i) => {
-                            return self.currYAvailValue(i);
-                        }),
+                    // {
+                    //     type: 'line',
+                    //     name: 'AU Line',
+                    //     showSymbol: false,
+                    //     symbolSize: 0,
+                    //     data: self.sharedDatasetService.currAus.map((item, i) => {
+                    //         return self.currYAvailValue(i);
+                    //     }),
 
-                        itemStyle: {
-                            color: 'blue',
-                            borderColor: '#001871',
-                            borderWidth: 0
-                        },
-                        lineStyle: {
-                            width: 0
-                        }
-                    },
+                    //     itemStyle: {
+                    //         color: 'blue',
+                    //         borderColor: '#001871',
+                    //         borderWidth: 0
+                    //     },
+                    //     lineStyle: {
+                    //         width: 0
+                    //     }
+                    // },
                     {
                         type: 'bar',
                         barGap: '-100%',
-                        barWidth: 7,
+                        barWidth: 6,
                         //stack: 'total',
                         showBackground: false,
                         roundCap: true,
@@ -406,19 +324,19 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         }),
                         itemStyle: {
                             normal: {
-                                color: '#fae529',
+                                color: 'rgb(0,238,110)',
                                 opacity: 1
                             }
                         },
                         label: {
                             show: true,
                             formatter: (params) => {
-                                return self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.bucketDetails[params.dataIndex].Sa > 10 ? self.sharedDatasetService.bucketDetails[params.dataIndex].Sa : ''
+                                return self.sharedDatasetService.bucketDetails[params.dataIndex].Sa
                             },
-                            color: 'black',
+                            color: 'white',
                             fontSize: 11,
                             fontWeight: 'bold',
-                            offset: [10, 10],
+                            offset: [-10, 10],
                             position: 'insideRight',
                         }
                     },
@@ -472,11 +390,11 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         }),
 
                         itemStyle: {
-                            color: 'rgba(0,10,190,0.63',
+                            color: 'rgb(12, 63, 185)',
                             shadowColor: 'Purple',
-                            shadowOffsetX: 0,
-                            shadowOffsetY: 0,
-                            shadowBlur: 2,
+                            // shadowOffsetX: 0,
+                            // shadowOffsetY: 0,
+                            // shadowBlur: 2,
                             opacity: 1,
                             decal: {
                                 symbol: 'rect',
@@ -519,15 +437,15 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         }),
                         itemStyle: {
                             color: (params) => {
-                                return 'Purple'
+                                return 'rgb(92, 136, 248)'
                                 //return self.colorRange.value[0];
 
                             },
                             decal: {
                                 symbol: 'rect',
-                                color: 'rgba(0, 0, 0, 0.32)',
-                                dashArrayX: [1, 0],
-                                dashArrayY: [4, 4],
+                                color: 'rgba(0, 0, 0, 0.2)',
+                                dashArrayX: [3, 0],
+                                dashArrayY: [4, 2],
                                 symbolSize: 1,
                                 rotation: Math.PI / 6
                             }
@@ -560,19 +478,19 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         label: {
                             show: true,
                             formatter: (params) => {
-                                const labelValues = `${self.sharedDatasetService.currAus[params.dataIndex]}   ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}`
+                                const labelValues = `${self.sharedDatasetService.currAus[params.dataIndex]} ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}`
                                 return '{a|' + labelValues + '}';
                             },
                             rich: {
                                 a: {
                                     color: 'black',
-                                    fontSize: 12,
+                                    fontSize: 10,
                                     fontWeight: 'bold',
-                                    padding: [10, 5, 0, 5]
+                                    padding: [10, 3, 0, 3]
                                 },
                             },
                             position: 'right',
-                            offset: [2, -4]
+                            offset: [0, -4]
                         }
                     }
                 ]

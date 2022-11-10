@@ -104,11 +104,19 @@ sans-serif;
   height: 1.5rem !important;
 }
 
-:host ::ng-deep .ng-select .ng-select-container .ng-value-container {
-  align-items: center;
-  padding-left: 3px !important;
-}
+// :host ::ng-deep .ng-select .ng-select-container .ng-value-container {
+//   align-items: center;
+//   padding-left: 3px !important;
+// }
 
+:host ::ng-deep .ng-select .ng-select-container {
+  color: #333;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-height: 26px !important;
+  align-items: center;
+}
 
 .ng-select.primary-background ::ng-deep .ng-select-container {
   color: $brand-off-white-lt !important;

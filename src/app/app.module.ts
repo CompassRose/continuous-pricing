@@ -21,6 +21,7 @@ import { FlightHeaderComponent } from './pricing-grid/Fight-header/flight-header
 import { MatSliderModule } from '@angular/material/slider';
 import { BipPriceConfigureComponent } from './bid-price-configure/bid-price-configure.component';
 import { ContinousBidPricingComponent } from './continuous-bidpricing-chart/continuous-bidpricing-chart.component';
+//import { culori } from 'culori';
 
 @NgModule({
   declarations: [

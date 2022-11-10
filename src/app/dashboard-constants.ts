@@ -15,7 +15,7 @@ export enum ConstraintType {
 }
 
 export const ContinousColors: ColorObject[] = [
-    { key: 'Blue Green Red', value: ['#0000fd', '#004cfe', '#0292ff', '#01dbff', '#00ff95', '#dcff00', '#ffd302', '#ff9001', '#fc4a00', '#ff0000'] },
+    { key: 'Blue Green Red', value: ['rgb(255, 255, 241)', 'rgb(255, 255, 201)', 'rgb(255, 255, 170)', 'rgb(255, 255, 147)', 'rgb(255, 255, 132)', 'rgb(255, 221, 124)', 'rgb(255, 185, 122)', 'rgb(255, 149, 124)', 'rgb(255, 114, 127)', 'rgb(255, 80, 131)', 'rgb(240, 47, 135)', 'rgb(199, 0, 132)', 'rgb(154, 0, 127)', 'rgb(106, 0, 118)', 'rgb(51, 0, 107)', 'rgb(0, 0, 92)', 'rgb(0, 0, 75)', 'rgb(0, 0, 55)', 'rgb(0, 0, 35)', 'rgb(0, 0, 5)', 'rgb(0, 0, 0)'] },
     { key: 'Red Green Blue', value: ['#ff0000', '#ff9001', '#ffd302', '#94ff00', '#01ff44', '#00ff95', '#00ffdb', '#01dbff', '#0292ff', '#0000fd'] },
     { key: 'Red Yellow Green', value: ['#a50026', '#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850', '#006837'] },
     { key: 'Purple Green', value: ['#40004b', '#762a83', '#9970ab', '#c2a5cf', '#e7d4e8', '#d9f0d3', '#a6dba0', '#5aae61', '#1b7837', '#00441b'] },
@@ -99,7 +99,8 @@ export const dropdownSettingsSingle = {
     showCheckbox: false
 };
 
-export const fareClasses = ['Y', 'D', 'B', 'A', 'Z', 'W', 'U', 'S', 'R', 'I', 'L', 'J', 'H', 'K', 'N', 'Q', 'T', 'O'];
+export const testColors = ['rgb(255, 255, 241)', 'rgb(255, 255, 201)', 'rgb(255, 255, 170)', 'rgb(255, 255, 147)', 'rgb(255, 255, 132)', 'rgb(255, 221, 124)', 'rgb(255, 185, 122)', 'rgb(255, 149, 124)', 'rgb(255, 114, 127)', 'rgb(255, 80, 131)', 'rgb(240, 47, 135)', 'rgb(199, 0, 132)', 'rgb(154, 0, 127)', 'rgb(106, 0, 118)', 'rgb(51, 0, 107)', 'rgb(0, 0, 92)', 'rgb(0, 0, 75)', 'rgb(0, 0, 55)', 'rgb(0, 0, 35)', 'rgb(0, 0, 5)', 'rgb(0, 0, 0)']
+
 export const days = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct'];
 export const blueRamp16 = ['#2058A7', '#2A5FAB', '#3467AF', '#3E6EB3', '#4876B8', '#527EBC', '#5C85C0', '#668DC4', '#7094C9', '#7A9CCD', '#84A4D1', '#8EABD5', '#98B3DA', '#A2BADE', '#ACC2E2', '#B6CAE7'];
 export const redRamp10 = ['#cb1c1e', '#d2382a', '#d84c36', '#de5e43', '#e46e51', '#e97e5f', '#ef8d6e', '#f39c7e', '#f8aa8e', '#fcb99f'];

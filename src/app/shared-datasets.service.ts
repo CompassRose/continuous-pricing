@@ -10,24 +10,31 @@ import { ContinousColors, ColorObject } from './dashboard-constants';
 
 export class SharedDatasetService {
 
-    public fareClass: string[] = ['Y', 'B', 'M', 'H', 'K', 'L', 'V', 'A', 'T', 'X'];
     public currAus: number[] = [];
     public colorCollections: ColorObject[] = ContinousColors;
 
     public bucketDetails: BucketDetails[] = [
-        { letter: 'Y', fare: 300, modifiedFare: null, protections: 0, multiplier: 1, Aus: 150, Sa: 150, bookings: 0, active: true },
-        { letter: 'C', fare: 290, modifiedFare: null, protections: 0, multiplier: 1, Aus: 140, Sa: 140, bookings: 0, active: true },
-        { letter: 'B', fare: 280, modifiedFare: null, protections: 0, multiplier: 1, Aus: 135, Sa: 135, bookings: 0, active: true },
-        { letter: 'M', fare: 250, modifiedFare: null, protections: 0, multiplier: 1, Aus: 130, Sa: 130, bookings: 0, active: true },
-        { letter: 'Q', fare: 230, modifiedFare: null, protections: 0, multiplier: 1, Aus: 120, Sa: 120, bookings: 0, active: true },
-        { letter: 'H', fare: 200, modifiedFare: null, protections: 0, multiplier: 1, Aus: 110, Sa: 110, bookings: 0, active: true },
-        { letter: 'K', fare: 150, modifiedFare: null, protections: 0, multiplier: 1, Aus: 90, Sa: 90, bookings: 0, active: true },
+        { letter: 'A', fare: 300, modifiedFare: null, protections: 0, multiplier: 1, Aus: 150, Sa: 150, bookings: 0, active: true },
+        { letter: 'B', fare: 290, modifiedFare: null, protections: 0, multiplier: 1, Aus: 140, Sa: 140, bookings: 0, active: true },
+        { letter: 'C', fare: 280, modifiedFare: null, protections: 0, multiplier: 1, Aus: 135, Sa: 135, bookings: 0, active: true },
+        { letter: 'D', fare: 250, modifiedFare: null, protections: 0, multiplier: 1, Aus: 130, Sa: 130, bookings: 0, active: true },
+        { letter: 'E', fare: 240, modifiedFare: null, protections: 0, multiplier: 1, Aus: 125, Sa: 125, bookings: 0, active: true },
+        { letter: 'F', fare: 230, modifiedFare: null, protections: 0, multiplier: 1, Aus: 120, Sa: 120, bookings: 0, active: true },
+        { letter: 'G', fare: 220, modifiedFare: null, protections: 0, multiplier: 1, Aus: 115, Sa: 115, bookings: 0, active: true },
+        { letter: 'H', fare: 210, modifiedFare: null, protections: 0, multiplier: 1, Aus: 110, Sa: 110, bookings: 0, active: true },
+        { letter: 'I', fare: 200, modifiedFare: null, protections: 0, multiplier: 1, Aus: 100, Sa: 100, bookings: 0, active: true },
+        { letter: 'J', fare: 150, modifiedFare: null, protections: 0, multiplier: 1, Aus: 90, Sa: 90, bookings: 0, active: true },
+        { letter: 'K', fare: 140, modifiedFare: null, protections: 0, multiplier: 1, Aus: 80, Sa: 80, bookings: 0, active: true },
         { letter: 'L', fare: 130, modifiedFare: null, protections: 0, multiplier: 1, Aus: 65, Sa: 65, bookings: 0, active: true },
-        { letter: 'V', fare: 120, modifiedFare: null, protections: 0, multiplier: 1, Aus: 50, Sa: 50, bookings: 0, active: true },
-        { letter: 'A', fare: 90, modifiedFare: null, protections: 0, multiplier: 1, Aus: 30, Sa: 30, bookings: 0, active: true },
-        { letter: 'T', fare: 80, modifiedFare: null, protections: 0, multiplier: 1, Aus: 25, Sa: 25, bookings: 0, active: true },
-        { letter: 'U', fare: 60, modifiedFare: null, protections: 0, multiplier: 1, Aus: 15, Sa: 15, bookings: 0, active: true },
-        { letter: 'X', fare: 50, modifiedFare: null, protections: 0, multiplier: 1, Aus: 10, Sa: 10, bookings: 0, active: true }
+        { letter: 'M', fare: 120, modifiedFare: null, protections: 0, multiplier: 1, Aus: 50, Sa: 50, bookings: 0, active: true },
+        { letter: 'N', fare: 110, modifiedFare: null, protections: 0, multiplier: 1, Aus: 40, Sa: 40, bookings: 0, active: true },
+        { letter: 'O', fare: 100, modifiedFare: null, protections: 0, multiplier: 1, Aus: 35, Sa: 35, bookings: 0, active: true },
+        { letter: 'P', fare: 90, modifiedFare: null, protections: 0, multiplier: 1, Aus: 30, Sa: 30, bookings: 0, active: true },
+        { letter: 'Q', fare: 80, modifiedFare: null, protections: 0, multiplier: 1, Aus: 25, Sa: 25, bookings: 0, active: true },
+        { letter: 'R', fare: 70, modifiedFare: null, protections: 0, multiplier: 1, Aus: 17, Sa: 17, bookings: 0, active: true },
+        { letter: 'S', fare: 60, modifiedFare: null, protections: 0, multiplier: 1, Aus: 12, Sa: 12, bookings: 0, active: true },
+        { letter: 'T', fare: 50, modifiedFare: null, protections: 0, multiplier: 1, Aus: 8, Sa: 8, bookings: 0, active: true },
+        { letter: 'U', fare: 40, modifiedFare: null, protections: 0, multiplier: 1, Aus: 5, Sa: 5, bookings: 0, active: true }
     ];
 
     public totalProtections: number = 0;
@@ -36,7 +43,7 @@ export class SharedDatasetService {
 
     public selectedColorRangeBehaviorSubject$ = new BehaviorSubject<ColorObject>(this.colorCollections[0])
 
-    public bucketDetailsBehaviorSubject$ = new BehaviorSubject<[BucketDetails[], boolean]>([this.bucketDetails, true]);
+    public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(true);
 
     public bookingUpdateBehaviorSubject$ = new BehaviorSubject<number>(0);
 
@@ -45,9 +52,11 @@ export class SharedDatasetService {
     public dynamicBidPrices: number[] = [];
 
     static roundMultiplierDecimals = 4;
+
     static roundFactor = Math.pow(10, SharedDatasetService.roundMultiplierDecimals);
 
     public totalBookingsCollector: number = 0;
+
     public totalLoadFactor: string = '';
     public maxAuValue: number = 0;
     public activeBookingElement = this.bucketDetails.length - 1;
@@ -87,6 +96,7 @@ export class SharedDatasetService {
 
     public generateBucketValues() {
 
+        let total = 0;
         this.bucketDetails.forEach((a, i) => {
 
             if (this.bucketDetails[i + 1]) {
@@ -95,10 +105,13 @@ export class SharedDatasetService {
             } else {
                 this.bucketDetails[i].protections = a.Aus;
             }
+            total += this.bucketDetails[i].protections
+            //console.log('total ', total)
         })
 
-        // console.log('this.activeBookingElement ', this.activeBookingElement)
-        this.bucketDetailsBehaviorSubject$.next([this.bucketDetails, true])
+
+        this.generateSeatsAvailable()
+        this.bucketDetailsBehaviorSubject$.next(true)
     }
 
 
@@ -109,13 +122,10 @@ export class SharedDatasetService {
 
 
     public generateBookingCounts(metric): number {
-
         let metricTemp = 0;
-
         for (let i = 0; i < this.bucketDetails.length; i++) {
             metricTemp += Number(this.bucketDetails[i][metric]);
         }
-
         return metricTemp;
     }
 
@@ -133,7 +143,7 @@ export class SharedDatasetService {
                 seatTemp += this.bucketDetails[i].Sa
             }
         }
-        // console.log('seatTemp ', seatTemp)
+        //console.log('seatTemp ', seatTemp)
         return seatTemp
     }
 
@@ -141,7 +151,6 @@ export class SharedDatasetService {
     public protectionLevel(idx: number) {
         //console.log('idx ', idx)
         const nextBucketValue = (idx === (this.currAus.length - 1)) ? 0 : this.currAus[idx + 1];
-
         const diff = this.currAus[idx] - nextBucketValue;
         //console.log('     |||| diff ', diff)
         return (diff > 0) ? diff : 0;
@@ -179,7 +188,6 @@ export class SharedDatasetService {
 
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
-        //console.log('           currAu ', currAu, ' bucketIdx ', bucketIdx, ' targetAu ', targetAu)
         let targetBp: number;
         if (targetAu === 0) {
             targetBp = 0;

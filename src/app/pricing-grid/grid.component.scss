@@ -133,17 +133,23 @@ textarea {
   }
 }
 
+.booking-input {
+  text-align: center !important;
+  max-width: 40px !important;
+}
 
 .flex-basis-main {
   display: flex;
   flex-direction: column;
   width: $screen-width-modifier;
+  height: auto;
   margin: 0px auto;
 
   .header {
     position: relative;
+    z-index: 100;
     width: 100%;
-    min-height: calc(100vh * 0.04);
+    //min-height: calc(100vh * 0.02);
     display: flex;
     align-items: center;
     border-top: 3px solid $accelya-pink;
@@ -194,62 +200,64 @@ textarea {
   }
 
 
-  .flex-main {
+  .pricing-window {
+    flex-basis: 100%;
+    //height: 100% !important;
+    height: calc(100vh * 0.47) !important;
+  }
 
-    .slider {
-      display: flex;
-      align-items: center;
-      //padding: 2px;
-      background-color: rgb(247, 247, 247) !important;
-      //border: 1px solid grey;
+  .slider {
+    display: flex;
+    align-items: center;
+    //padding: 2px;
+    background-color: rgb(247, 247, 247) !important;
+    //border: 1px solid grey;
 
-      .example-margin {
-        width: 97%;
-      }
-
-    }
-
-    .row-to-column-wrap {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      width: 100% !important;
-
-      .value-entry {
-        width: 25% !important;
-
-        .collapsed {
-          width: 25% !important;
-        }
-
-        .open {
-          width: 25% !important;
-        }
-      }
-
-      .pricing-window {
-        flex-basis: 100%;
-      }
-
-      .sa-au-window {
-        z-index: 100;
-        width: 75% !important;
-        margin-left: auto;
-
-        .collapsed {
-          width: 75% !important;
-        }
-
-        .open {
-          width: 90% !important;
-        }
-      }
-    }
-
-    .footer {
-      margin: 0 auto;
-      min-width: 100%;
-      height: calc(100vh * 0.035);
+    .example-margin {
+      width: 97%;
     }
   }
+
+  .row-to-column-wrap {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100% !important;
+    height: calc(100vh * 0.5) !important;
+
+    .value-entry {
+      width: 20% !important;
+      height: 100% !important;
+
+      .collapsed {
+        width: 25% !important;
+      }
+
+      .open {
+        width: 25% !important;
+      }
+    }
+
+    .sa-au-window {
+      // z-index: 100;
+      width: 80% !important;
+      height: 100% !important;
+      margin-left: auto;
+
+      .collapsed {
+        width: 75% !important;
+      }
+
+      .open {
+        width: 90% !important;
+      }
+    }
+  }
+
+  .footer {
+    margin: 0 auto;
+    min-width: 100%;
+    //height: calc(100vh * 0.035);
+  }
+
 }

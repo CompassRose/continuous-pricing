@@ -1,21 +1,18 @@
-<div class="bidprice-influence-size px-1">
+<div class="bidprice-influence-size">
   <div class="bp-inf-layout bp-inf-column">
     <div class="bp-inf-row contrast-white-background">
       <div class="title-block">
-        <div class="bpi-header font-13 fw-600">
+        <div class="bpi-header font-11">
           {{constraintService.bpHeaderAbbrev[0].name}}</div>
       </div>
-
       <div class="bp-inf-value-group w-100 py-1">
-
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[0].name}}</div>
-          <div class="font-14 fw-600">{{staticModifiers.mult}}</div>
+        <div class="centered-group font-12">
+          <div class="font-10">{{constraintService.bpCategory[0].name}}</div>
+          <div class="font-12">{{staticModifiers.mult}}</div>
         </div>
         <div class="centered-group">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[1].name}}</div>
-
-          <input class="center-input font-14 fw-600"
+          <div class="font-10">{{constraintService.bpCategory[1].name}}</div>
+          <input class="center-input font-11"
             type="number"
             id="influence-id-0"
             step="0.01"
@@ -23,9 +20,9 @@
             onClick="this.select();"
             (ngModelChange)="this.influenceInput.next([$event,'mult',0 ])">
         </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[2].name}}</div>
-          <div class="font-14 fw-600 me-2">
+        <div class="centered-group font-12">
+          <div class="font-10">{{constraintService.bpCategory[2].name}}</div>
+          <div class="font-12 me-2">
             {{modifierObj.mult}}
           </div>
         </div>
@@ -33,19 +30,17 @@
     </div>
     <div class="bp-inf-row contrast-white-background">
       <div class="title-block">
-        <div class="bpi-header font-13 fw-600">
+        <div class="bpi-header font-11">
           {{constraintService.bpHeaderAbbrev[1].name}}</div>
       </div>
-
       <div class="bp-inf-value-group w-100 py-1">
-
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[0].name}}</div>
-          <div class="font-14 fw-600">{{staticModifiers.addSub}}</div>
+        <div class="centered-group font-12">
+          <div class="font-10">{{constraintService.bpCategory[0].name}}</div>
+          <div class="font-12">{{staticModifiers.addSub}}</div>
         </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[1].name}}</div>
-          <input class="center-input font-14 fw-600"
+        <div class="centered-group font-12">
+          <div class="font-11">{{constraintService.bpCategory[1].name}}</div>
+          <input class="center-input font-11"
             type="number"
             id="influence-id-1"
             step="1"
@@ -53,15 +48,15 @@
             onClick="this.select();"
             (ngModelChange)="influenceInput.next([$event,'addSub',1])">
         </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[2].name}}</div>
-          <div class="font-14 fw-600 me-2">
+        <div class="centered-group font-12">
+          <div class="font-10">{{constraintService.bpCategory[2].name}}</div>
+          <div class="font-12 me-2">
             {{modifierObj.addSub}}
           </div>
         </div>
       </div>
     </div>
-    <div class="bp-inf-row contrast-white-background">
+    <!-- <div class="bp-inf-row contrast-white-background">
       <div class="title-block">
         <div class="bpi-header font-13 fw-600">
           {{constraintService.bpHeaderAbbrev[2].name}}</div>
@@ -90,8 +85,8 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="bp-inf-row contrast-white-background">
+    </div> -->
+    <!-- <div class="bp-inf-row contrast-white-background">
       <div class="title-block">
         <div class="bpi-header font-13 fw-600">
           {{constraintService.bpHeaderAbbrev[3].name}}</div>
@@ -120,10 +115,10 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 
-  <div class="d-flex align-items-center mb-auto my-3"
+  <!-- <div class="d-flex align-items-center mb-auto my-3"
     *ngIf="showInfluenceControls">
     <button type="button"
       class="btn btn-primary btn-xs">
@@ -131,5 +126,5 @@
     </button>
     <button type="button"
       class="btn btn-primary btn-xs ms-auto">Clear Influences</button>
-  </div>
+  </div> -->
 </div>
