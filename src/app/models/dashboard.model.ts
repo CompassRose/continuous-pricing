@@ -83,7 +83,7 @@ export interface BucketDetails {
   protections: number;
   Aus?: number;
   Sa?: number;
-  active: boolean;
+  active?: boolean;
 }
 
 export interface ODLocate {

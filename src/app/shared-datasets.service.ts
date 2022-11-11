@@ -14,27 +14,27 @@ export class SharedDatasetService {
     public colorCollections: ColorObject[] = ContinousColors;
 
     public bucketDetails: BucketDetails[] = [
-        { letter: 'A', fare: 300, modifiedFare: null, protections: 0, multiplier: 1, Aus: 150, Sa: 150, bookings: 0, active: true },
-        { letter: 'B', fare: 290, modifiedFare: null, protections: 0, multiplier: 1, Aus: 140, Sa: 140, bookings: 0, active: true },
-        { letter: 'C', fare: 280, modifiedFare: null, protections: 0, multiplier: 1, Aus: 135, Sa: 135, bookings: 0, active: true },
-        { letter: 'D', fare: 250, modifiedFare: null, protections: 0, multiplier: 1, Aus: 130, Sa: 130, bookings: 0, active: true },
-        { letter: 'E', fare: 240, modifiedFare: null, protections: 0, multiplier: 1, Aus: 125, Sa: 125, bookings: 0, active: true },
-        { letter: 'F', fare: 230, modifiedFare: null, protections: 0, multiplier: 1, Aus: 120, Sa: 120, bookings: 0, active: true },
-        { letter: 'G', fare: 220, modifiedFare: null, protections: 0, multiplier: 1, Aus: 115, Sa: 115, bookings: 0, active: true },
-        { letter: 'H', fare: 210, modifiedFare: null, protections: 0, multiplier: 1, Aus: 110, Sa: 110, bookings: 0, active: true },
-        { letter: 'I', fare: 200, modifiedFare: null, protections: 0, multiplier: 1, Aus: 100, Sa: 100, bookings: 0, active: true },
-        { letter: 'J', fare: 150, modifiedFare: null, protections: 0, multiplier: 1, Aus: 90, Sa: 90, bookings: 0, active: true },
-        { letter: 'K', fare: 140, modifiedFare: null, protections: 0, multiplier: 1, Aus: 80, Sa: 80, bookings: 0, active: true },
-        { letter: 'L', fare: 130, modifiedFare: null, protections: 0, multiplier: 1, Aus: 65, Sa: 65, bookings: 0, active: true },
-        { letter: 'M', fare: 120, modifiedFare: null, protections: 0, multiplier: 1, Aus: 50, Sa: 50, bookings: 0, active: true },
-        { letter: 'N', fare: 110, modifiedFare: null, protections: 0, multiplier: 1, Aus: 40, Sa: 40, bookings: 0, active: true },
-        { letter: 'O', fare: 100, modifiedFare: null, protections: 0, multiplier: 1, Aus: 35, Sa: 35, bookings: 0, active: true },
-        { letter: 'P', fare: 90, modifiedFare: null, protections: 0, multiplier: 1, Aus: 30, Sa: 30, bookings: 0, active: true },
-        { letter: 'Q', fare: 80, modifiedFare: null, protections: 0, multiplier: 1, Aus: 25, Sa: 25, bookings: 0, active: true },
-        { letter: 'R', fare: 70, modifiedFare: null, protections: 0, multiplier: 1, Aus: 17, Sa: 17, bookings: 0, active: true },
-        { letter: 'S', fare: 60, modifiedFare: null, protections: 0, multiplier: 1, Aus: 12, Sa: 12, bookings: 0, active: true },
-        { letter: 'T', fare: 50, modifiedFare: null, protections: 0, multiplier: 1, Aus: 8, Sa: 8, bookings: 0, active: true },
-        { letter: 'U', fare: 40, modifiedFare: null, protections: 0, multiplier: 1, Aus: 5, Sa: 5, bookings: 0, active: true }
+        { letter: 'A', fare: 289, modifiedFare: null, protections: 0, multiplier: 1, Aus: 189, Sa: 189, bookings: 0 },
+        { letter: 'B', fare: 249, modifiedFare: null, protections: 0, multiplier: 1, Aus: 189, Sa: 189, bookings: 0 },
+        { letter: 'C', fare: 219, modifiedFare: null, protections: 0, multiplier: 1, Aus: 189, Sa: 189, bookings: 0 },
+        { letter: 'D', fare: 194, modifiedFare: null, protections: 0, multiplier: 1, Aus: 188, Sa: 188, bookings: 0 },
+        { letter: 'E', fare: 169, modifiedFare: null, protections: 0, multiplier: 1, Aus: 187, Sa: 187, bookings: 0 },
+        { letter: 'F', fare: 149, modifiedFare: null, protections: 0, multiplier: 1, Aus: 186, Sa: 186, bookings: 0 },
+        { letter: 'G', fare: 129, modifiedFare: null, protections: 0, multiplier: 1, Aus: 185, Sa: 185, bookings: 0 },
+        { letter: 'H', fare: 114, modifiedFare: null, protections: 0, multiplier: 1, Aus: 180, Sa: 180, bookings: 0 },
+        { letter: 'I', fare: 99, modifiedFare: null, protections: 0, multiplier: 1, Aus: 170, Sa: 170, bookings: 0 },
+        { letter: 'J', fare: 86, modifiedFare: null, protections: 0, multiplier: 1, Aus: 160, Sa: 160, bookings: 0 },
+        { letter: 'K', fare: 74, modifiedFare: null, protections: 0, multiplier: 1, Aus: 150, Sa: 150, bookings: 0 },
+        { letter: 'L', fare: 64, modifiedFare: null, protections: 0, multiplier: 1, Aus: 140, Sa: 140, bookings: 0 },
+        { letter: 'M', fare: 54, modifiedFare: null, protections: 0, multiplier: 1, Aus: 120, Sa: 120, bookings: 0 },
+        { letter: 'N', fare: 44, modifiedFare: null, protections: 0, multiplier: 1, Aus: 100, Sa: 100, bookings: 0 },
+        { letter: 'O', fare: 34, modifiedFare: null, protections: 0, multiplier: 1, Aus: 85, Sa: 85, bookings: 0 },
+        { letter: 'P', fare: 29, modifiedFare: null, protections: 0, multiplier: 1, Aus: 70, Sa: 70, bookings: 0 },
+        { letter: 'Q', fare: 24, modifiedFare: null, protections: 0, multiplier: 1, Aus: 60, Sa: 60, bookings: 0 },
+        { letter: 'R', fare: 20, modifiedFare: null, protections: 0, multiplier: 1, Aus: 50, Sa: 50, bookings: 0 },
+        { letter: 'S', fare: 17, modifiedFare: null, protections: 0, multiplier: 1, Aus: 40, Sa: 40, bookings: 0 },
+        { letter: 'T', fare: 15, modifiedFare: null, protections: 0, multiplier: 1, Aus: 30, Sa: 30, bookings: 0 },
+
     ];
 
     public totalProtections: number = 0;
