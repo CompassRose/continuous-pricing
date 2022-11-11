@@ -6,7 +6,7 @@ $screen-width-modifier: 100%;
 
 
 #myProgress {
-  width: 140px;
+  width: 100px;
   border-radius: 4px;
   border: 1px solid rgb(150, 150, 150);
   background-color: rgb(16, 16, 17);
@@ -20,78 +20,11 @@ $screen-width-modifier: 100%;
   text-align: center;
   line-height: 18px;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 10px;
   border: 1px solid rgb(49, 98, 190);
   color: white;
 }
 
-textarea {
-  resize: none;
-  padding: 5px;
-  width: 45px;
-  margin-bottom: 8px;
-}
-
-.metric-group {
-  display: flex;
-  flex-direction: row;
-  padding: 5px;
-  flex-wrap: nowrap;
-
-
-  .metrics {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: black;
-
-    .metric-body {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-
-      .left-class-text {
-        width: 100%;
-        color: black;
-        //line-height: 1.12 !important;
-
-        //border: 1px solid black;
-        padding: 0.16rem 2.2rem;
-      }
-
-      .text-area-center-input-text {
-        color: black;
-        line-height: 0.32 !important;
-        padding-top: 9px;
-        text-align: center;
-      }
-
-      .center-input-text {
-        width: 100%;
-        color: black;
-        line-height: 0.47 !important;
-        padding-top: 8px;
-        text-align: center;
-      }
-
-      &.aggregate-text {
-        width: 100%;
-        font-size: .9rem;
-        font-weight: 600;
-        line-height: 1 !important;
-        color: black;
-        border: 1px solid black;
-        padding: 0.23rem 1.5rem;
-
-        &.red {
-          font-weight: bold;
-          color: red
-        }
-      }
-    }
-  }
-}
 
 .control-row {
   width: 13% !important;
@@ -225,22 +158,22 @@ textarea {
     width: 100% !important;
     height: calc(100vh * 0.5) !important;
 
-    .value-entry {
-      width: 20% !important;
-      height: 100% !important;
+    // .value-entry {
+    //   width: 100% !important;
+    //   height: 100% !important;
 
-      .collapsed {
-        width: 25% !important;
-      }
+    //   .collapsed {
+    //     width: 25% !important;
+    //   }
 
-      .open {
-        width: 25% !important;
-      }
-    }
+    //   .open {
+    //     width: 25% !important;
+    //   }
+    // }
 
     .sa-au-window {
       // z-index: 100;
-      width: 80% !important;
+      width: 100% !important;
       height: 100% !important;
       margin-left: auto;
 

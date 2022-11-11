@@ -223,6 +223,8 @@ export class SharedDatasetService {
         applyModifiedFare(this.bucketDetails, bucketInfo);
     }
 
+
+
 }
 
 function applyModifiedFare(bucketData: BucketDetails[], val: any) {
@@ -234,3 +236,5 @@ function applyModifiedFare(bucketData: BucketDetails[], val: any) {
         }
     }
 }
+
+

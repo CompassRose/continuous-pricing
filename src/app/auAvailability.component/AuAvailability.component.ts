@@ -148,7 +148,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     textStyle: {
                         fontSize: 13
                     },
-                    top: -5,
+                    top: 0,
                     itemWidth: 18,
                     itemHeight: 12,
                     right: 80,
@@ -181,19 +181,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         fontSize: 0
                     },
                 },
-                // tooltip: {
-                //     trigger: 'item',
-                //     //triggerOn: 'none',
-                //     formatter: function (params) {
-                //         console.log('params ', params)
-                //         return (
-                //             'X: ' +
-                //             params.value +
-                //             '<br>Y: ' +
-                //             params.name
-                //         );
-                //     }
-                // },
                 yAxis:
                 {
                     show: true,
@@ -291,29 +278,10 @@ export class AuAvailabilityComponent implements AfterViewInit {
                 },
 
                 series: [
-                    // {
-                    //     type: 'line',
-                    //     name: 'AU Line',
-                    //     showSymbol: false,
-                    //     symbolSize: 0,
-                    //     data: self.sharedDatasetService.currAus.map((item, i) => {
-                    //         return self.currYAvailValue(i);
-                    //     }),
-
-                    //     itemStyle: {
-                    //         color: 'blue',
-                    //         borderColor: '#001871',
-                    //         borderWidth: 0
-                    //     },
-                    //     lineStyle: {
-                    //         width: 0
-                    //     }
-                    // },
                     {
                         type: 'bar',
                         barGap: '-100%',
                         barWidth: 6,
-                        //stack: 'total',
                         showBackground: false,
                         roundCap: true,
                         name: 'Seat Availability',
@@ -324,7 +292,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         }),
                         itemStyle: {
                             normal: {
-                                color: 'rgb(0,238,110)',
+                                color: 'rgb(0,218,90)',
                                 opacity: 1
                             }
                         },
@@ -340,48 +308,11 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             position: 'insideRight',
                         }
                     },
-                    // {
-                    //     type: 'bar',
-                    //     showBackground: false,
-                    //     name: 'Bookings',
-                    //     barWidth: 26,
-                    //     z: 8,
-                    //     animation: false,
-                    //     data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                    //         return item.bookings > 0 ? item.bookings : 0;
-                    //     }),
-
-                    //     itemStyle: {
-                    //         color: 'Blue',
-                    //         shadowColor: 'Purple',
-                    //         shadowOffsetX: 0,
-                    //         shadowOffsetY: 0,
-                    //         shadowBlur: 2,
-                    //         opacity: 1
-                    //     },
-                    //     // label: {
-                    //     //     show: false,
-                    //     //     formatter: (params) => {
-                    //     //         if (self.sharedDatasetService.bucketDetails[params.dataIndex].bookings > 0) {
-                    //     //             return self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
-                    //     //         } else {
-                    //     //             return ''
-                    //     //         }
-                    //     //     },
-                    //     //     //z: 12,
-                    //     //     //fontSize: 12,
-                    //     //     //rotate: -90,
-                    //     //     //fontWeight: 'bold',
-                    //     //     //position: 'insideRight',
-                    //     //     //offset: [5, 13]
-                    //     // }
-                    // },
                     {
                         type: 'bar',
                         stack: 'total',
                         name: 'Protections',
                         silent: true,
-                        //barWidth: 26,
                         barGap: '-100%',
                         z: 6,
                         animation: false,
@@ -392,9 +323,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         itemStyle: {
                             color: 'rgb(12, 63, 185)',
                             shadowColor: 'Purple',
-                            // shadowOffsetX: 0,
-                            // shadowOffsetY: 0,
-                            // shadowBlur: 2,
                             opacity: 1,
                             decal: {
                                 symbol: 'rect',
@@ -428,8 +356,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         name: 'AUs',
                         barWidth: 20,
                         showBackground: true,
-                        //selectedMode: 'multiple',
-                        //roundCap: true,
                         z: 1,
                         animation: false,
                         data: self.sharedDatasetService.currAus.map((item, i) => {
@@ -450,25 +376,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 rotation: Math.PI / 6
                             }
                         },
-                        // itemStyle: {
-                        //     color: '#7B46E3',
-                        //     shadowColor: 'Purple',
-                        //     shadowOffsetX: 0,
-                        //     shadowOffsetY: 0,
-                        //     shadowBlur: 2,
-                        //     opacity: 1,
-                        //     borderColor: 'yellow',
-                        //     borderWidth: 0,
-                        //     borderStyle: 'solid',
-                        //     decal: {
-                        //         symbol: 'rect',
-                        //         color: 'rgba(0, 0, 0, 0.12)',
-                        //         dashArrayX: [1, 0],
-                        //         dashArrayY: [4, 4],
-                        //         symbolSize: 1,
-                        //         rotation: Math.PI / 6
-                        //     }
-                        // },
                         select: {
                             itemStyle: {
                                 borderWidth: 3,
@@ -495,15 +402,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     }
                 ]
             });
-
-            // window.addEventListener('keyup', (event: any) => {
-            //     if (event.isComposing) {
-            //         return;
-            //     }
-            //     event.stopImmediatePropagation();
-            //     console.log('keyup keyup ', event)
-            //     //logKey(event.key);
-            // });
 
         }
 

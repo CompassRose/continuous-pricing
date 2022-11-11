@@ -6,13 +6,18 @@
           style="width: 150px; height: 45px;"
           src="../../assets/images/accelyaTextLogo.jpg">
       </div>
-      <span class="font-16 fw-600 me-4">IB: &nbsp;6262 </span>
+      <span class="font-16 me-4">IB: &nbsp;6262 </span>
     </div>
     <div class="flight-specifics me-4">
       <app-flight-header></app-flight-header>
     </div>
-    <span class="font-13 me-4">Departure: &nbsp;8:05am</span>
-
+    <span class="font-12 me-4">Departure: &nbsp;8:05am</span>
+    <div class="d-flex me-5">
+      <div class="font-12 me-2">Load Factor:</div>
+      <div id="myProgress">
+        <div id="myBar">0%</div>
+      </div>
+    </div>
     <div class="ms-auto">
       <button type="button"
         class="btn btn-primary btn-xs">
@@ -51,73 +56,47 @@
     <div class="chart-container">
       <div class="d-flex justify-content-between text-header-area">
         <div class="">Continuous Pricing</div>
+        <bidprice-configure></bidprice-configure>
         <div class="d-flex">
           <label class="me-2 font-12">Percentage Based</label>
           <input type="checkbox" />
         </div>
       </div>
       <div class='container-body'>
-        <div class='pricing-chart'>
-          <continuous-bid-pricing></continuous-bid-pricing>
+        <continuous-bid-pricing></continuous-bid-pricing>
+        <div class="slider mt-1 ms-2 me-2">
+          <mat-slider thumbLabel
+            class="example-margin"
+            dir="rtl"
+            [max]="max"
+            [min]="min"
+            [step]="1"
+            [(ngModel)]="value"
+            (input)="bookingSlider$.next($event)">
+          </mat-slider>
         </div>
       </div>
     </div>
-  </div>
-  <div class="slider mt-1 ms-2 me-2">
-    <mat-slider thumbLabel
-      class="example-margin"
-      dir="rtl"
-      [max]="max"
-      [min]="min"
-      [step]="1"
-      [(ngModel)]="value"
-      (input)="bookingSlider$.next($event)">
-    </mat-slider>
   </div>
   <div class="row-to-column-wrap mt-2 mb-2">
-    <div class="value-entry mx-2">
+    <!-- <div class="value-entry mx-2">
       <div class="chart-container">
         <div class="d-flex justify-content-between text-header-area">
-          <div class="">Continuous Pricing Controls</div>
+          <div class="">Continuous Pricing Influence</div>
         </div>
         <div class='container-body'>
-          <div class="prot-text-entry">
-            <bidprice-configure></bidprice-configure>
-          </div>
+          <bidprice-configure></bidprice-configure>
         </div>
       </div>
-
-    </div>
-    <div class="sa-au-window me-2">
+    </div> -->
+    <div class="sa-au-window mx-2">
       <div class="chart-container">
         <div class="d-flex justify-content-between text-header-area">
           <div class="">Seat Availability / Aus</div>
-          <!-- <div class="d-flex">
-              <div class="font-11 fw-500">Bookings</div>
-              <button (click)="decrementBookingChange(5)">- 5</button>
-              <button (click)="decrementBookingChange(1)">- 1</button>
-              <input class="booking-input font-14 fw-600"
-                type="number"
-                id="influence-id-2"
-                step="1"
-                [(ngModel)]="sharedDatasetService.totalBookingsCollector"
-                onClick="this.select();">
-              <button (click)="incrementBookingChange(1)">+ 1</button>
-              <button (click)="incrementBookingChange(5)">+ 5</button>
-            </div> -->
-          <div class="d-flex me-5">
-            <div class="font-14 me-2">Load Factor:</div>
-            <div id="myProgress">
-              <div id="myBar">0%</div>
-            </div>
-          </div>
         </div>
-        <div class='container-body d-flex'>
-          <div class="seatavail-aus">
-            <draggable-available></draggable-available>
-          </div>
+        <div class='container-body'>
+          <draggable-available></draggable-available>
         </div>
       </div>
     </div>
-
   </div>

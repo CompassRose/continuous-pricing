@@ -23,7 +23,7 @@ export class ConstraintService {
 
 
     public bpHeaderAbbrev: any[] = [
-        { name: 'MULT', constraint: 'mult', categories: this.bpCategory },
+        { name: 'MULTIPLY', constraint: 'mult', categories: this.bpCategory },
         { name: 'ADD/SUB', constraint: 'addSub', categories: this.bpCategory },
         { name: 'MIN', constraint: 'min', categories: this.bpCategory },
         { name: 'MAX', constraint: 'max', categories: this.bpCategory },

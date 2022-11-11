@@ -17,10 +17,12 @@ const culori = require('culori')
 
 export class ContinousBidPricingComponent implements OnInit {
 
-    public interpolateCurvePointsFromPieces: any[] = [];
+    public interpolateBidPriceCurvePoints: any[] = [];
     public adjustedCurvePoints: any[] = [];
 
+    public activeCurve: number[] = [];
     public modifierCollection = [];
+
     public barSeriesValuesColors: any[] = [];
 
     public markPointUpdatedPosition: any = [];
@@ -75,24 +77,30 @@ export class ContinousBidPricingComponent implements OnInit {
                     }
                     this.createChartElement();
 
-                    // console.log('modifierCollection ', this.modifierCollection, '\n mcollect ', this.adjustedCurvePoints)
-                    // if (this.modifierCollection.length > 0) {
-                    //     this.adjustedCurvePoints = [];
-                    //     this.interpolateCurvePointsFromPieces.forEach((ip, i) => {
-                    //         //console.log('ip ', ip)
-                    //         this.adjustedCurvePoints.push(ip)
-                    //     })
-                    // }
+                    //console.log('modifierCollection ', this.modifierCollection, '\n mcollect ', this.adjustedCurvePoints)
+                    //console.log(' this.sharedDatasetService.totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
+                    this.activeCurve = this.interpolateBidPriceCurvePoints;
+                    if (this.modifierCollection.length > 0) {
+                        this.adjustedCurvePoints = [];
+                        this.interpolateBidPriceCurvePoints.forEach((ip, i) => {
+
+                            const staticArray = [...this.interpolateBidPriceCurvePoints]
+                            this.adjustedCurvePoints = this.applyAllInfluences(staticArray, this.modifierCollection);
+                            this.activeCurve = this.adjustedCurvePoints;
+                        })
+                    }
                 }
             })
 
         this.sharedDatasetService.influenceInput$
             .subscribe(([response, mod, id]) => {
-                // console.log('response ', response, ' idx ', mod, ' id ', id)
+                //console.log('response ', response, ' idx ', mod, ' id ', id)
                 if (response !== null) {
                     this.modifierObj[mod] = response;
                     const staticModifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 };
+
                     this.adjustedCurvePoints = [];
+
                     Object.entries(staticModifierObj).forEach((d: any, i) => {
                         if (staticModifierObj[mod] !== this.modifierObj[mod]) {
                             if (!this.modifierCollection.some(influence => influence.key === mod)) {
@@ -107,23 +115,19 @@ export class ContinousBidPricingComponent implements OnInit {
                         } else {
                             this.modifierCollection.splice(this.modifierCollection.findIndex(idx => idx === idx), 1);
                         }
-
                     });
 
                     console.log('modifierCollection. ', this.modifierCollection)
 
-                    this.interpolateCurvePointsFromPieces.forEach((ip, i) => {
-                        // console.log('ip ', ip)
-                        this.adjustedCurvePoints.push(ip)
-                    })
+                    if (this.modifierCollection.length > 0) {
 
-                    const staticArray = [...this.adjustedCurvePoints];
-
-                    this.adjustedCurvePoints = this.applyAllInfluences(staticArray, this.modifierCollection);
-
-                    console.log('response ', this.adjustedCurvePoints)
-
-                    //this.adjustPieceRegions();
+                        const staticArray = [...this.interpolateBidPriceCurvePoints]
+                        this.adjustedCurvePoints = this.applyAllInfluences(staticArray, this.modifierCollection);
+                        this.activeCurve = this.adjustedCurvePoints
+                    } else {
+                        this.adjustedCurvePoints = [];
+                        this.activeCurve = this.interpolateBidPriceCurvePoints;
+                    }
 
                     this.adjustPieceColorForBookingUpdates();
                     this.generateInterpolatedCurvePoints();
@@ -138,11 +142,10 @@ export class ContinousBidPricingComponent implements OnInit {
 
         this.adjustPieceColorForBookingUpdates();
         this.generateInterpolatedCurvePoints();
-        //this.adjustPieceRegions();
 
         setTimeout(() => {
             this.createSvg();
-        }, 330);
+        }, 230);
     }
 
     public updatePosition: () => void;
@@ -205,7 +208,7 @@ export class ContinousBidPricingComponent implements OnInit {
         let rangeArray = [];
 
         this.sharedDatasetService.bucketDetails.map((p, i) => {
-            // console.log('p ', p, ' bucket ', this.sharedDatasetService.bucketDetails[i])
+
             if (i === 0) {
                 for (let m = 0; m < this.sharedDatasetService.bucketDetails[0].protections; m++) {
                     rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
@@ -215,12 +218,11 @@ export class ContinousBidPricingComponent implements OnInit {
                 stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
                 rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2)
                 rangeArray.pop();
-
             }
             result.push(...rangeArray)
         })
 
-        this.interpolateCurvePointsFromPieces = result;
+        this.interpolateBidPriceCurvePoints = result;
 
     }
 
@@ -369,7 +371,7 @@ export class ContinousBidPricingComponent implements OnInit {
             const test = dataIndex + 1;
             dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
             yValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
-            //console.log('dragPosition ', yValue, ' dataIndex ', test, ' Letter ', self.sharedDatasetService.bucketDetails[test].letter)
+            //console.log('dragPosition ', this.position, ' dataIndex ', test, ' Letter ', self.sharedDatasetService.bucketDetails[test].letter)
             if (yValue < 1) { yValue = 1; }
             if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
 
@@ -379,10 +381,19 @@ export class ContinousBidPricingComponent implements OnInit {
             updatePosition();
         }
 
+        function showTooltip(dataIndex) {
+            console.log('showTooltip ', dataIndex)
+            self.myChart.dispatchAction({
+                type: 'showTip',
+                position: [0, 0],
+                seriesIndex: 0,
+                dataIndex: dataIndex
+            });
+        }
 
         const setChartDragPoints = function () {
 
-            const symbolSize = 24;
+            const symbolSize = 26;
             let placeTemp = 0;
             self.myChart.setOption({
 
@@ -390,30 +401,54 @@ export class ContinousBidPricingComponent implements OnInit {
                     const xPlace = placeTemp += item.protections
                     const dragPoint = 0
                     let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;
+
                     const scaleHandles = dataIndex === self.sharedDatasetService.bucketDetails.length - 1 ? [] : [xPlace, dragPoint]
+                    const scaleText = [xPlace - 1, dragPoint + 8]
                     const fillColor = doesInclude ? 'red' : 'white';
                     const strokeColor = dataIndex === self.sharedDatasetService.bucketDetails.length - 1 ? 'transparent' : doesInclude ? 'Blue' : 'Blue';
                     const lineWidth = doesInclude ? 2 : 1;
 
                     return {
-                        type: 'circle',
-                        position: self.myChart.convertToPixel('grid', scaleHandles),
-                        shape: {
-                            cx: 0,
-                            cy: 0,
-                            r: symbolSize / 3
-                        },
-                        style: {
-                            fill: fillColor,
-                            stroke: strokeColor,
-                            lineWidth: lineWidth
-                        },
-                        invisible: false,
-                        draggable: true,
-                        ondrag: echarts.util.curry(onPointDragging, dataIndex),
-                        onclick: echarts.util.curry(selectElement, dataIndex),
-                        z: 100
-                    };
+                        type: 'group',
+                        // left: '10%',
+                        // top: 'center',
+                        children: [
+
+                            // {
+                            //     type: 'text',
+                            //     position: self.myChart.convertToPixel('grid', scaleText),
+                            //     z: 102,
+                            //     style: {
+                            //         fill: 'black',
+                            //         text: item.letter,
+                            //         font: 'bold 14px sans-serif'
+                            //     }
+                            // },
+                            {
+                                type: 'circle',
+                                position: self.myChart.convertToPixel('grid', scaleHandles),
+                                shape: {
+                                    cx: 0,
+                                    cy: 0,
+                                    r: symbolSize / 3
+                                },
+                                style: {
+                                    fill: fillColor,
+                                    stroke: strokeColor,
+                                    lineWidth: lineWidth
+                                },
+                                invisible: false,
+                                draggable: true,
+                                ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                                onclick: echarts.util.curry(selectElement, dataIndex),
+                                // onmouseover: function () {
+                                //     showTooltip(dataIndex);
+                                // },
+                                z: 100
+                            },
+
+                        ]
+                    }
                 })
             })
         }
@@ -482,19 +517,18 @@ export class ContinousBidPricingComponent implements OnInit {
                     extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
                     padding: 5,
                     textStyle: {
-                        fontSize: 14,
+                        fontSize: 12,
                         color: '#000'
                     },
-                    axisPointer: {
-                        link: { xAxisIndex: 'all' },
-                        type: 'cross',
-                        snap: true,
-                        label: {
-                            backgroundColor: '#6a7985'
-                        }
-                    },
+                    // axisPointer: {
+                    //     link: { xAxisIndex: 'all' },
+                    //     type: 'cross',
+                    //     snap: true,
+                    //     label: {
+                    //         backgroundColor: '#6a7985'
+                    //     }
+                    // },
                     formatter: (params) => {
-                        // console.log('params ', params)
                         let test = ''
                         if (params[3]) {
                             test = `${params[3].marker}Influenced: ${params[3].data}<br>`
@@ -541,7 +575,7 @@ export class ContinousBidPricingComponent implements OnInit {
                                 }
                             }
                         }),
-                        markLine: self.markVerticalLineSellingValues(),
+                        markLine: (this.sharedDatasetService.totalBookingsCollector > 0 && this.sharedDatasetService.totalBookingsCollector < 150) ? self.markVerticalLineSellingValues() : null,
 
                         markArea: {
                             silent: true,
@@ -624,7 +658,7 @@ export class ContinousBidPricingComponent implements OnInit {
                             color: 'blue',
                             width: 4
                         },
-                        data: self.interpolateCurvePointsFromPieces,
+                        data: self.interpolateBidPriceCurvePoints,
                         markPoint: self.markPointUpdatedPosition
                     },
                     {
@@ -694,11 +728,9 @@ export class ContinousBidPricingComponent implements OnInit {
             const fareValue = bucketInfo.fare;
             if (fareValue < bidPrice) {
                 currData = bucketInfo;
-                //console.log('fareValue ', fareValue, ' bidPrice ', bidPrice, ' currData ', currData)
                 break;
             }
         }
-        //console.log('letter ', currData.letter, ' currData ', currData.fare)
         return currData;
     }
 
@@ -706,22 +738,29 @@ export class ContinousBidPricingComponent implements OnInit {
 
     // Places lines vertically with labels on top of chart signifying fare call regions
     private markVerticalLineSellingValues() {
-        //console.log('markVerticalLineSellingValues ', this.sharedDatasetService.totalBookingsCollector)
-        let sellingPoint = 149 - this.sharedDatasetService.totalBookingsCollector;
+
+        let sellingPoint = 150 - this.sharedDatasetService.totalBookingsCollector;
 
         if (sellingPoint < 0) {
             sellingPoint = 0;
         }
 
-        const activeCurve = this.interpolateCurvePointsFromPieces;
+        const activeCurve = this.adjustedCurvePoints.length ? this.adjustedCurvePoints : this.interpolateBidPriceCurvePoints;
+
+        const activeColor = this.adjustedCurvePoints.length ? 'green' : 'navy';
         const baseCurve = this.sharedDatasetService.dynamicBidPrices;
         const sellingValues = this.findMatchingBucketForBidPrice(activeCurve[sellingPoint]);
 
+        // console.log('sellingPoint ', sellingPoint, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector, '\n adjustedCurvePoints ', this.adjustedCurvePoints[sellingPoint], '\nactiveCurve ', activeCurve[sellingPoint])
+
+        this.markPointUpdatedPosition = this.sharedDatasetService.totalBookingsCollector > 0 ? this.markPoint([sellingPoint, activeCurve[sellingPoint]], activeColor, sellingValues.letter) : {}
+
+        //console.log('this.markPointUpdatedPosition ', this.markPointUpdatedPosition)
         if (this.sharedDatasetService.totalBookingsCollector > 0) {
-            const rounded = Math.round(activeCurve[sellingPoint])
+            const rounded = Math.round(activeCurve[sellingPoint]);
             const fareClass = `Selling: ${rounded}`
 
-            this.markPointUpdatedPosition = this.markPoint([sellingPoint, this.interpolateCurvePointsFromPieces[sellingPoint]], 'green', sellingValues.letter)
+
 
             // Vertical Active Class/Value Selling Line
             return {
@@ -740,7 +779,7 @@ export class ContinousBidPricingComponent implements OnInit {
                     id: 'clickedLabel',
                     position: 'end',
                     show: true,
-                    distance: [0, -80],
+                    distance: [0, -60],
                     formatter: () => {
                         return `{a|${fareClass}\nBase: ${baseCurve[sellingPoint]}}`
                     },
@@ -748,13 +787,13 @@ export class ContinousBidPricingComponent implements OnInit {
                         a: {
                             align: 'center',
                             padding: [3, 0, 2, 0],
-                            width: 100,
-                            fontSize: 14,
+                            width: 80,
+                            fontSize: 12,
                             fontWeight: 'normal',
-                            borderColor: 'Green',
-                            backgroundColor: 'Green',
+                            borderColor: activeColor,
+                            backgroundColor: activeColor,
                             borderWidth: 3,
-                            borderRadius: 3,
+                            borderRadius: 1,
                             color: 'white',
                         },
                     },

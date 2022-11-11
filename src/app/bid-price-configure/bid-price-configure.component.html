@@ -1,130 +1,70 @@
-<div class="bidprice-influence-size">
-  <div class="bp-inf-layout bp-inf-column">
-    <div class="bp-inf-row contrast-white-background">
-      <div class="title-block">
-        <div class="bpi-header font-11">
-          {{constraintService.bpHeaderAbbrev[0].name}}</div>
+<div class="bp-inf-column">
+  <div class="bp-inf-row ">
+    <div class="title-block">
+      <div class="bpi-header font-11">
+        {{constraintService.bpHeaderAbbrev[0].name}}</div>
+    </div>
+    <div class="bp-inf-value-group w-100 dark-gray-text">
+      <div class="centered-group">
+        <div class="font-10">{{constraintService.bpCategory[0].name}}</div>
+        <div class="font-11">{{staticModifiers.mult}}</div>
       </div>
-      <div class="bp-inf-value-group w-100 py-1">
-        <div class="centered-group font-12">
-          <div class="font-10">{{constraintService.bpCategory[0].name}}</div>
-          <div class="font-12">{{staticModifiers.mult}}</div>
-        </div>
-        <div class="centered-group">
-          <div class="font-10">{{constraintService.bpCategory[1].name}}</div>
-          <input class="center-input font-11"
-            type="number"
-            id="influence-id-0"
-            step="0.01"
-            [(ngModel)]="modifierObj.mult"
-            onClick="this.select();"
-            (ngModelChange)="this.influenceInput.next([$event,'mult',0 ])">
-        </div>
-        <div class="centered-group font-12">
-          <div class="font-10">{{constraintService.bpCategory[2].name}}</div>
-          <div class="font-12 me-2">
-            {{modifierObj.mult}}
-          </div>
+      <div class="centered-group">
+        <div class="font-10">{{constraintService.bpCategory[1].name}}</div>
+        <input class="center-input font-11"
+          type="number"
+          id="influence-id-0"
+          step="0.01"
+          [(ngModel)]="modifierObj.mult"
+          onClick="this.select();"
+          (ngModelChange)="this.influenceInput.next([$event,'mult',0 ])">
+      </div>
+      <div class="centered-group">
+        <div class="font-10">{{constraintService.bpCategory[2].name}}</div>
+        <div class="font-11 me-1">
+          {{modifierObj.mult}}
         </div>
       </div>
     </div>
-    <div class="bp-inf-row contrast-white-background">
-      <div class="title-block">
-        <div class="bpi-header font-11">
-          {{constraintService.bpHeaderAbbrev[1].name}}</div>
+  </div>
+  <div class="bp-inf-row">
+    <div class="title-block">
+      <div class="bpi-header font-11">
+        {{constraintService.bpHeaderAbbrev[1].name}}</div>
+    </div>
+    <div class="bp-inf-value-group w-100 dark-gray-text">
+      <div class="centered-group">
+        <div class="font-10">{{constraintService.bpCategory[0].name}}:</div>
+        <div class="font-11">{{staticModifiers.addSub}}</div>
       </div>
-      <div class="bp-inf-value-group w-100 py-1">
-        <div class="centered-group font-12">
-          <div class="font-10">{{constraintService.bpCategory[0].name}}</div>
-          <div class="font-12">{{staticModifiers.addSub}}</div>
-        </div>
-        <div class="centered-group font-12">
-          <div class="font-11">{{constraintService.bpCategory[1].name}}</div>
-          <input class="center-input font-11"
-            type="number"
-            id="influence-id-1"
-            step="1"
-            [(ngModel)]="modifierObj.addSub"
-            onClick="this.select();"
-            (ngModelChange)="influenceInput.next([$event,'addSub',1])">
-        </div>
-        <div class="centered-group font-12">
-          <div class="font-10">{{constraintService.bpCategory[2].name}}</div>
-          <div class="font-12 me-2">
-            {{modifierObj.addSub}}
-          </div>
+      <div class="centered-group font-11">
+        <div class="font-10">{{constraintService.bpCategory[1].name}}</div>
+        <input class="center-input font-11"
+          type="number"
+          id="influence-id-1"
+          step="1"
+          [(ngModel)]="modifierObj.addSub"
+          onClick="this.select();"
+          (ngModelChange)="influenceInput.next([$event,'addSub',1])">
+      </div>
+      <div class="centered-group">
+        <div class="font-10">{{constraintService.bpCategory[2].name}}:</div>
+        <div class="font-11 me-2">
+          {{modifierObj.addSub}}
         </div>
       </div>
     </div>
-    <!-- <div class="bp-inf-row contrast-white-background">
-      <div class="title-block">
-        <div class="bpi-header font-13 fw-600">
-          {{constraintService.bpHeaderAbbrev[2].name}}</div>
-      </div>
-
-      <div class="bp-inf-value-group w-100 py-1">
-
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[0].name}}</div>
-          <div class="font-14 fw-600">{{staticModifiers.min}}</div>
-        </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[1].name}}</div>
-          <input class="center-input font-14 fw-600"
-            type="number"
-            id="influence-id-2"
-            step="1"
-            [(ngModel)]="modifierObj.min"
-            onClick="this.select();"
-            (ngModelChange)="influenceInput.next([$event, 'min', 2])">
-        </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[2].name}}</div>
-          <div class="font-14 fw-600 me-2">
-            {{modifierObj.min}}
-          </div>
-        </div>
-      </div>
-    </div> -->
-    <!-- <div class="bp-inf-row contrast-white-background">
-      <div class="title-block">
-        <div class="bpi-header font-13 fw-600">
-          {{constraintService.bpHeaderAbbrev[3].name}}</div>
-      </div>
-
-      <div class="bp-inf-value-group w-100 py-1">
-
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[0].name}}</div>
-          <div class="font-14 fw-600"> {{staticModifiers.max}}</div>
-        </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[1].name}}</div>
-          <input class="center-input font-14 fw-600"
-            type="number"
-            id="influence-id"
-            step="1"
-            [(ngModel)]="modifierObj.max"
-            onClick="this.select();"
-            (ngModelChange)="influenceInput.next([$event, 'max', 3])">
-        </div>
-        <div class="centered-group font-14 fw-600">
-          <div class="font-11 fw-500">{{constraintService.bpCategory[2].name}}</div>
-          <div class="font-14 fw-600 me-2">
-            {{modifierObj.max}}
-          </div>
-        </div>
-      </div>
-    </div> -->
   </div>
 
-  <!-- <div class="d-flex align-items-center mb-auto my-3"
+
+
+  <div class="d-flex align-items-center"
     *ngIf="showInfluenceControls">
     <button type="button"
-      class="btn btn-primary btn-xs">
-      Save Influences
+      class="btn btn-primary btn-xs me-2">
+      Save
     </button>
     <button type="button"
-      class="btn btn-primary btn-xs ms-auto">Clear Influences</button>
-  </div> -->
+      class="btn btn-primary btn-xs">Clear</button>
+  </div>
 </div>
