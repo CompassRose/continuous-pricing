@@ -6,7 +6,7 @@
 
 $font-family: "OpenSans-Semibold";
 $body-background: rgb(227, 231, 235);
-$chart-corner-radius: 6px;
+
 
 html,
 body {
@@ -92,20 +92,7 @@ mat-slider {
   }
 }
 
-.navy-background {
 
-  background-color: $accelya-blue;
-  color: $brand-off-white-lt;
-
-  &.corner-radius {
-    border-radius: 8px;
-  }
-
-  &.top-corner-radius {
-    border-top-right-radius: $chart-corner-radius;
-    border-top-left-radius: $chart-corner-radius;
-  }
-}
 
 .contrast-blue-background {
   background-color: $brand-primary-background3;
@@ -117,44 +104,6 @@ mat-slider {
   color: $brand-primary-text;
 }
 
-
-.chart-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background-color: white;
-  border: 1px solid rgb(71, 71, 71);
-  border-top-right-radius: $chart-corner-radius;
-  border-top-left-radius: $chart-corner-radius;
-
-  .text-header-area {
-    display: flex;
-    align-items: center;
-    font-size: 0.95rem;
-    border-top-right-radius: $chart-corner-radius;
-    border-top-left-radius: $chart-corner-radius;
-    padding: 8px 8px;
-    margin-bottom: 4px;
-    color: white !important;
-    background-color: $accelya-blue;
-    //background-color: rgb(221, 226, 233);
-    border-bottom: 1px solid rgb(163, 163, 163);
-  }
-
-  .container-body {
-    height: 100% !important;
-    width: 100% !important;
-
-    &.error-state-on {
-      opacity: 0;
-    }
-
-    &.error-state-off {
-      opacity: 1;
-    }
-  }
-
-}
 
 * {
   box-sizing: border-box

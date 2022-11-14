@@ -34,7 +34,7 @@ export class ContinousPricingComponent implements OnInit {
   autoTicks = false;
   disabled = false;
   invert = true;
-  max = 150;
+  max = 189;
   min = 0;
   showTicks = true;
   step = 1;

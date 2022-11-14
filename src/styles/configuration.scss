@@ -28,9 +28,6 @@ $accelya-blue: rgb(1, 33, 105);
 $accelya-contrast-blue: rgb(92, 136, 218);
 $accelya-pink: rgb(223, 70, 97);
 
-//1171196
-//http://BidPriceManager/index.html#/grid/1171196
-
 
 $font-size-large: 2.0rem; // 1.4rem == 14px
 $font-size-medium-large: 1.8rem;
@@ -48,6 +45,7 @@ $font-weight-md: 500;
 $font-weight-nml: 400;
 $font-weight-lt: 300;
 
+$chart-corner-radius: 6px;
 
 $font-family: "OpenSans-Semibold",
 sans-serif;
@@ -70,12 +68,6 @@ sans-serif;
 // "Segoe UI Emoji",
 // "Segoe UI Symbol" !default;
 
-
-:host ::ng-deep .option-template-text {
-  min-width: 50px;
-  font-size: $font-size-base-sm;
-  color: $brand-off-black-text;
-}
 
 
 /* width */

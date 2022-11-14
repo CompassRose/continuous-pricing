@@ -50,6 +50,7 @@ export class SharedDatasetService {
     public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
 
     public dynamicBidPrices: number[] = [];
+    public interpolateBidPriceCurvePoints: any[] = [];
 
     static roundMultiplierDecimals = 4;
 
@@ -66,6 +67,7 @@ export class SharedDatasetService {
         const AuList = this.bucketDetails.map(object => {
             return object.Aus;
         });
+
         return Math.max(...AuList)
     }
 
@@ -77,13 +79,17 @@ export class SharedDatasetService {
     // Returns Derived AU breakpoints
     public calculateAus() {
         this.currAus = [];
+
         this.bucketDetails.forEach((a, i) => {
 
             if (a.Aus >= 0) {
-                this.currAus.push(a.Aus)
+                this.currAus.push(a.Aus);
             }
         })
         //this.currAus = this.calculateBucketBands();
+
+        // console.log('currAus ', this.currAus)
+
     }
 
 
@@ -96,7 +102,7 @@ export class SharedDatasetService {
 
     public generateBucketValues() {
 
-        let total = 0;
+
         this.bucketDetails.forEach((a, i) => {
 
             if (this.bucketDetails[i + 1]) {
@@ -105,8 +111,7 @@ export class SharedDatasetService {
             } else {
                 this.bucketDetails[i].protections = a.Aus;
             }
-            total += this.bucketDetails[i].protections
-            //console.log('total ', total)
+            // console.log('protections ', this.bucketDetails[i].protections)
         })
 
 
@@ -188,6 +193,12 @@ export class SharedDatasetService {
 
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
+
+        // console.log('MAX ', this.maxAuValue, ' targetAu ', targetAu, ' currAu ', currAu)
+
+        let remainder = 0;
+        let range = 0;
+
         let targetBp: number;
         if (targetAu === 0) {
             targetBp = 0;
@@ -196,26 +207,67 @@ export class SharedDatasetService {
         }
 
         // How many handles to bring along on the way up -->
-        if (targetAu > currAu) {
+
+        if (targetAu >= currAu) {
+
             for (let i = bucketIdx; i >= 0; i--) {
                 const bucketInfo = this.bucketDetails[i];
                 if (bucketInfo.fare < targetBp) {
+                    range = this.bucketDetails.length;
+                    //console.log(' ****  UP bucketIdx ', bucketInfo.letter)
+                    remainder = this.maxAuValue - bucketInfo.Aus;
+                    this.justifyAusFromDrag(remainder, bucketIdx, range)
                     bucketInfo.Aus = targetAu;
                     bucketInfo.Sa = targetAu;
                 }
             }
+
+
         } else {
+
             for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
                 const bucketInfo = this.bucketDetails[i];
                 if (bucketInfo.fare >= targetBp) {
+                    range = 0;
+                    //console.log(' *****  DOWN bucketIdx ', bucketInfo.letter)
+                    remainder = bucketInfo.Aus;
+                    this.justifyAusFromDrag(remainder, bucketIdx, range)
                     bucketInfo.Aus = targetAu;
                     bucketInfo.Sa = targetAu;
                 }
             }
+
         }
+
+
     }
 
+    public justifyAusFromDrag(active, bucketIdx, range) {
+        let divider = 0;
 
+        //console.log('               bucketIdx ', bucketIdx, ' range ', range, ' active ', active)
+        //console.log('justify ', this.maxAuValue, ' active  ', active, ' bucketIdx ', bucketIdx, ' range ', range)
+
+        if (range > bucketIdx) {
+            divider = range - bucketIdx;
+            //console.log(' UP  >>>>>>>>>>  d ', range - bucketIdx)
+
+
+        } else {
+            divider = range + bucketIdx;
+            //console.log(' DOWN <<<<<<<<<< d ', (range + bucketIdx))
+
+        }
+
+        //console.log(' divider ', divider, ' active / divider ', active / divider)
+
+        this.bucketDetails.forEach((d, i) => {
+
+            //console.log('bucketInfo ', arr)
+
+        });
+
+    }
 
     private setBucketInfoToBidPrice(bucketInfo: BucketDetails, targetBp) {
         const newMult = Math.round(targetBp / bucketInfo.fare * SharedDatasetService.roundFactor) / SharedDatasetService.roundFactor;
