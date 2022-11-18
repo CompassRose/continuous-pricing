@@ -75,15 +75,11 @@ export interface ScriptContent {
 
 export interface BucketDetails {
   letter: string;
-  frequency?: number;
-  multiplier: number;
   fare: number;
-  modifiedFare?: number;
   bookings: number;
   protections: number;
   Aus?: number;
   Sa?: number;
-  active?: boolean;
 }
 
 export interface ODLocate {

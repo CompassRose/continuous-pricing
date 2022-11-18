@@ -47,7 +47,7 @@ export class ColorManagerService {
                     mode: "lch"
                 });
             }
-            // console.log('palette ', palette)
+            //console.log('palette ', palette)
             return palette;
         }
 

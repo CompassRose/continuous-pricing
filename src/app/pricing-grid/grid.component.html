@@ -1,4 +1,4 @@
-<div class="flex-basis-main">
+<div class="flex-basis-main px-2">
   <div class="header navy-background px-4">
     <div class="logo-flight-nfo d-flex align-items-center ml-5">
       <div class="py-2">
@@ -52,46 +52,86 @@
     </div> -->
   </div>
 
-  <div class="pricing-window mx-2 mt-1">
+
+
+  <div class="pricing-window mx-2 my-2">
     <div class="chart-container">
       <div class="d-flex justify-content-between text-header-area">
         <div class="">Continuous Pricing</div>
-        <bidprice-configure></bidprice-configure>
+
         <div class="d-flex me-3">
-          <div class="d-flex me-3">
-            <label class="me-2 font-12">A/U %</label>
-            <input type="checkbox" />
+
+          <div class="d-flex me-3"
+            *ngFor="let item of sharedDatasetService.dragGrouping;  let i = index">
+            <label class="me-2 font-12">{{item.name}}</label>
+            <input type="checkbox"
+              [checked]="sharedDatasetService.selected === i"
+              [disabled]="item.disabled"
+              (change)="sharedDatasetService.setGroupingMethod(i)" />
           </div>
+
+          <!-- <div class="d-flex me-3">
+            <label class="me-2 font-12">A/U %</label>
+            <input type="checkbox"
+              [(ngModel)]="sharedDatasetService.dragGrouping.auPercent"
+              (ngModelChange)="sharedDatasetService.setGroupingMethod('auPercent')" />
+          </div>
+
           <div class="d-flex me-3">
             <label class="me-2 font-12">Inverse Fare %</label>
-            <input type="checkbox" />
+            <input type="checkbox"
+              [(ngModel)]="sharedDatasetService.dragGrouping.inverseFare"
+              (ngModelChange)="sharedDatasetService.setGroupingMethod('inverseFare')" />
           </div>
+
           <div class="d-flex">
             <label class="me-2 font-12">Linear Protections</label>
             <input type="checkbox"
-              checked />
-          </div>
+              [(ngModel)]="sharedDatasetService.dragGrouping.linear"
+              checked=false
+              (ngModelChange)="sharedDatasetService.setGroupingMethod('linear')" />
+          </div> -->
+
         </div>
       </div>
       <div class='container-body'>
         <continuous-bid-pricing></continuous-bid-pricing>
       </div>
-      <div class="slider ms-3">
-        <mat-slider thumbLabel
-          class="example-margin"
-          dir="rtl"
-          [max]="max"
-          [min]="min"
-          [step]="1"
-          [(ngModel)]="value"
-          (input)="bookingSlider$.next($event)">
-        </mat-slider>
-      </div>
-
     </div>
   </div>
 
-  <div class="sa-au-window m-2">
+  <div class="bookings-inluence mx-2 mb-2">
+    <div class="chart-container">
+
+      <div class="d-flex text-header-area-full">
+        <div class="status-col w-100">
+          <div class="d-flex justify-content-between">
+            <div class="">Bookings / Price Influences</div>
+
+            <div class="ml-auto">
+              <bidprice-configure></bidprice-configure>
+            </div>
+          </div>
+
+          <div class="slider">
+            <mat-slider thumbLabel
+              class="example-margin"
+              dir="rtl"
+              [max]="max"
+              [min]="min"
+              [step]="1"
+              [(ngModel)]="value"
+              (input)="bookingSlider$.next($event)">
+            </mat-slider>
+          </div>
+        </div>
+      </div>
+      <!-- <div class='container-body'>
+
+      </div> -->
+    </div>
+  </div>
+  <div class="sa-au-window mx-2 mb-1">
     <div class="chart-container">
       <div class="d-flex justify-content-between text-header-area">
         <div class="">Seat Availability / Aus</div>

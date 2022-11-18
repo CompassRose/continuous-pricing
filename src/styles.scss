@@ -23,7 +23,7 @@ body {
 }
 
 .mat-slider.mat-slider-horizontal .mat-slider-track-fill {
-  background-color: rgb(156, 156, 156);
+  background-color: rgb(255, 255, 255) !important;
 }
 
 .mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
@@ -33,6 +33,10 @@ body {
 .mat-slider.mat-slider-horizontal .mat-slider-track-wrapper {
   height: 10px;
   border-radius: 10px
+}
+
+.mat-slider-track-background {
+  background-color: rgb(255, 255, 255) !important;
 }
 
 .mat-slider.mat-slider-horizontal .mat-slider-track-background,
@@ -52,7 +56,7 @@ body {
 .mat-slider-thumb-label-text {
   font-size: 12px !important;
   font-weight: bold !important;
-  color: black !important;
+  color: rgb(255, 255, 255) !important;
   opacity: 1 !important;
 }
 
@@ -83,7 +87,7 @@ mat-slider {
 }
 
 .status-col {
-  width: auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
 

@@ -1,0 +1,51 @@
+{
+    "shoppingIds": {
+        "sessionId": "99d70c0e-2494-48d7-b7f4-0f91da871799",
+        "transactionId": "ab8789e3-3dd1-4584-a794-7d2132b59e6e"
+    },
+    "flights": [{
+        "flightKey": "PDX|DXB|2258|2022-11-04_06:50",
+        "flightNumber": 2258,
+        "origin": "PDX",
+        "destination": "DXB",
+        "departureDateTime": "2022-11-04T06:50:00",
+        "flightCharges": {
+            "baseFare": 129
+        },
+        "availabilityInfo": {
+            "bidPriceIndex": 12,
+            "bidPriceVector": [129, 134, 139, 144, 149, 154, 159, 164, 169, 174, 179, 184, 199, 214, 229, 244, 259]
+        },
+        "offer_addons": [{
+            "key": "Meal_Nomihoudai",
+            "offerType": "Meal",
+            "desc": "All you can drink",
+            "cost": 20
+        }, {
+            "key": "Seat_ExitRow",
+            "offerType": "SeatChoice",
+            "desc": "Exit Row Seat",
+            "cost": 35
+        }]
+    }, {
+        "flightKey": "JFK|DXB|9958|2022-06-30_09:10",
+        "flightNumber": 9958,
+        "origin": "JFK",
+        "destination": "DXB",
+        "departureDateTime": "2022-06-30T09:10:00",
+        "discountFare": -20,
+        "flightCharges": {
+            "baseFare": 133
+        },
+        "availabilityInfo": {
+            "bidPriceIndex": 10,
+            "bidPriceVector": [133, 138, 143, 148, 153, 158, 163, 168, 173, 183, 193, 203, 213, 223]
+        },
+        "offer_addons": [{
+            "key": "Meal_Veg",
+            "offerType": "Meal",
+            "desc": "Vegetarian Meal",
+            "cost": 11
+        }]
+    }]
+}

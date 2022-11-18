@@ -2,8 +2,7 @@
 @import '../../styles/configuration.scss';
 @import 'src/styles/selection-frame';
 
-$screen-width-modifier: 100%;
-
+$screen-width-modifier: 80%;
 
 #myProgress {
   width: 100px;
@@ -90,10 +89,21 @@ $screen-width-modifier: 100%;
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: white;
-  border: 1px solid rgb(71, 71, 71);
+  //background-color: white;
+  //border: 1px solid rgb(71, 71, 71);
   border-top-right-radius: $chart-corner-radius;
   border-top-left-radius: $chart-corner-radius;
+
+  .text-header-area-full {
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    border-radius: $chart-corner-radius;
+    padding: 8px 8px;
+    color: white !important;
+    background-color: $accelya-blue;
+    //border-bottom: 1px solid rgb(163, 163, 163);
+  }
 
   .text-header-area {
     display: flex;
@@ -102,7 +112,7 @@ $screen-width-modifier: 100%;
     border-top-right-radius: $chart-corner-radius;
     border-top-left-radius: $chart-corner-radius;
     padding: 8px 8px;
-    margin-bottom: 4px;
+    //margin-bottom: 4px;
     color: white !important;
     background-color: $accelya-blue;
     //background-color: rgb(221, 226, 233);
@@ -111,6 +121,7 @@ $screen-width-modifier: 100%;
 
   .container-body {
     height: 100% !important;
+    background-color: white;
     // width: 100% !important;
     // background-color: $accelya-blue;
   }
@@ -118,7 +129,7 @@ $screen-width-modifier: 100%;
   .slider {
     display: flex;
     align-items: center;
-    background-color: rgb(247, 247, 247) !important;
+    background-color: $accelya-blue;
 
     .example-margin {
       width: 98%;
@@ -128,20 +139,22 @@ $screen-width-modifier: 100%;
 
 
 
+
 .flex-basis-main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  //align-content: space-between;
   width: 100%;
   height: 100%;
-  //margin: 0px auto;
 
   .header {
     z-index: 100;
     width: 100%;
+    //height: 6% !important;
     display: flex;
     align-items: center;
-    border-top: 3px solid $accelya-pink;
+    //border-top: 3px solid $accelya-pink;
 
     .header-body {
       width: 100%;
@@ -196,9 +209,15 @@ $screen-width-modifier: 100%;
 
   }
 
+  .bookings-inluence {
+    width: $screen-width-modifier;
+    //height: 10% !important;
+    //height: calc(100vh * 0.5) !important;
+  }
+
   .sa-au-window {
     width: $screen-width-modifier;
-    height: 50% !important;
+    height: 40% !important;
     //height: calc(100vh * 0.5) !important;
   }
 

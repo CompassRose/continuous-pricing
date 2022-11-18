@@ -1,9 +1,8 @@
-import { Component, ViewChildren, OnInit, AfterViewInit, QueryList } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ContinousColors, ColorObject } from '../dashboard-constants';
-import { Subscription, fromEvent, Subject } from 'rxjs'
+import { Subject } from 'rxjs'
 import { SharedDatasetService } from '../shared-datasets.service';
-import { KeyBoardService } from '../keyboard.service';
-import { debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
+import { debounceTime, tap, filter } from 'rxjs/operators';
 
 export interface BidPriceCurvePoints {
   x: number;
@@ -25,10 +24,7 @@ export interface TempBucketDetails {
 
 export class ContinousPricingComponent implements OnInit {
 
-  @ViewChildren("queryProtectionsInput") queryProtectionsInput: QueryList<any>;
-
   public colorCollections: ColorObject[] = ContinousColors;
-  private subscription = new Subscription();
   public collapsePanel = true;
 
   autoTicks = false;
@@ -49,8 +45,7 @@ export class ContinousPricingComponent implements OnInit {
   public bookingSlider$ = new Subject<any>();
 
   constructor(
-    public sharedDatasetService: SharedDatasetService,
-    public keyBoardService: KeyBoardService) {
+    public sharedDatasetService: SharedDatasetService) {
 
     this.bookingSlider$.pipe(
       filter(Boolean),
@@ -92,9 +87,7 @@ export class ContinousPricingComponent implements OnInit {
   }
 
   public ngOnInit() {
-
     // this.sharedDatasetService.totalBookingsCollector = this.sharedDatasetService.generateBookingCounts('bookings');
-
     // this.sliderCounter = this.sharedDatasetService.totalBookingsCollector;
     // console.log('this.sharedDatasetService.totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
   }
@@ -103,7 +96,6 @@ export class ContinousPricingComponent implements OnInit {
   public togglePanelState() {
     this.collapsePanel = !this.collapsePanel;
   }
-
 
 
   public loadFactorFillPercent(value: number) {

@@ -27,10 +27,16 @@ export class AuAvailabilityComponent implements AfterViewInit {
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
             .subscribe((state) => {
                 if (this.myChart) {
+
+                    this.sharedDatasetService.bucketDetails.forEach((bd, i) => {
+                        //console.log('  i ', i, ' protections ', this.sharedDatasetService.bucketDetails[i])
+                    })
+
+
                     //this.sharedDatasetService.totalProtections = this.sharedDatasetService.generateBookingCounts('protections');
                     // this.sharedDatasetService.totalBookingsCollector = this.sharedDatasetService.generateBookingCounts('bookings');
                     //console.log('dataIndex ', this.sharedDatasetService.totalBookingsCollector)
-                    this.sharedDatasetService.totalLoadFactor = ((this.sharedDatasetService.totalBookingsCollector / this.sharedDatasetService.totalProtections) * 100).toFixed(0);
+                    // this.sharedDatasetService.totalLoadFactor = ((this.sharedDatasetService.totalBookingsCollector / this.sharedDatasetService.totalProtections) * 100).toFixed(0);
                     this.createChartElement();
                 }
             })
@@ -64,8 +70,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
 
     public ngAfterViewInit(): void {
-        this.sharedDatasetService.applyDataChanges();
-
         this.createSvg('draggable-available')
     }
 
@@ -77,7 +81,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
         this.myChart = echarts.init(chart, 'light');
 
         setTimeout(() => {
-            this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
             this.createChartElement();
         }, 200);
 
@@ -124,22 +127,22 @@ export class AuAvailabilityComponent implements AfterViewInit {
         const setChartOptions = function () {
 
             self.myChart.setOption({
-                title: {
-                    show: true,
-                    left: 0,
-                    top: 5,
-                    textStyle: {
-                        fontSize: 11,
-                        fontWeight: 'bold'
-                    },
-                    text: '            DF       AU       SA     Book'
-                },
+                // title: {
+                //     show: true,
+                //     left: 0,
+                //     top: 5,
+                //     textStyle: {
+                //         fontSize: 11,
+                //         fontWeight: 'bold'
+                //     },
+                //     text: '            DF       AU       SA     Book'
+                // },
                 backgroundColor: 'rgba(205,225,245,0.05)',
                 grid: {
                     show: false,
-                    left: 205,
+                    left: 35,
                     right: 10,
-                    top: 20,
+                    top: 25,
                     bottom: 30
                 },
                 legend: {
@@ -153,11 +156,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     itemHeight: 12,
                     right: 80,
                     data: [
-
-                        {
-                            name: 'Protections',
-                            icon: 'roundRect'
-                        },
                         {
                             name: 'AUs',
                             icon: 'roundRect'
@@ -165,28 +163,37 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         {
                             name: 'Seat Availability',
                             icon: 'roundRect'
-                        }]
+                        },
+                        {
+                            name: 'Protections',
+                            icon: 'roundRect'
+                        },
+                        {
+                            name: 'Bookings',
+                            icon: 'roundRect'
+                        },]
                 },
-                xAxis: {
+                yAxis: {
                     type: 'value',
                     min: 0,
                     max(value) {
-                        return value.max + 20;
+                        return value.max + 40;
                     },
                     inverse: false,
                     axisLine: {
                         show: false
                     },
                     axisLabel: {
-                        fontSize: 0
+                        fontSize: 10
                     },
                 },
-                yAxis:
+                xAxis:
                 {
                     show: true,
                     type: 'category',
                     boundaryGap: true,
-                    inverse: true,
+                    scale: false,
+                    inverse: false,
                     position: 'left',
                     axisTick: {
                         show: true,
@@ -194,135 +201,64 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     axisLine: {
                         show: true,
                         onZero: false,
-                    },
-                    // data: self.sharedDatasetService.bucketDetails.map((val, i) => {
-                    //     return val.letter;
-                    // }), 
-                    axisLabel: {
-                        formatter: (params, i) => {
-                            const bookings = self.sharedDatasetService.bucketDetails[i].bookings;
-                            const letter = self.sharedDatasetService.bucketDetails[i].letter;
-                            const fare = self.sharedDatasetService.bucketDetails[i].fare;
-                            const sa = self.sharedDatasetService.bucketDetails[i].Sa;
-                            const au = self.sharedDatasetService.bucketDetails[i].Aus;
-                            // const loadFactor = (self.sharedDatasetService.bucketDetails[i].bookings / self.sharedDatasetService.bucketDetails[i].protections) * 100;
-                            return '{f|' + letter + '}{a|' + fare + '}{h|' + au + '}{d|' + sa + '}{i|' + bookings + '}';
-                        },
-                        margin: 20,
-                        verticalAlign: 'middle',
-                        rich: {
-                            f: {
-                                align: 'center',
-                                width: 30,
-                                fontSize: 12,
-                                padding: [4, 0, 4, 0],
-                                borderColor: 'rgba(0,0,0,0.2)',
-                                backgroundColor: 'rgba(255,255,255,1)',
-                                borderWidth: 1,
-                                fontWeight: 'bold',
-                                color: 'black',
-                            },
-                            a: {
-                                color: 'black',
-                                borderColor: 'rgba(0,0,0,0.2)',
-                                backgroundColor: 'rgba(255,255,255,1)',
-                                borderWidth: 1,
-                                align: 'center',
-                                width: 40,
-                                fontSize: 12,
-                                padding: [4, 0, 4, 0],
-                            },
-                            d: {
-                                borderColor: 'rgba(0,0,0,0.2)',
-                                backgroundColor: 'rgba(255,255,255,1)',
-                                borderWidth: 1,
-                                align: 'center',
-                                width: 40,
-                                fontSize: 12,
-                                color: 'black',
-                                padding: [4, 0, 4, 0],
-                            },
-                            l: {
-                                borderColor: 'rgba(0,0,0,0.2)',
-                                backgroundColor: 'rgba(255,255,255,1)',
-                                borderWidth: 1,
-                                align: 'center',
-                                width: 50,
-                                fontSize: 12,
-                                color: '#313F4A',
-                                padding: [4, 0, 4, 0],
-                            },
-                            h: {
-                                borderColor: 'rgba(0,0,0,0.2)',
-                                backgroundColor: 'rgba(255,255,255,1)',
-                                borderWidth: 1,
-                                align: 'center',
-                                width: 35,
-                                fontSize: 12,
-                                color: '#313F4A',
-                                padding: [4, 0, 4, 0],
-                            },
-                            i: {
-                                borderColor: 'rgba(0,0,0,0.2)',
-                                backgroundColor: 'rgba(255,255,255,1)',
-                                borderWidth: 2,
-                                align: 'center',
-                                //fontWeight: 'bold',
-                                width: 35,
-                                fontSize: 12,
-                                color: '#313F4A',
-                                padding: [4, 0, 4, 0],
-                            },
-                        },
-                    },
+                    }
                 },
 
                 series: [
                     {
                         type: 'bar',
                         barGap: '-100%',
-                        barWidth: 6,
+                        //barWidth: 3,
                         showBackground: false,
                         roundCap: true,
                         name: 'Seat Availability',
-                        z: 9,
+                        z: 5,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            return item.Sa;
+                            // console.log('item ', item)
+                            return item.Sa - item.protections;
                         }),
                         itemStyle: {
-                            normal: {
-                                color: 'rgb(0,218,90)',
-                                opacity: 1
+                            color: (params) => {
+                                return 'rgba(72, 116, 228, 1)'
+                                //return self.colorRange.value[0];
+                            },
+                            decal: {
+                                symbol: 'rect',
+                                color: 'rgba(0, 0, 0, 0.2)',
+                                dashArrayX: [3, 0],
+                                dashArrayY: [4, 2],
+                                symbolSize: 1,
+                                rotation: Math.PI / 6
                             }
                         },
                         label: {
                             show: true,
                             formatter: (params) => {
-                                return self.sharedDatasetService.bucketDetails[params.dataIndex].Sa
+                                return Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Sa)
                             },
                             color: 'white',
-                            fontSize: 11,
-                            fontWeight: 'bold',
-                            offset: [-10, 10],
-                            position: 'insideRight',
+                            fontSize: 10,
+                            fontWeight: 'normal',
+                            offset: [0, 26],
+                            position: 'top',
                         }
                     },
                     {
                         type: 'bar',
-                        stack: 'total',
+                        // stack: 'total',
                         name: 'Protections',
                         silent: true,
                         barGap: '-100%',
                         z: 6,
                         animation: false,
                         data: self.sharedDatasetService.currAus.map((item, i) => {
-                            return self.protectionYValue(i) > 0 ? self.protectionYValue(i) - self.sharedDatasetService.bucketDetails[i].bookings : 0;
+                            return self.protectionYValue(i);
                         }),
 
                         itemStyle: {
                             color: 'rgb(12, 63, 185)',
-                            shadowColor: 'Purple',
+                            //shadowColor: 'Purple',
                             opacity: 1,
                             decal: {
                                 symbol: 'rect',
@@ -333,8 +269,9 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 rotation: Math.PI / 6
                             }
                         },
+
                         label: {
-                            show: false,
+                            show: true,
                             color: 'white',
                             formatter: (params) => {
                                 if (self.protectionYValue(params.dataIndex) > 0 && self.protectionYValue(params.dataIndex) !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
@@ -345,27 +282,51 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             },
                             fontSize: 11,
                             fontWeight: 'bold',
-                            offset: [26, 2],
-                            position: 'insideRight',
+                            offset: [0, 18],
+                            position: 'top',
                         }
                     },
+                    {
+                        type: 'bar',
+                        //stack: 'total',
+                        name: 'Bookings',
+                        silent: true,
+                        barGap: '-100%',
+                        z: 7,
+                        animation: false,
+                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            return item.bookings;
+                        }),
 
+                        itemStyle: {
+                            color: 'rgba(12, 163, 85, 0.75)',
+                            decal: {
+                                symbol: 'rect',
+                                color: 'rgba(0, 0, 0, 0.12)',
+                                dashArrayX: [1, 0],
+                                dashArrayY: [4, 4],
+                                symbolSize: 1,
+                                rotation: Math.PI / 6
+                            }
+                        },
+                    },
                     {
                         type: 'bar',
                         stack: 'total',
                         name: 'AUs',
-                        barWidth: 20,
+                        //barWidth: 13,
                         showBackground: true,
                         z: 1,
                         animation: false,
+
                         data: self.sharedDatasetService.currAus.map((item, i) => {
-                            return item - self.protectionYValue(i)
+                            return item - self.protectionYValue(i);
                         }),
+
                         itemStyle: {
                             color: (params) => {
-                                return 'rgb(92, 136, 248)'
+                                return 'rgba(92, 136, 248, 1)'
                                 //return self.colorRange.value[0];
-
                             },
                             decal: {
                                 symbol: 'rect',
@@ -384,20 +345,22 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         },
                         label: {
                             show: true,
+                            fontSize: 12,
+                            fontWeight: 'bold',
                             formatter: (params) => {
-                                const labelValues = `${self.sharedDatasetService.currAus[params.dataIndex]} ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}`
-                                return '{a|' + labelValues + '}';
+                                const labelValues = `${Math.round(self.sharedDatasetService.currAus[params.dataIndex])}\n${Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].fare)}`
+                                return labelValues;
                             },
-                            rich: {
-                                a: {
-                                    color: 'black',
-                                    fontSize: 10,
-                                    fontWeight: 'bold',
-                                    padding: [10, 3, 0, 3]
-                                },
-                            },
-                            position: 'right',
-                            offset: [0, -4]
+                            // rich: {
+                            //     a: {
+                            //         color: 'black',
+                            //         fontSize: 10,
+                            //         fontWeight: 'bold',
+                            //         padding: [10, 3, 0, 3]
+                            //     },
+                            // },
+                            position: 'top',
+                            //offset: [0, -4]
                         }
                     }
                 ]
