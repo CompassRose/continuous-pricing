@@ -48,19 +48,20 @@ export class ContinousBidPricingComponent implements OnInit {
         private colorManagerService: ColorManagerService,
         private host: ElementRef) {
 
-        this.colorRange.value = this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length)
-        console.log('this.colorRange.value ', this.colorRange.value)
+        this.colorRange.value = this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length);
+
+        //console.log('this.colorRange.value ', this.colorRange.value)
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
             .subscribe((state) => {
 
                 if (this.myChart) {
 
                     //console.log(' $$$$ CONTINUOUS ', ' state ', state)
+
+                    this.adjustPieceColorForBookingUpdates();
                     if (state) {
-                        this.adjustPieceColorForBookingUpdates();
                         this.generateInterpolatedCurvePoints();
                     } else {
-                        this.adjustPieceColorForBookingUpdates();
                         this.createChartElement();
                     }
 
@@ -75,6 +76,19 @@ export class ContinousBidPricingComponent implements OnInit {
                         this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
                     }
                 }
+            })
+
+        this.sharedDatasetService.resetDefaultSubject$
+            .subscribe(response => {
+                console.log('resetDefaultSubject$ response ', response)
+                this.sharedDatasetService.totalBookingsCollector = 0;
+                this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
+                this.sharedDatasetService.applyDataChanges();
+                this.adjustPieceColorForBookingUpdates();
+                this.generateInterpolatedCurvePoints();
+
+                this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                this.createChartElement();
             })
 
         this.sharedDatasetService.influenceInput$
@@ -129,14 +143,14 @@ export class ContinousBidPricingComponent implements OnInit {
         this.generateInterpolatedCurvePoints();
 
         this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+
         setTimeout(() => {
             this.createSvg();
-        }, 230);
+        }, 0);
     }
 
 
     public updatePosition: () => void;
-
 
 
     public refreshChartVisual = () => {
@@ -459,16 +473,17 @@ export class ContinousBidPricingComponent implements OnInit {
                     //     }
                     // },
                     formatter: (params) => {
-                        let bucket;
+                        let bucket = null;
+                        // console.log('letter ', params)
                         if (self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex])) {
-                            bucket = self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex])
+                            bucket = self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex]).letter;
                         }
 
                         let testForSecond = ''
                         if (params[3]) {
                             testForSecond = `${params[3].marker}Influenced: ${params[3].data}<br>`
                         }
-                        return `${params[0].marker}Class: ${bucket.letter}<br>${testForSecond}${params[2].marker}Modified: ${params[2].data}<br>${params[1].marker}Base: ${params[1].data}`
+                        return `${params[0].marker}Class: ${bucket}<br>${testForSecond}${params[2].marker}Modified: ${params[2].data}<br>${params[1].marker}Base: ${params[1].data}`
                     }
                 },
                 // dataZoom: [
@@ -690,7 +705,7 @@ export class ContinousBidPricingComponent implements OnInit {
     public markPoint(): any {
 
         let sellingPoint = this.sharedDatasetService.maxAuValue - this.sharedDatasetService.totalBookingsCollector;
-        const test = [sellingPoint, this.activeCurve[sellingPoint]]
+        const coordinatesForMarkPoint = [sellingPoint, this.activeCurve[sellingPoint]]
         const sellingValues = this.findMatchingBucketForBidPrice(this.activeCurve[sellingPoint]);
         const activeColor = this.adjustedCurvePoints.length ? 'green' : 'navy';
 
@@ -699,7 +714,7 @@ export class ContinousBidPricingComponent implements OnInit {
             animation: false,
             data: [
                 {
-                    coord: test,
+                    coord: coordinatesForMarkPoint,
                     symbol: 'circle',
                     symbolSize: 22,
                     itemStyle: {
@@ -709,6 +724,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         show: true,
                         offset: [0, 1],
                         formatter: () => {
+                            console.log('sellingValues ', sellingValues)
                             return '{a|' + sellingValues.letter + '}';
                         },
                         rich: {

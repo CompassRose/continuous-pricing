@@ -82,7 +82,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
         setTimeout(() => {
             this.createChartElement();
-        }, 200);
+        }, 0);
 
     }
 

@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Subject } from 'rxjs'
 import { BucketDetails } from './models/dashboard.model';
 import { ContinousColors, ColorObject } from './dashboard-constants';
 
@@ -10,19 +10,16 @@ import { ContinousColors, ColorObject } from './dashboard-constants';
 
 export class SharedDatasetService {
 
-    public currAus: number[] = [];
-    public colorCollections: ColorObject[] = ContinousColors;
-
     public bucketDetails: BucketDetails[] = [
-        { letter: 'A', fare: 289, protections: 0, Aus: 189, Sa: 189, bookings: 0 },
-        { letter: 'B', fare: 249, protections: 0, Aus: 189, Sa: 189, bookings: 0 },
-        { letter: 'C', fare: 219, protections: 0, Aus: 189, Sa: 189, bookings: 0 },
-        { letter: 'D', fare: 194, protections: 0, Aus: 188, Sa: 188, bookings: 0 },
-        { letter: 'E', fare: 169, protections: 0, Aus: 187, Sa: 187, bookings: 0 },
-        { letter: 'F', fare: 149, protections: 0, Aus: 186, Sa: 186, bookings: 0 },
-        { letter: 'G', fare: 129, protections: 0, Aus: 185, Sa: 185, bookings: 0 },
-        { letter: 'H', fare: 114, protections: 0, Aus: 180, Sa: 180, bookings: 0 },
-        { letter: 'I', fare: 99, protections: 0, Aus: 170, Sa: 170, bookings: 0 },
+        // { letter: 'A', fare: 289, protections: 0, Aus: 189, Sa: 189, bookings: 0 },
+        // { letter: 'B', fare: 249, protections: 0, Aus: 189, Sa: 189, bookings: 0 },
+        // { letter: 'C', fare: 219, protections: 0, Aus: 189, Sa: 189, bookings: 0 },
+        { letter: 'D', fare: 194, protections: 0, Aus: 190, Sa: 190, bookings: 0 },
+        { letter: 'E', fare: 169, protections: 0, Aus: 185, Sa: 185, bookings: 0 },
+        { letter: 'F', fare: 149, protections: 0, Aus: 180, Sa: 180, bookings: 0 },
+        { letter: 'G', fare: 129, protections: 0, Aus: 175, Sa: 175, bookings: 0 },
+        { letter: 'H', fare: 114, protections: 0, Aus: 170, Sa: 170, bookings: 0 },
+        { letter: 'I', fare: 99, protections: 0, Aus: 165, Sa: 165, bookings: 0 },
         { letter: 'J', fare: 86, protections: 0, Aus: 160, Sa: 160, bookings: 0 },
         { letter: 'K', fare: 74, protections: 0, Aus: 150, Sa: 150, bookings: 0 },
         { letter: 'L', fare: 64, protections: 0, Aus: 140, Sa: 140, bookings: 0 },
@@ -37,31 +34,52 @@ export class SharedDatasetService {
 
     ];
 
+    public currAus: number[] = [];
+    public colorCollections: ColorObject[] = ContinousColors;
+
+    public archivedBucketDetails: BucketDetails[] = [];
+
     static roundMultiplierDecimals = 4;
+
     static roundFactor = Math.pow(10, SharedDatasetService.roundMultiplierDecimals);
 
     public selectedColorRange: ColorObject = this.colorCollections[0];
-    public selectedColorRangeBehaviorSubject$ = new BehaviorSubject<ColorObject>(this.colorCollections[0])
+
+    public selectedColorRangeBehaviorSubject$ = new BehaviorSubject<ColorObject>(this.colorCollections[0]);
+
     public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(true);
+
+    public resetDefaultSubject$ = new Subject<boolean>();
+
     public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
+
     public dynamicBidPrices: number[] = [];
+
     public interpolateBidPriceCurvePoints: any[] = [];
 
     public totalBookingsCollector: number = 0;
+
     public totalLoadFactor: string = '';
+
     public totalProtections: number = 0;
 
     public maxAuValue: number = 0;
 
-    public selected = 0;
+    public selected = 1;
 
 
     public dragGrouping: any = [
-        { name: 'Seperate', id: 'Sp', selected: true, disabled: false },
-        { name: 'AU %', id: 'Au', selected: false, disabled: true },
-        { name: 'Inverse Fare %', id: 'If', selected: false, disabled: true },
-        { name: 'Linear', id: 'Ln', selected: false, disabled: true }
+        { name: 'Seperate', id: 0, selected: true, disabled: false },
+        { name: 'AU %', id: 1, selected: false, disabled: false },
+        { name: 'Linear', id: 2, selected: false, disabled: false }
+        // { name: 'Inverse Fare %', id: 3, selected: false, disabled: true }
     ];
+
+    constructor() {
+        // Save clean copy for resetting to default
+        this.archivedBucketDetails = JSON.parse(JSON.stringify(this.bucketDetails));
+        this.setGroupingMethod(0)
+    }
 
 
     public setGroupingMethod(model) {
@@ -77,7 +95,14 @@ export class SharedDatasetService {
     }
 
 
+    public resetFromArchivedBuckets() {
+        this.bucketDetails = JSON.parse(JSON.stringify(this.archivedBucketDetails));
+        this.resetDefaultSubject$.next(true)
+    }
+
+
     public getMaxAu(): number {
+
         const AuList = this.bucketDetails.map(object => {
             return object.Aus;
         });
@@ -97,16 +122,17 @@ export class SharedDatasetService {
         this.currAus = [];
 
         this.bucketDetails.forEach((a, i) => {
+            //console.log('currAus ', a.Aus)
             if (a.Aus > this.maxAuValue) {
                 a.Aus = this.maxAuValue;
             }
-            if (a.Aus > 0) {
+            if (a.Aus >= 0) {
                 this.currAus.push(Math.round(Math.floor(a.Aus)));
             }
         })
-
+        this.maxAuValue = this.currAus[0];
         //this.currAus = this.calculateBucketBands();
-        // console.log('currAus ', this.currAus)
+        // console.log('currAus ', this.currAus, ' this.maxAuValue  ', this.maxAuValue)
 
     }
 
@@ -166,7 +192,7 @@ export class SharedDatasetService {
     public protectionMyLevel(idx: number) {
         const nextBucketValue = (idx === (this.currAus.length - 1)) ? 0 : this.currAus[idx + 1];
         const diff = this.currAus[idx] - nextBucketValue;
-        //console.log('     |||| diff idx ', idx, ' diff ', diff)
+        //console.log('diff idx ', idx, ' diff ', diff)
         return (diff > 0) ? diff : 0;
     }
 
@@ -176,7 +202,6 @@ export class SharedDatasetService {
     public protectionLevel(idx: number) {
         const nextBucketValue = (idx === (this.currAus.length - 1)) ? 0 : this.currAus[idx + 1];
         const diff = this.currAus[idx] - nextBucketValue;
-        // console.log('     |||| diff idx ', idx, ' diff ', diff)
         return (diff > 0) ? diff : 0;
     }
 
@@ -186,17 +211,13 @@ export class SharedDatasetService {
         const arr = new Array<number>();
         this.bucketDetails.forEach((d, i) => {
             arr.push(0);
-            //console.log('bucketInfo ', arr)
         });
 
         arr[0] = this.dynamicBidPrices.length;
-
         this.dynamicBidPrices.forEach((d, i) => {
-
             const bidPrice = this.dynamicBidPrices[i];
             for (let bucketIdx = 1; bucketIdx < this.bucketDetails.length; bucketIdx++) {
                 const bucketInfo = this.bucketDetails[bucketIdx];
-                //console.log('bucketInfo ', bucketInfo)
                 const fareValue = bucketInfo.fare;
                 if (fareValue >= bidPrice) {
                     arr[bucketIdx]++;
@@ -212,11 +233,9 @@ export class SharedDatasetService {
 
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
-
+        // console.log('this.archivedBucketDetails ', this.archivedBucketDetails)
         // console.log(' totalBookingsCollector ', this.totalBookingsCollector)
         //console.log('\n\nMAX ', this.maxAuValue, ' currAu ', currAu, ' targetAu ', targetAu)
-
-        let range = 0;
 
         let targetBp: number;
         if (targetAu === 0) {
@@ -227,19 +246,17 @@ export class SharedDatasetService {
 
         // How many handles to bring along on the way up -->
 
-
         if (targetAu >= currAu) {
 
             for (let i = bucketIdx; i >= 0; i--) {
                 const bucketInfo = this.bucketDetails[i];
                 if (bucketInfo.fare < targetBp) {
-                    range = 0;
                     // console.log(' ****  UP bucketIdx ', bucketInfo.letter, ' bucketIdx  ', bucketIdx, ' currAu ', currAu, ' targetAu ', targetAu, ' dragGrouping ', this.dragGrouping[this.selected])
 
                     bucketInfo.Aus = targetAu;
                     bucketInfo.Sa = targetAu;
 
-                    if (this.dragGrouping[this.selected] !== undefined) {
+                    if (this.dragGrouping[this.selected] !== undefined && this.dragGrouping[this.selected].id !== 0) {
                         this.justifyAusFromDrag(bucketIdx, targetAu, 'up')
                     }
                 }
@@ -250,14 +267,11 @@ export class SharedDatasetService {
             for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
                 const bucketInfo = this.bucketDetails[i];
                 if (bucketInfo.fare >= targetBp) {
-                    //range = this.bucketDetails.length;
-                    //console.log(' bucketIdx ', bucketInfo.letter, ' bucketIdx  ', bucketIdx, ' currAu ', currAu, ' targetAu ', targetAu, ' dragGrouping ', this.dragGrouping[this.selected])
-
-                    // this.justifyAusFromDrag(remainder, bucketIdx, range)
+                    // console.log(' DOWN bucketIdx ', bucketInfo.letter, ' bucketIdx  ', bucketIdx, ' currAu ', currAu, ' targetAu ', targetAu, ' this.selected ', this.selected)
                     bucketInfo.Aus = targetAu;
                     bucketInfo.Sa = targetAu;
 
-                    if (this.dragGrouping[this.selected] !== undefined) {
+                    if (this.dragGrouping[this.selected] !== undefined && this.dragGrouping[this.selected].id !== 0) {
                         this.justifyAusFromDrag(bucketIdx, targetAu, 'down')
                     }
                 }
@@ -269,35 +283,69 @@ export class SharedDatasetService {
     public justifyAusFromDrag(bucketIdx, targetAu, direction) {
 
         //console.log('bucketIdx ', bucketIdx, ' targetAu ', targetAu, ' direction ', direction)
+
+        const groupValueLinearModifier = (targetAu / bucketIdx) / bucketIdx;
+
         if (direction === 'up') {
 
-            if (this.dragGrouping[this.selected].id === 'Au') {
+            if (this.dragGrouping[this.selected].id === 1) {
 
                 for (let i = 0; i < bucketIdx; i++) {
 
                     if (i > 0) {
 
+                        const groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx;
                         const bucketInfo = this.bucketDetails[i];
-                        bucketInfo.Aus < this.maxAuValue ? bucketInfo.Aus += this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx : this.maxAuValue;
-                        bucketInfo.Sa < this.maxAuValue ? bucketInfo.Sa += this.bucketDetails[i].Sa / (targetAu / bucketIdx) / bucketIdx : this.maxAuValue;
-                        //console.log('     bucketIdx  ', i, ': ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[i].Aus, ' Math ', this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx)
+
+                        bucketInfo.Aus < this.maxAuValue ? bucketInfo.Aus += groupValueAuPercentage : this.maxAuValue;
+                        bucketInfo.Sa < this.maxAuValue ? bucketInfo.Sa += groupValueAuPercentage : this.maxAuValue;
+                        // console.log('  UP   bucketIdx  ', i, ': ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[i].Aus.toFixed(2), ' Math ', (groupValueAuPercentage).toFixed(2))
                     }
                 }
+
+            } else if (this.dragGrouping[this.selected].id === 2) {
+
+                for (let i = 0; i < bucketIdx; i++) {
+
+                    if (i > 0) {
+                        const bucketInfo = this.bucketDetails[i];
+                        bucketInfo.Aus < this.maxAuValue ? bucketInfo.Aus += groupValueLinearModifier : this.maxAuValue;
+                        bucketInfo.Sa < this.maxAuValue ? bucketInfo.Sa += groupValueLinearModifier : this.maxAuValue;
+                        // console.log('  UP   bucketIdx  ', i, ': ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[i].Aus.toFixed(2), ' Math ', (groupValueLinearModifier).toFixed(2))
+                    }
+                }
+
             }
+
         } else {
 
-
-            if (this.dragGrouping[this.selected].id === 'Au') {
+            if (this.dragGrouping[this.selected].id === 1) {
 
                 for (let i = bucketIdx + 1; i < this.bucketDetails.length; i++) {
 
                     if (i < this.bucketDetails.length) {
-                        const bucketInfo = this.bucketDetails[i];
-                        // console.log('     bucketIdx  ', i, ': ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[0].Aus, ' Math ', (this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx).toFixed(2))
 
+                        const bucketInfo = this.bucketDetails[i];
+
+                        // console.log('  DOWN    bucketIdx  ', i, ': ', this.bucketDetails[i].letter, ' Aus ', bucketInfo.Aus.toFixed(2), ' Math ', targetAu / bucketIdx.toFixed(2))
                         bucketInfo.Aus > 0 ? bucketInfo.Aus -= this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx : 0;
                         bucketInfo.Sa > 0 ? bucketInfo.Sa -= this.bucketDetails[i].Sa / (targetAu / bucketIdx) / bucketIdx : 0
                     }
+                }
+            } else if (this.dragGrouping[this.selected].id === 2) {
+
+                for (let i = bucketIdx + 1; i < this.bucketDetails.length; i++) {
+
+                    if (i < this.bucketDetails.length) {
+
+
+                        const bucketInfo = this.bucketDetails[i];
+                        bucketInfo.Aus < this.maxAuValue ? bucketInfo.Aus -= groupValueLinearModifier : this.maxAuValue;
+                        bucketInfo.Sa < this.maxAuValue ? bucketInfo.Sa -= groupValueLinearModifier : this.maxAuValue;
+                        //console.log('  Down 2    bucketIdx  ', i, ': ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[i].Aus.toFixed(2), ' Math ', (groupValueLinearModifier).toFixed(2))
+
+                    }
+
                 }
             }
 

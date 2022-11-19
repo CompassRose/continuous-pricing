@@ -42,8 +42,8 @@ export class BipPriceConfigureComponent {
     public currentCaptureDate: any;
 
     // async pipe in template
-    public $activeInfluenceBehaviorSubject = new BehaviorSubject<any>(null);
-    public subsript: Subscription = new Subscription;
+    // public $activeInfluenceBehaviorSubject = new BehaviorSubject<any>(null);
+
 
     public influenceInput = new Subject<any[]>();
 
@@ -64,9 +64,9 @@ export class BipPriceConfigureComponent {
             distinctUntilChanged(),
             tap(([event, item, id]) => {
 
-                Object.entries(this.modifierObj).forEach((d: any, i) => {
-                    // console.log('       d ', d)
-                })
+                // Object.entries(this.modifierObj).forEach((d: any, i) => {
+                //     // console.log('       d ', d)
+                // })
 
                 //console.log('\n\ninfluenceInput ', event, ' item ', item, ' row ', id)
                 this.sharedDatasetService.influenceInput$.next([event, item, id])

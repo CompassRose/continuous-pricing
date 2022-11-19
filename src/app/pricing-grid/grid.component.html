@@ -18,13 +18,22 @@
         <div id="myBar">0%</div>
       </div>
     </div>
-    <div class="ms-auto">
-      <button type="button"
-        class="btn btn-primary btn-xs">
-        Save
-      </button>
-    </div>
 
+    <div class="d-flex ms-auto">
+
+      <button type="button"
+        class="btn btn-primary btn-xs"
+        (click)="sharedDatasetService.resetFromArchivedBuckets()">
+        Reset Default
+      </button>
+
+      <div class="ms-2">
+        <button type="button"
+          class="btn btn-primary btn-xs">
+          Save
+        </button>
+      </div>
+    </div>
     <!-- <div class="control-row">
       <ng-select class="color-select"
         title="Select Color Range"
@@ -53,14 +62,11 @@
   </div>
 
 
-
   <div class="pricing-window mx-2 my-2">
     <div class="chart-container">
       <div class="d-flex justify-content-between text-header-area">
         <div class="">Continuous Pricing</div>
-
         <div class="d-flex me-3">
-
           <div class="d-flex me-3"
             *ngFor="let item of sharedDatasetService.dragGrouping;  let i = index">
             <label class="me-2 font-12">{{item.name}}</label>
@@ -69,28 +75,6 @@
               [disabled]="item.disabled"
               (change)="sharedDatasetService.setGroupingMethod(i)" />
           </div>
-
-          <!-- <div class="d-flex me-3">
-            <label class="me-2 font-12">A/U %</label>
-            <input type="checkbox"
-              [(ngModel)]="sharedDatasetService.dragGrouping.auPercent"
-              (ngModelChange)="sharedDatasetService.setGroupingMethod('auPercent')" />
-          </div>
-
-          <div class="d-flex me-3">
-            <label class="me-2 font-12">Inverse Fare %</label>
-            <input type="checkbox"
-              [(ngModel)]="sharedDatasetService.dragGrouping.inverseFare"
-              (ngModelChange)="sharedDatasetService.setGroupingMethod('inverseFare')" />
-          </div>
-
-          <div class="d-flex">
-            <label class="me-2 font-12">Linear Protections</label>
-            <input type="checkbox"
-              [(ngModel)]="sharedDatasetService.dragGrouping.linear"
-              checked=false
-              (ngModelChange)="sharedDatasetService.setGroupingMethod('linear')" />
-          </div> -->
 
         </div>
       </div>
@@ -114,14 +98,16 @@
           </div>
 
           <div class="slider">
+
             <mat-slider thumbLabel
               class="example-margin"
               dir="rtl"
-              [max]="max"
-              [min]="min"
+              [max]="bookingControlService.max"
+              [min]="bookingControlService.min"
               [step]="1"
-              [(ngModel)]="value"
-              (input)="bookingSlider$.next($event)">
+              [value]="bookingControlService.value"
+              [(ngModel)]="bookingControlService.value"
+              (change)="bookingControlService.change(bookingControlService.value)">
             </mat-slider>
           </div>
         </div>
