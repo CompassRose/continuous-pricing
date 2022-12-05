@@ -30,6 +30,7 @@ export class BookingControlService {
     constructor(public sharedDatasetService: SharedDatasetService) {
 
 
+
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
                 this.min = 0
@@ -38,11 +39,10 @@ export class BookingControlService {
             })
 
         this.bookingSlider$.pipe(
-            filter(Boolean),
             debounceTime(120),
 
             tap((event) => {
-                // console.log('event ', event)
+                //console.log('event ', event)
                 let collObj = [...this.tempBucketHolderStatic]
                 this.sharedDatasetService.totalBookingsCollector = event;
                 let counter = 0;
@@ -71,6 +71,7 @@ export class BookingControlService {
                     })
                 }
 
+                //console.log('totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
                 this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
             })
         )
@@ -78,7 +79,10 @@ export class BookingControlService {
     }
 
     public change(element: any) {
+        this.sharedDatasetService.totalBookingsCollector = element;
         this.bookingSlider$.next(element)
+
+        //console.log('totalBookingsCollector ', element, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
     }
 
     public loadFactorFillPercent(value: number) {

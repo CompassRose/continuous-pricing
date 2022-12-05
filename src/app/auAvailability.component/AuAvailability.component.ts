@@ -123,7 +123,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
         };
 
 
-
         const setChartOptions = function () {
 
             self.myChart.setOption({
@@ -142,8 +141,8 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     show: false,
                     left: 35,
                     right: 10,
-                    top: 25,
-                    bottom: 30
+                    top: 55,
+                    bottom: 10
                 },
                 legend: {
                     show: true,
@@ -191,59 +190,67 @@ export class AuAvailabilityComponent implements AfterViewInit {
                 {
                     show: true,
                     type: 'category',
-                    boundaryGap: true,
-                    scale: false,
+                    nameGap: 0,
+                    axisLabel: {
+                        fontSize: 13,
+                        fontWeight: 'bold',
+                    },
+
                     inverse: false,
-                    position: 'left',
+                    position: 'top',
                     axisTick: {
                         show: true,
                     },
                     axisLine: {
                         show: true,
                         onZero: false,
-                    }
+                    },
+                    data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                        // console.log('item ', item)
+                        return item.letter;
+                    }),
                 },
 
                 series: [
-                    {
-                        type: 'bar',
-                        barGap: '-100%',
-                        //barWidth: 3,
-                        showBackground: false,
-                        roundCap: true,
-                        name: 'Seat Availability',
-                        z: 5,
-                        animation: false,
-                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            // console.log('item ', item)
-                            return item.Sa - item.protections;
-                        }),
-                        itemStyle: {
-                            color: (params) => {
-                                return 'rgba(72, 116, 228, 1)'
-                                //return self.colorRange.value[0];
-                            },
-                            decal: {
-                                symbol: 'rect',
-                                color: 'rgba(0, 0, 0, 0.2)',
-                                dashArrayX: [3, 0],
-                                dashArrayY: [4, 2],
-                                symbolSize: 1,
-                                rotation: Math.PI / 6
-                            }
-                        },
-                        label: {
-                            show: true,
-                            formatter: (params) => {
-                                return Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Sa)
-                            },
-                            color: 'white',
-                            fontSize: 10,
-                            fontWeight: 'normal',
-                            offset: [0, 26],
-                            position: 'top',
-                        }
-                    },
+                    // {
+                    //     type: 'bar',
+                    //     barGap: '-100%',
+                    //     //barWidth: 3,
+                    //     showBackground: false,
+                    //     roundCap: true,
+                    //     name: 'Seat Availability',
+                    //     z: 5,
+                    //     animation: false,
+                    //     data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                    //         // console.log('item ', item)
+                    //         return item.Sa - item.protections;
+                    //     }),
+                    //     itemStyle: {
+                    //         color: (params) => {
+                    //             return 'rgba(72, 116, 228, 1)'
+                    //             //return self.colorRange.value[0];
+                    //         },
+                    //         decal: {
+                    //             symbol: 'rect',
+                    //             color: 'rgba(0, 0, 0, 0.2)',
+                    //             dashArrayX: [3, 0],
+                    //             dashArrayY: [4, 2],
+                    //             symbolSize: 1,
+                    //             rotation: Math.PI / 6
+                    //         }
+                    //     },
+                    //     label: {
+                    //         show: true,
+                    //         formatter: (params) => {
+                    //             return Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Sa)
+                    //         },
+                    //         color: 'white',
+                    //         fontSize: 10,
+                    //         fontWeight: 'normal',
+                    //         offset: [0, 26],
+                    //         position: 'top',
+                    //     }
+                    // },
                     {
                         type: 'bar',
                         // stack: 'total',

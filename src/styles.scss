@@ -13,6 +13,10 @@ body {
   height: 100%;
 }
 
+canvas {
+  cursor: w-resize !important;
+}
+
 body {
   background: rgb(188, 208, 255) !important;
 }
@@ -87,7 +91,7 @@ mat-slider {
 }
 
 .status-col {
-  width: 100%;
+  //width: 100%;
   display: flex;
   flex-direction: column;
 

@@ -38,6 +38,7 @@ export class ContinousBidPricingComponent implements OnInit {
 
     public resetChartElementView = true;
 
+    public markPointContainer: any = {}
     // Width observer
     public targetElement: any;
     public bidPriceObserver: any;
@@ -56,13 +57,14 @@ export class ContinousBidPricingComponent implements OnInit {
 
                 if (this.myChart) {
 
-                    //console.log(' $$$$ CONTINUOUS ', ' state ', state)
+                    /// console.log(' $$$$ CONTINUOUS ', ' state ', state)
 
                     this.adjustPieceColorForBookingUpdates();
                     if (state) {
                         this.generateInterpolatedCurvePoints();
                     } else {
                         this.createChartElement();
+
                     }
 
                     if (this.modifierCollection.length > 0) {
@@ -80,7 +82,7 @@ export class ContinousBidPricingComponent implements OnInit {
 
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
-                console.log('resetDefaultSubject$ response ', response)
+                // console.log('resetDefaultSubject$ response ', response)
                 this.sharedDatasetService.totalBookingsCollector = 0;
                 this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
                 this.sharedDatasetService.applyDataChanges();
@@ -150,7 +152,7 @@ export class ContinousBidPricingComponent implements OnInit {
     }
 
 
-    public updatePosition: () => void;
+    //public updatePosition: () => void;
 
 
     public refreshChartVisual = () => {
@@ -165,7 +167,6 @@ export class ContinousBidPricingComponent implements OnInit {
         this.targetElement = this.host.nativeElement.querySelector('#continuous-bidpricing');
         // @ts-ignore
         this.bidPriceObserver = new ResizeObserver(entries => {
-            // console.log('|||||   refreshChartVisual ||||||   ')
             if (this.myChart) {
                 this.refreshChartVisual();
             }
@@ -179,7 +180,7 @@ export class ContinousBidPricingComponent implements OnInit {
     public createSvg(): void {
         const chart: HTMLCanvasElement = document.getElementById('continuous-bidpricing') as HTMLCanvasElement;
         this.myChart = echarts.init(chart, 'light');
-        this.createChartElement();
+        // this.createChartElement();
     }
 
 
@@ -285,8 +286,8 @@ export class ContinousBidPricingComponent implements OnInit {
 
     // Re-generates chart elements
     public createChartElement(): void {
-        const self = this;
 
+        const self = this;
 
         // self.myChart.on('datazoom', (params) => {
         //     console.log('||  dataZoom || ', params)
@@ -325,17 +326,36 @@ export class ContinousBidPricingComponent implements OnInit {
         }
 
 
-
-        function showTooltip(dataIndex) {
-            console.log('showTooltip ', dataIndex)
+        const mouseClick = (dataIndex, params) => {
+            console.log('mouseClick ', dataIndex, ' params ', params)
             self.myChart.dispatchAction({
                 type: 'showTip',
-                position: [0, 0],
+                position: [params.offsetX - 10, params.offsetY - 50],
                 seriesIndex: 0,
                 dataIndex: dataIndex
             });
         }
 
+        const showTooltip = (dataIndex, params) => {
+            // console.log('showTooltip ', params)
+            self.myChart.dispatchAction({
+                type: 'showTip',
+                position: [params.offsetX - 10, params.offsetY - 50],
+                seriesIndex: 0,
+                dataIndex: dataIndex
+            });
+        }
+
+        const hideTooltip = (dataIndex, params) => {
+            // console.log('hideTooltip ', params)
+
+            self.myChart.dispatchAction({
+                type: 'hideTip',
+                position: [params.offsetX - 10, params.offsetY - 50],
+                seriesIndex: 0,
+                dataIndex: dataIndex
+            });
+        }
 
         const setChartDragPoints = function () {
 
@@ -344,56 +364,59 @@ export class ContinousBidPricingComponent implements OnInit {
             self.myChart.setOption({
 
                 graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, (item, dataIndex) => {
-                    const xPlace = placeTemp += item.protections
+
+
+                    const xPlace = placeTemp += item.protections;
+
                     const dragPoint = 0;
                     let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;
 
-                    const scaleHandles = dataIndex === self.sharedDatasetService.bucketDetails.length - 1 ? [] : [xPlace, dragPoint]
+                    const scaleHandles = (dataIndex === self.sharedDatasetService.bucketDetails.length - 1) ? [] : [xPlace, dragPoint];
+                    //  console.log('  LENGTH ', ' item ', item)
+
                     //const scaleText = [xPlace - 1, dragPoint + 8]
                     const fillColor = doesInclude ? 'red' : 'white';
-                    const strokeColor = dataIndex === self.sharedDatasetService.bucketDetails.length - 1 ? 'transparent' : doesInclude ? 'Blue' : 'Blue';
+                    const strokeColor = (dataIndex === self.sharedDatasetService.bucketDetails.length - 1) ? 'transparent' : 'Blue';
                     const lineWidth = doesInclude ? 2 : 1;
 
                     return {
-                        type: 'group',
+                        //  type: 'group',
                         // left: '10%',
                         // top: 'center',
-                        children: [
+                        /// children: [
 
-                            // {
-                            //     type: 'text',
-                            //     position: self.myChart.convertToPixel('grid', scaleText),
-                            //     z: 102,
-                            //     style: {
-                            //         fill: 'black',
-                            //         text: item.letter,
-                            //         font: 'bold 14px sans-serif'
-                            //     }
-                            // },
-                            {
-                                type: 'circle',
-                                position: self.myChart.convertToPixel('grid', scaleHandles),
-                                shape: {
-                                    cx: 0,
-                                    cy: 0,
-                                    r: symbolSize / 3
-                                },
-                                style: {
-                                    fill: fillColor,
-                                    stroke: strokeColor,
-                                    lineWidth: lineWidth
-                                },
-                                invisible: false,
-                                draggable: true,
-                                ondrag: echarts.util.curry(onPointDragging, dataIndex),
-                                // onclick: echarts.util.curry(selectElement, dataIndex),
-                                // onmouseover: function () {
-                                //     showTooltip(dataIndex);
-                                // },
-                                z: 100
-                            },
-
-                        ]
+                        // {
+                        //     type: 'text',
+                        //     position: self.myChart.convertToPixel('grid', scaleText),
+                        //     z: 102,
+                        //     style: {
+                        //         fill: 'black',
+                        //         text: item.letter,
+                        //         font: 'bold 14px sans-serif'
+                        //     }
+                        // },
+                        //   {
+                        type: 'circle',
+                        id: dataIndex,
+                        position: self.myChart.convertToPixel('grid', scaleHandles),
+                        shape: {
+                            cx: 0,
+                            cy: 0,
+                            r: symbolSize / 3
+                        },
+                        style: {
+                            fill: fillColor,
+                            stroke: strokeColor,
+                            lineWidth: lineWidth
+                        },
+                        invisible: false,
+                        draggable: true,
+                        ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                        onmousemove: echarts.util.curry(showTooltip, dataIndex),
+                        onclick: echarts.util.curry(mouseClick, dataIndex),
+                        onmouseover: echarts.util.curry(showTooltip, dataIndex),
+                        onmouseout: echarts.util.curry(hideTooltip, dataIndex),
+                        z: 100
                     }
                 })
             })
@@ -454,7 +477,10 @@ export class ContinousBidPricingComponent implements OnInit {
                 },
                 tooltip: {
                     show: true,
-                    trigger: 'axis',
+                    triggerOn: 'item',
+
+
+                    //trigger: 'axis',
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     borderWidth: 2,
                     borderColor: 'Blue',
@@ -473,17 +499,23 @@ export class ContinousBidPricingComponent implements OnInit {
                     //     }
                     // },
                     formatter: (params) => {
-                        let bucket = null;
-                        // console.log('letter ', params)
-                        if (self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex])) {
-                            bucket = self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex]).letter;
-                        }
 
-                        let testForSecond = ''
-                        if (params[3]) {
-                            testForSecond = `${params[3].marker}Influenced: ${params[3].data}<br>`
+                        let bucket = null;
+                        let tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
+
+                        if (params.length) {
+                            bucket = self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex]).letter;
+                            let testForSecond = ''
+                            if (params[3]) {
+                                testForSecond = `${params[3].marker}Influenced: ${params[3].data}<br>`
+                            }
+                            tester = `${params[0].marker}Class: ${bucket}<br>${testForSecond}${params[2].marker}Modified: ${params[2].data}<br>${params[1].marker}Base: ${params[1].data}`;
+                        } else {
+
+                            tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
+                            //console.log('letter ', params)
                         }
-                        return `${params[0].marker}Class: ${bucket}<br>${testForSecond}${params[2].marker}Modified: ${params[2].data}<br>${params[1].marker}Base: ${params[1].data}`
+                        return tester;
                     }
                 },
                 // dataZoom: [
@@ -634,7 +666,7 @@ export class ContinousBidPricingComponent implements OnInit {
                             color: 'red',
                             width: 0
                         },
-                        data: self.sharedDatasetService.dynamicBidPrices,
+                        data: self.sharedDatasetService.dynamicBidPrices
                     },
                     {
                         id: 'd',
@@ -682,8 +714,19 @@ export class ContinousBidPricingComponent implements OnInit {
             })
         }
 
+        // self.myChart.getZr().on('contextmenu', function (params) {
+        //     echarts.util.curry(showTooltip, params),
+        //         console.log("right clicked ", params.topTarget)
+        // });
+        // self.myChart.getZr().on('mousemove', e => {
+
+        //     // mouse position within chart, in pixels
+        //     const pointInPixel = [e.offsetX, e.offsetY]
+        //     console.log('pointInPixel ', pointInPixel)
+        // })
         updatePosition();
     }
+
 
 
 
@@ -697,47 +740,77 @@ export class ContinousBidPricingComponent implements OnInit {
                 break;
             }
         }
+
+        //console.log('currData ', currData)
         return currData;
     }
+
+
 
 
     // Fare class currently selling 
     public markPoint(): any {
 
-        let sellingPoint = this.sharedDatasetService.maxAuValue - this.sharedDatasetService.totalBookingsCollector;
-        const coordinatesForMarkPoint = [sellingPoint, this.activeCurve[sellingPoint]]
-        const sellingValues = this.findMatchingBucketForBidPrice(this.activeCurve[sellingPoint]);
-        const activeColor = this.adjustedCurvePoints.length ? 'green' : 'navy';
+        let coordinatesForMarkPoint = [];
 
-        return {
-            clickable: false,
-            animation: false,
-            data: [
+
+        let sellingValues: any = {};
+        let sellingPoint = null;
+
+
+
+        if (this.sharedDatasetService.totalBookingsCollector > 0) {
+
+            sellingPoint = this.sharedDatasetService.maxAuValue - this.sharedDatasetService.totalBookingsCollector;
+            coordinatesForMarkPoint = [sellingPoint, this.activeCurve[sellingPoint]];
+            sellingValues = this.findMatchingBucketForBidPrice(this.activeCurve[sellingPoint]);
+            const activeColor = this.adjustedCurvePoints.length ? 'green' : this.sharedDatasetService.totalBookingsCollector > 0 ? 'navy' : 'transparent';
+            this.markPointContainer = {
+                clickable: false,
+                animation: false,
+                data: [
+                    {
+                        coord: coordinatesForMarkPoint,
+                        symbol: 'circle',
+                        symbolSize: this.sharedDatasetService.totalBookingsCollector > 0 ? 22 : 'none',
+                        itemStyle: {
+                            color: activeColor,
+                        },
+                        label: {
+                            show: true,
+                            offset: [0, 1],
+                            formatter: () => {
+                                return '{a|' + sellingValues.letter + '}';
+                            },
+                            rich: {
+                                a: {
+                                    align: 'center',
+                                    fontSize: 12,
+                                    color: 'white'
+                                },
+                            },
+                        }
+                    }
+                ]
+            };
+
+        } else {
+
+            this.markPointContainer.data = [
                 {
                     coord: coordinatesForMarkPoint,
-                    symbol: 'circle',
-                    symbolSize: 22,
+                    symbol: 'none',
+                    symbolSize: 0,
                     itemStyle: {
-                        color: activeColor,
+                        color: 'transparent',
                     },
                     label: {
-                        show: true,
-                        offset: [0, 1],
-                        formatter: () => {
-                            console.log('sellingValues ', sellingValues)
-                            return '{a|' + sellingValues.letter + '}';
-                        },
-                        rich: {
-                            a: {
-                                align: 'center',
-                                fontSize: 12,
-                                color: 'white'
-                            },
-                        },
+                        show: false
                     }
                 }
-            ]
-        };
+            ];
+        }
+        return this.markPointContainer;
     }
 
     // Places lines vertically with labels on top of chart signifying fare call regions
