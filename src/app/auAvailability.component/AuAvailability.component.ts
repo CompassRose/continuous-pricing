@@ -2,6 +2,7 @@ import { Component, ElementRef, AfterViewInit } from '@angular/core';
 import * as echarts from 'echarts';
 import { SharedDatasetService } from '../shared-datasets.service';
 import { ContinousColors, ColorObject } from '../dashboard-constants';
+import { end } from '@popperjs/core';
 
 
 @Component({
@@ -24,32 +25,13 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
     constructor(public sharedDatasetService: SharedDatasetService, private host: ElementRef) {
 
+
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
             .subscribe((state) => {
                 if (this.myChart) {
-
-                    this.sharedDatasetService.bucketDetails.forEach((bd, i) => {
-                        //console.log('  i ', i, ' protections ', this.sharedDatasetService.bucketDetails[i])
-                    })
-
-
-                    //this.sharedDatasetService.totalProtections = this.sharedDatasetService.generateBookingCounts('protections');
-                    // this.sharedDatasetService.totalBookingsCollector = this.sharedDatasetService.generateBookingCounts('bookings');
-                    //console.log('dataIndex ', this.sharedDatasetService.totalBookingsCollector)
-                    // this.sharedDatasetService.totalLoadFactor = ((this.sharedDatasetService.totalBookingsCollector / this.sharedDatasetService.totalProtections) * 100).toFixed(0);
                     this.createChartElement();
                 }
             })
-
-        this.sharedDatasetService.selectedColorRangeBehaviorSubject$
-            .subscribe(color => {
-                this.colorRange = color;
-                if (this.myChart) {
-                    this.createChartElement();
-                }
-                //console.log('Avail selectedColorRangeBehaviorSubject this.colorRange ', this.colorRange)
-            })
-
     }
 
 
@@ -139,10 +121,38 @@ export class AuAvailabilityComponent implements AfterViewInit {
                 backgroundColor: 'rgba(205,225,245,0.05)',
                 grid: {
                     show: false,
-                    left: 35,
-                    right: 10,
+                    left: 55,
+                    right: 20,
                     top: 55,
-                    bottom: 10
+                    bottom: 40
+                },
+                tooltip: {
+                    show: true,
+                    //triggerOn: 'item',
+                    //appendToBody: 'true',
+                    //trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                    borderWidth: 2,
+                    borderColor: 'Blue',
+                    extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
+                    padding: 5,
+                    textStyle: {
+                        fontSize: 14,
+                        color: '#000'
+                    },
+                    // axisPointer: {
+                    //     // link: { xAxisIndex: 'all' },
+                    //     type: 'line',
+                    //     snap: true,
+                    //     label: {
+                    //         backgroundColor: '#6a7985'
+                    //     }
+                    // },
+                    formatter: (params) => {
+                        //console.log('params ', params)
+                        let tester = `${params.marker}  ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}<br>Aus: ${self.sharedDatasetService.bucketDetails[params.dataIndex].Aus}<br>Fare: ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}`;
+                        return tester;
+                    }
                 },
                 legend: {
                     show: true,
@@ -152,16 +162,19 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     },
                     top: 0,
                     itemWidth: 18,
-                    itemHeight: 12,
+                    itemHeight: 10,
                     right: 80,
                     data: [
                         {
-                            name: 'AUs',
+                            name: 'Seat Availability',
                             icon: 'roundRect'
                         },
                         {
-                            name: 'Seat Availability',
-                            icon: 'roundRect'
+                            name: 'AUs',
+                            icon: 'roundRect',
+                            itemStyle: {
+                                color: 'rgba(241, 255, 135, 0.75)'
+                            }
                         },
                         {
                             name: 'Protections',
@@ -172,100 +185,120 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             icon: 'roundRect'
                         },]
                 },
-                yAxis: {
-                    type: 'value',
-                    min: 0,
-                    max(value) {
-                        return value.max + 40;
+                yAxis: [
+                    {
+                        type: 'value',
+                        id: 0,
+                        name: 'Seats',
+                        position: 'left',
+                        nameLocation: 'middle',
+                        nameRotate: 90,
+                        nameGap: 35,
+                        nameTextStyle: {
+                            fontSize: 14,
+                            fontWeight: 'normal'
+                        },
+                        max: self.sharedDatasetService.bucketDetails[0].Aus + 20,
+                        interval: 10,
+                        inverse: false,
+                        axisLine: {
+                            show: true
+                        },
+                        axisLabel: {
+                            fontSize: 12
+                        },
                     },
-                    inverse: false,
-                    axisLine: {
-                        show: false
-                    },
-                    axisLabel: {
-                        fontSize: 10
-                    },
-                },
-                xAxis:
-                {
-                    show: true,
-                    type: 'category',
-                    nameGap: 0,
-                    axisLabel: {
-                        fontSize: 13,
-                        fontWeight: 'bold',
-                    },
+                ],
+                xAxis: [
+                    {
+                        show: true,
+                        type: 'category',
 
-                    inverse: false,
-                    position: 'top',
-                    axisTick: {
-                        show: true,
+                        axisLabel: {
+                            fontSize: 13,
+                            fontWeight: 'bold',
+                        },
+                        inverse: false,
+                        position: 'top',
+                        axisTick: {
+                            show: true,
+                        },
+                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            return item.letter;
+                        }),
                     },
-                    axisLine: {
+                    {
                         show: true,
-                        onZero: false,
+                        type: 'category',
+                        name: 'Bookings',
+                        nameLocation: 'middle',
+                        nameGap: 25,
+                        nameTextStyle: {
+                            fontSize: 14,
+                            fontWeight: 'bold'
+                        },
+
+                        axisLabel: {
+                            fontSize: 13,
+                            fontWeight: 'normal',
+                            color: 'green'
+                        },
+
+                        inverse: false,
+                        position: 'bottom',
+                        axisTick: {
+                            show: true,
+                        },
+                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            return `${item.bookings}`
+                            // return booked;
+                        }),
                     },
-                    data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                        // console.log('item ', item)
-                        return item.letter;
-                    }),
-                },
+                ],
 
                 series: [
-                    // {
-                    //     type: 'bar',
-                    //     barGap: '-100%',
-                    //     //barWidth: 3,
-                    //     showBackground: false,
-                    //     roundCap: true,
-                    //     name: 'Seat Availability',
-                    //     z: 5,
-                    //     animation: false,
-                    //     data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                    //         // console.log('item ', item)
-                    //         return item.Sa - item.protections;
-                    //     }),
-                    //     itemStyle: {
-                    //         color: (params) => {
-                    //             return 'rgba(72, 116, 228, 1)'
-                    //             //return self.colorRange.value[0];
-                    //         },
-                    //         decal: {
-                    //             symbol: 'rect',
-                    //             color: 'rgba(0, 0, 0, 0.2)',
-                    //             dashArrayX: [3, 0],
-                    //             dashArrayY: [4, 2],
-                    //             symbolSize: 1,
-                    //             rotation: Math.PI / 6
-                    //         }
-                    //     },
-                    //     label: {
-                    //         show: true,
-                    //         formatter: (params) => {
-                    //             return Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Sa)
-                    //         },
-                    //         color: 'white',
-                    //         fontSize: 10,
-                    //         fontWeight: 'normal',
-                    //         offset: [0, 26],
-                    //         position: 'top',
-                    //     }
-                    // },
                     {
                         type: 'bar',
-                        // stack: 'total',
+                        barGap: '-100%',
+                        showBackground: false,
+                        name: 'AUs',
+                        z: 1,
+                        animation: false,
+                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            return self.sharedDatasetService.bucketDetails[i].Aus;
+                        }),
+                        itemStyle: {
+                            color: (params) => {
+                                return 'rgba(255, 245, 66, 0.65)'
+                            },
+                        },
+                        label: {
+                            show: true,
+                            formatter: (params) => {
+                                const auDiff = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector);
+                                return auDiff < self.sharedDatasetService.bucketDetails[params.dataIndex].Aus ? Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus) : ''
+                            },
+                            color: 'black',
+                            fontSize: 10,
+                            fontWeight: 'normal',
+                            padding: 5,
+                            offset: [0, 10],
+                            position: 'top',
+                        }
+                    },
+                    {
+                        type: 'bar',
                         name: 'Protections',
                         silent: true,
                         barGap: '-100%',
                         z: 6,
                         animation: false,
-                        data: self.sharedDatasetService.currAus.map((item, i) => {
-                            return self.protectionYValue(i);
+                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            return self.sharedDatasetService.protectionLevel(i);
                         }),
 
                         itemStyle: {
                             color: 'rgb(12, 63, 185)',
-                            //shadowColor: 'Purple',
                             opacity: 1,
                             decal: {
                                 symbol: 'rect',
@@ -274,37 +307,59 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 dashArrayY: [4, 4],
                                 symbolSize: 1,
                                 rotation: Math.PI / 6
-                            }
-                        },
-
-                        label: {
-                            show: true,
-                            color: 'white',
-                            formatter: (params) => {
-                                if (self.protectionYValue(params.dataIndex) > 0 && self.protectionYValue(params.dataIndex) !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
-                                    return self.protectionYValue(params.dataIndex) - self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
-                                } else {
-                                    return ''
-                                }
                             },
-                            fontSize: 11,
-                            fontWeight: 'bold',
-                            offset: [0, 18],
-                            position: 'top',
-                        }
+                        },
+                        // label: {
+                        //     show: true,
+                        //     color: 'black',
+
+                        //     shadowBlur: 4,
+                        //     shadowOffsetX: 1,
+                        //     shadowOffsetY: 1,
+                        //     formatter: (params) => {
+                        //         if (self.sharedDatasetService.bucketDetails[params.dataIndex].protections !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
+                        //             return self.protectionYValue(params.dataIndex) - self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
+                        //         } else {
+                        //             return ''
+                        //         }
+                        //     },
+                        //     fontSize: 12,
+                        //     fontWeight: 'bold',
+                        //     offset: [-45, -15],
+                        //     position: 'bottom',
+                        // }
                     },
                     {
                         type: 'bar',
                         //stack: 'total',
                         name: 'Bookings',
-                        silent: true,
+                        //silent: true,
                         barGap: '-100%',
                         z: 7,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            //console.log('book ', item.bookings)
                             return item.bookings;
                         }),
+                        // label: {
+                        //     show: true,
+                        //     color: 'green',
 
+                        //     shadowBlur: 4,
+                        //     shadowOffsetX: 1,
+                        //     shadowOffsetY: 1,
+                        //     formatter: (params) => {
+                        //         // if (self.sharedDatasetService.bucketDetails[params.dataIndex].protections !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
+                        //         return self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
+                        //         // } else {
+                        //         //     return ''
+                        //         //}
+                        //     },
+                        //     fontSize: 12,
+                        //     fontWeight: 'bold',
+                        //     offset: [-45, -20],
+                        //     position: 'bottom',
+                        // },
                         itemStyle: {
                             color: 'rgba(12, 163, 85, 0.75)',
                             decal: {
@@ -320,21 +375,19 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     {
                         type: 'bar',
                         stack: 'total',
-                        name: 'AUs',
-                        //barWidth: 13,
+                        name: 'Seat Availability',
                         showBackground: true,
-                        z: 1,
+                        z: 2,
                         animation: false,
-
-                        data: self.sharedDatasetService.currAus.map((item, i) => {
-                            return item - self.protectionYValue(i);
+                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                            // console.log('item ', item.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? item.Aus - self.sharedDatasetService.totalBookingsCollector : 0)
+                            return item.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? item.Aus - self.sharedDatasetService.totalBookingsCollector : 0;
                         }),
-
                         itemStyle: {
-                            color: (params) => {
-                                return 'rgba(92, 136, 248, 1)'
-                                //return self.colorRange.value[0];
-                            },
+                            color: 'rgba(32, 96, 248, 1)',
+                            borderColor: 'transparent',
+                            borderWidth: 1,
+                            borderType: 'solid',
                             decal: {
                                 symbol: 'rect',
                                 color: 'rgba(0, 0, 0, 0.2)',
@@ -344,30 +397,56 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 rotation: Math.PI / 6
                             }
                         },
-                        select: {
+                        emphasis: {
                             itemStyle: {
-                                borderWidth: 3,
-                                borderColor: 'red',
+                                borderColor: '#000',
+                                borderWidth: 1,
+                                borderType: 'solid',
                             }
                         },
                         label: {
                             show: true,
                             fontSize: 12,
-                            fontWeight: 'bold',
+                            fontWeight: 'normal',
                             formatter: (params) => {
-                                const labelValues = `${Math.round(self.sharedDatasetService.currAus[params.dataIndex])}\n${Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].fare)}`
-                                return labelValues;
+                                let labelString: any;
+                                self.sharedDatasetService.bucketDetails.map((bd, i) => {
+                                    // console.log('dis ', self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
+                                    const tom = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
+                                    if (self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 26) {
+
+                                        labelString = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 0 ?
+                                            `${tom}`
+                                            : self.sharedDatasetService.bucketDetails[params.dataIndex].fare;
+
+                                    } else {
+                                        labelString = ''
+                                    }
+
+                                })
+                                return `{a|${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}}\n{b|${labelString}}`
+                                //return `{ a|${labelString}}`
                             },
-                            // rich: {
-                            //     a: {
-                            //         color: 'black',
-                            //         fontSize: 10,
-                            //         fontWeight: 'bold',
-                            //         padding: [10, 3, 0, 3]
-                            //     },
-                            // },
-                            position: 'top',
-                            //offset: [0, -4]
+                            rich: {
+                                a: {
+                                    align: 'center',
+                                    fontSize: 13,
+                                    fontWeight: 'bold',
+                                    color: 'white',
+                                },
+                                b: {
+                                    align: 'center',
+                                    fontSize: 12,
+                                    fontWeight: 'normal',
+                                    color: 'white',
+                                },
+                            },
+                            position: 'insideTop',
+                            //offset: [0, 0]
+                            // offset: self.sharedDatasetService.bucketDetails.map((bd, i) => {
+                            //     console.log('lllll ', bd.Aus - self.sharedDatasetService.totalBookingsCollector)
+                            //     return bd.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? [0, -40] : [0, -40]
+                            // })
                         }
                     }
                 ]
@@ -380,9 +459,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
         window.addEventListener('resize', updatePosition);
     }
 
-    public protectionYValue(idx: number) {
-        return this.sharedDatasetService.protectionLevel(idx);
-    }
 
     private getTextColor(idx) {
         return this.sharedDatasetService.bucketDetails[idx].fare;

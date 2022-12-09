@@ -4,18 +4,20 @@
 @import "styles/fonts";
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
-$font-family: "OpenSans-Semibold";
+$font-family: "'Crimson Pro', sans-serif"; //"OpenSans-Semibold";
 $body-background: rgb(227, 231, 235);
 
 
 html,
 body {
   height: 100%;
+  overflow-x: hidden;
+  font-family: "OpenSans-Semibold", sans-serif !important;
 }
 
-canvas {
-  cursor: w-resize !important;
-}
+// canvas {
+//   cursor: w-resize !important;
+// }
 
 body {
   background: rgb(188, 208, 255) !important;
@@ -30,9 +32,9 @@ body {
   background-color: rgb(255, 255, 255) !important;
 }
 
-.mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
-  //background-color: red;
-}
+// .mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
+//   //background-color: red;
+// }
 
 .mat-slider.mat-slider-horizontal .mat-slider-track-wrapper {
   height: 10px;

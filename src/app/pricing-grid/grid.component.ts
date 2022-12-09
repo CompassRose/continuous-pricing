@@ -1,6 +1,7 @@
-import { Component, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, Inject, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { DOCUMENT } from "@angular/common";
 import { ContinousColors, ColorObject } from '../dashboard-constants';
-import { Subject, Subscription, fromEvent, take, distinctUntilChanged, map, merge, share, combineLatest, Observable } from 'rxjs';
+import { Subject, Subscription, fromEvent, take, distinctUntilChanged, map, merge, share, combineLatest, Observable, pairwise, scan } from 'rxjs';
 import { SharedDatasetService } from '../shared-datasets.service';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { BookingControlService } from '../booking-controls';
@@ -10,9 +11,32 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { KeyCode } from './lib/keycodes';
 import { shortcut, sequence } from './lib/shortcuts';
 
+import * as gradient from "javascript-color-gradient";
+
 export interface BidPriceCurvePoints {
   x: number;
   y: number;
+}
+
+
+export function animationFrame({
+  requestAnimationFrame,
+  cancelAnimationFrame
+}: Window): Observable<DOMHighResTimeStamp> {
+  return new Observable(subscriber => {
+    let id = NaN;
+
+    const callback = (timestamp: DOMHighResTimeStamp) => {
+      subscriber.next(timestamp);
+      id = requestAnimationFrame(callback);
+    };
+
+    id = requestAnimationFrame(callback);
+
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  });
 }
 
 export interface TempBucketDetails {
@@ -21,23 +45,37 @@ export interface TempBucketDetails {
   protections: number;
 }
 
-
+export const devPathToAssets = '../../assets/images/';
+export const prodPathToAssets = '';
 
 @Component({
   selector: 'draggable-aus',
   templateUrl: './grid.component.html',
-  styleUrls: ['./grid.component.scss'],
+  styleUrls: ['./grid.component.scss']
 })
-
 
 
 
 
 export class ContinousPricingComponent implements OnInit {
 
-  public colorCollections: ColorObject[] = ContinousColors;
+  readonly fps$ = animationFrame(this.documentRef.defaultView).pipe(
+    pairwise(),
+    scan((acc, [prev, cur]) => {
+      if (acc.push(1000 / (cur - prev)) > 60) {
+        acc.shift();
+      }
+      return acc;
+    }, []),
+    map(arr => Math.round(arr.reduce((acc, cur) => acc + cur, 0) / arr.length))
+  );
+
+  //public colorCollections: ColorObject[] = ContinousColors;
 
   public lastSelectedMetric = 0;
+
+  public pathToAssets = '';
+
 
   overlayRef: OverlayRef | null;
 
@@ -45,16 +83,24 @@ export class ContinousPricingComponent implements OnInit {
 
   shortcuts$: Observable<string>;
 
-
   constructor(
+    @Inject(DOCUMENT) private readonly documentRef: Document,
     public bookingControlService: BookingControlService,
     public sharedDatasetService: SharedDatasetService,
     public overlay: Overlay,
     public viewContainerRef: ViewContainerRef) {
+
+    this.pathToAssets = devPathToAssets;
   }
 
   public ngOnInit() {
 
+    // const gradientArray = new Gradient()
+    //   .setColorGradient("#3F2CAF", "#e9446a", "#edc988", "#607D8B")
+    //   .setMidpoint(20)
+    //   .getColors();
+
+    // console.log('||||  gradientArray ', gradientArray);
 
     const cmdJ = merge(
       shortcut([KeyCode.MetaRight, KeyCode.KeyJ]),
@@ -110,18 +156,29 @@ export class ContinousPricingComponent implements OnInit {
       //  altSpace
     ).pipe(map((arr) => {
       // console.log('arr 0 ', arr[0], ' 1 ', arr[1])
+
       return arr.map((a) => {
-        console.log('\n\n\na ', a.ctrlKey, ' code ', a.code, ' type ', a.type)
+        //console.log('\n\n\na ', a.ctrlKey, ' code ', a.code, ' type ', a.type, ' this.lastSelectedMetric ', this.lastSelectedMetric)
         if (a.ctrlKey) {
-          this.sharedDatasetService.setGroupingMethod(0)
+
+          if (this.sharedDatasetService.selectedMetric !== 0) {
+            this.lastSelectedMetric = this.sharedDatasetService.selectedMetric;
+          }
+          //console.log('TRUE this.sharedDatasetService.selectedMetric ', this.sharedDatasetService.selectedMetric, ' this.lastSelectedMetric ', this.lastSelectedMetric)
+          if (this.sharedDatasetService.selectedMetric !== 0) {
+            this.sharedDatasetService.setGroupingMethod(0);
+          }
+
         } else {
-          this.sharedDatasetService.setGroupingMethod(1)
+          //console.log('FALSE this.sharedDatasetService.selectedMetric ', this.sharedDatasetService.selectedMetric)
+          if (this.lastSelectedMetric !== 0) {
+            this.sharedDatasetService.setGroupingMethod(this.lastSelectedMetric);
+          }
+
         }
         return a.code
       }).join("+")
     }))
   }
-
-
 };
 

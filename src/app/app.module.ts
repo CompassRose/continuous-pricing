@@ -1,4 +1,4 @@
-import { NgModule, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA, DEFAULT_CURRENCY_CODE } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
@@ -21,7 +21,7 @@ import { FlightHeaderComponent } from './pricing-grid/Fight-header/flight-header
 import { MatSliderModule } from '@angular/material/slider';
 import { BipPriceConfigureComponent } from './bid-price-configure/bid-price-configure.component';
 import { ContinousBidPricingComponent } from './continuous-bidpricing-chart/continuous-bidpricing-chart.component';
-//import { culori } from 'culori';
+
 
 @NgModule({
   declarations: [
@@ -53,7 +53,7 @@ import { ContinousBidPricingComponent } from './continuous-bidpricing-chart/cont
       echarts: () => import('echarts')
     })
   ],
-  providers: [],
+  providers: [{ provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }],
   schemas: [NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]
 })

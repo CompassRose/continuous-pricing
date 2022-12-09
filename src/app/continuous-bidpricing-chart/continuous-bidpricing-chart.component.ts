@@ -1,12 +1,10 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
-import { ContinousColors, ColorObject, ConstraintType } from '../dashboard-constants';
+import { Component, OnInit, ElementRef, AfterViewInit } from '@angular/core';
+import { ConstraintType } from '../dashboard-constants';
 import * as echarts from 'echarts';
 import { BucketDetails, BidPriceInfluencers } from '../models/dashboard.model';
 import { SharedDatasetService } from '../shared-datasets.service';
 import { ColorManagerService } from '../color-manager-service';
-
-
-const culori = require('culori')
+import { startWith, delay, distinctUntilChanged } from 'rxjs';
 
 @Component({
     selector: 'continuous-bid-pricing',
@@ -14,31 +12,20 @@ const culori = require('culori')
     styleUrls: ['./continuous-bidpricing-chart.component.scss'],
 })
 
-export class ContinousBidPricingComponent implements OnInit {
+export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
 
     public adjustedCurvePoints: any[] = [];
-
-    public activeCurve: number[] = [];
-
     public modifierCollection = [];
-
     public barSeriesValuesColors: any[] = [];
-
     public selectedElement = [];
-
     public options: any = {};
-
     public myChart: echarts.ECharts = null;
-
     public modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
-
-    public colorCollections: ColorObject[] = ContinousColors;
-
     public colorRange: any = {};
-
     public resetChartElementView = true;
+    public markPointContainer: any = {};
 
-    public markPointContainer: any = {}
+
     // Width observer
     public targetElement: any;
     public bidPriceObserver: any;
@@ -49,54 +36,59 @@ export class ContinousBidPricingComponent implements OnInit {
         private colorManagerService: ColorManagerService,
         private host: ElementRef) {
 
+        this.sharedDatasetService.interpolatedBidPriceSumSubject$.next(0);
+
         this.colorRange.value = this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length);
 
-        //console.log('this.colorRange.value ', this.colorRange.value)
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
             .subscribe((state) => {
 
                 if (this.myChart) {
-
-                    /// console.log(' $$$$ CONTINUOUS ', ' state ', state)
-
+                    //console.log('bucketDetailsBehaviorSubject$$ response ', this.sharedDatasetService.bucketDetails, ' currAus ', this.sharedDatasetService.currAus)
                     this.adjustPieceColorForBookingUpdates();
                     if (state) {
                         this.generateInterpolatedCurvePoints();
                     } else {
                         this.createChartElement();
-
                     }
-
+                    this.loadInterpolatedBidPriceValues('activeCurve');
+                    this.loadDynamicBidPriceValues('dynamicBidPrices');
                     if (this.modifierCollection.length > 0) {
                         this.adjustedCurvePoints = [];
                         this.sharedDatasetService.interpolateBidPriceCurvePoints.forEach((ip, i) => {
                             const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints]
                             this.adjustedCurvePoints = this.applyAllInfluences(staticArray, this.modifierCollection);
-                            this.activeCurve = this.adjustedCurvePoints;
+                            this.sharedDatasetService.activeCurve = this.adjustedCurvePoints;
                         })
                     } else {
-                        this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
                     }
                 }
             })
 
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
-                // console.log('resetDefaultSubject$ response ', response)
+
+                //console.log('response ', response)
                 this.sharedDatasetService.totalBookingsCollector = 0;
                 this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
+
                 this.sharedDatasetService.applyDataChanges();
+
                 this.adjustPieceColorForBookingUpdates();
                 this.generateInterpolatedCurvePoints();
-
-                this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                this.loadInterpolatedBidPriceValues('activeCurve');
+                this.loadDynamicBidPriceValues('dynamicBidPrices');
+                //console.log('resetDefaultSubject$ response ', this.sharedDatasetService.bucketDetails, ' currAus ', this.sharedDatasetService.currAus, ' ', this.sharedDatasetService.archivedBucketDetails)
                 this.createChartElement();
             })
 
         this.sharedDatasetService.influenceInput$
             .subscribe(([response, mod, id]) => {
-                //console.log('response ', response, ' idx ', mod, ' id ', id)
+
                 if (response !== null) {
+                    //console.log('response ', response, ' idx ', mod, ' id ', id)
                     this.modifierObj[mod] = response;
                     const staticModifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 };
 
@@ -124,12 +116,14 @@ export class ContinousBidPricingComponent implements OnInit {
 
                         const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints]
                         this.adjustedCurvePoints = this.applyAllInfluences(staticArray, this.modifierCollection);
-                        this.activeCurve = this.adjustedCurvePoints;
+                        this.sharedDatasetService.activeCurve = this.adjustedCurvePoints;
+
                     } else {
                         this.adjustedCurvePoints = [];
-                        this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
                     }
 
+                    this.loadInterpolatedBidPriceValues('activeCurve');
                     this.adjustPieceColorForBookingUpdates();
                     this.generateInterpolatedCurvePoints();
                     this.createChartElement();
@@ -138,13 +132,64 @@ export class ContinousBidPricingComponent implements OnInit {
 
     }
 
+    public ngAfterViewInit(): void {
+
+        this.sharedDatasetService.steppedBidPriceSumSubject$
+            .pipe(
+                startWith(null),
+                delay(0),
+                distinctUntilChanged()
+            ).subscribe((res => {
+                this.loadDynamicBidPriceValues('dynamicBidPrices');
+            }));
+
+        this.sharedDatasetService.interpolatedBidPriceSumSubject$
+            .pipe(
+                startWith(null),
+                delay(0),
+                distinctUntilChanged()
+            ).subscribe((res => {
+                this.loadInterpolatedBidPriceValues('activeCurve');
+            }));
+
+
+    }
+
+
+    public loadDynamicBidPriceValues(metric: string) {
+        // console.log('loadBidPriceValues ', metric)
+
+        const sumTotal = this.sharedDatasetService[metric].reduce((accumulator, value) => {
+            return accumulator + value;
+        }, 0)
+        this.sharedDatasetService.steppedBidPriceSumSubject$.next(sumTotal);
+    }
+
+    public getDifference(previous, metric) {
+        console.log('loadBidPriceValues previous ', previous, ' metric ', metric)
+    }
+
+    public loadInterpolatedBidPriceValues(metric: string) {
+
+        this.sharedDatasetService.interpolatedBidPriceSumSubject$.next(this.sharedDatasetService[metric].reduce((accumulator, value) => {
+            return accumulator + value;
+        }, 0))
+
+
+        //this.sharedDatasetService.interpolatedBidPriceSumSubject$.next(derivedRevenue.toFixed(2));
+    }
+
     ngOnInit(): void {
+
         this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
         this.sharedDatasetService.applyDataChanges();
+
+        this.sharedDatasetService.archivedBucketDetails = JSON.parse(JSON.stringify(this.sharedDatasetService.bucketDetails));
+
         this.adjustPieceColorForBookingUpdates();
         this.generateInterpolatedCurvePoints();
 
-        this.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
 
         setTimeout(() => {
             this.createSvg();
@@ -180,20 +225,27 @@ export class ContinousBidPricingComponent implements OnInit {
     public createSvg(): void {
         const chart: HTMLCanvasElement = document.getElementById('continuous-bidpricing') as HTMLCanvasElement;
         this.myChart = echarts.init(chart, 'light');
-        // this.createChartElement();
+
     }
 
 
 
+    // Generates Bid Price Curve from adjustments
     public generateInterpolatedCurvePoints() {
 
         let stepper = 0;
+        let noProtections = 0;
 
         // @ts-ignore
         function ranger(from, to, step, prec) {
+
+
             if (typeof from == 'number') {
+
                 const A = [from];
-                step = typeof step == 'number' ? Math.abs(step) : 1;
+                step = typeof step === 'number' ? Math.abs(step) : 1;
+                //  console.log(' step ', step)
+
                 if (!prec) {
                     prec = (from + step) % 1 ? String((from + step) % 1).length + 1 : 0;
                 }
@@ -211,29 +263,61 @@ export class ContinousBidPricingComponent implements OnInit {
         let rangeArray = [];
 
         this.sharedDatasetService.bucketDetails.map((p, i) => {
+            //  console.log('MAP  p.letter ', p.letter, ' p.protections ', p.protections)
+
 
             if (i === 0) {
+
+
                 for (let m = 0; m < this.sharedDatasetService.bucketDetails[0].protections; m++) {
 
-                    rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
+                    if (this.sharedDatasetService.bucketDetails[0].protections > 0) {
+                        // console.log('PROTECTIONS  p.letter ', p.letter)
+                        rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
+                    }
                 }
             } else {
                 stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
+                //  console.log('         stepper ', stepper, ' type ', typeof (stepper))
 
-                rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2)
-                //console.log('p ', p.letter, ' rangeArray ', rangeArray)
+                rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2);
+
+
+
+                if (p.protections === 0) {
+                    //noProtections++;
+                    //console.log('p.letter ', p.letter, ' protections ', p.protections, ' fare ', p.fare, ' noProtections ', noProtections)
+                    // rangeArray.shift();
+                }
+
+                //if (this.sharedDatasetService.bucketDetails[noProtections - 1]) {
+                // console.log('               p ', p.letter, ' protections ', p.protections, ' noProtections ', noProtections, ' [noProtections] ', this.sharedDatasetService.bucketDetails[noProtections + 1].fare)
+                // }
+
                 rangeArray.shift();
+                //  console.log('p.letter ', p.letter, ' rangeArray ', rangeArray)
             }
-            // console.log('rangeArray letter ', p.letter, ' rangeArray ', rangeArray)
+
+            if (p.protections === 0) {
+                noProtections++
+            }
+
+            // console.log('PROTECTIONS  p.letter ', ' noProtections ', noProtections,
+            //     ' New Letter ', this.sharedDatasetService.bucketDetails[noProtections].letter,
+            //     ' test ', this.sharedDatasetService.bucketDetails[noProtections].protections)
+
+            //console.log('rangeArray letter ', p.letter, ' rangeArray ', rangeArray)
             result.push(...rangeArray)
         })
 
+        // console.log('dyn ', this.sharedDatasetService.dynamicBidPrices, ' result        ', result, '   ----------------------- \n\n\n\n\n')
         this.sharedDatasetService.interpolateBidPriceCurvePoints = result;
 
     }
 
 
 
+    // Set up bar colors 
     public adjustPieceColorForBookingUpdates() {
 
         this.barSeriesValuesColors = [];
@@ -289,18 +373,11 @@ export class ContinousBidPricingComponent implements OnInit {
 
         const self = this;
 
-        // self.myChart.on('datazoom', (params) => {
-        //     console.log('||  dataZoom || ', params)
-        //     this.resetChartElementView = false;
-        //     //this.myChart.resize();
-        //     setChartDragPoints();
-        // })
-
         const updatePosition = () => {
             setChartInstance();
-            setTimeout(() => {
-                setChartDragPoints();
-            }, 10);
+            //setTimeout(() => {
+            setChartDragPoints();
+            //}, 10);
         };
 
         const selectModifier = (dataIndex) => {
@@ -317,8 +394,8 @@ export class ContinousBidPricingComponent implements OnInit {
             const target = dataIndex + 1;
             dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
             yValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
-            //console.log('dragPosition ', this.position, ' dataIndex ', test, ' Letter ', self.sharedDatasetService.bucketDetails[test].letter)
-            if (yValue < 1) { yValue = 1; }
+            //console.log('dragPosition  target ', target, ' Letter ', self.sharedDatasetService.bucketDetails[target].letter, ' BD ', self.sharedDatasetService.currAus)
+            if (yValue < 1) { yValue = 0; }
             if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
             self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[target], target, yValue);
             self.sharedDatasetService.applyDataChanges();
@@ -365,37 +442,17 @@ export class ContinousBidPricingComponent implements OnInit {
 
                 graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, (item, dataIndex) => {
 
-
                     const xPlace = placeTemp += item.protections;
 
                     const dragPoint = 0;
                     let doesInclude = self.selectedElement.includes(dataIndex) ? true : false;
 
                     const scaleHandles = (dataIndex === self.sharedDatasetService.bucketDetails.length - 1) ? [] : [xPlace, dragPoint];
-                    //  console.log('  LENGTH ', ' item ', item)
-
-                    //const scaleText = [xPlace - 1, dragPoint + 8]
                     const fillColor = doesInclude ? 'red' : 'white';
                     const strokeColor = (dataIndex === self.sharedDatasetService.bucketDetails.length - 1) ? 'transparent' : 'Blue';
                     const lineWidth = doesInclude ? 2 : 1;
 
                     return {
-                        //  type: 'group',
-                        // left: '10%',
-                        // top: 'center',
-                        /// children: [
-
-                        // {
-                        //     type: 'text',
-                        //     position: self.myChart.convertToPixel('grid', scaleText),
-                        //     z: 102,
-                        //     style: {
-                        //         fill: 'black',
-                        //         text: item.letter,
-                        //         font: 'bold 14px sans-serif'
-                        //     }
-                        // },
-                        //   {
                         type: 'circle',
                         id: dataIndex,
                         position: self.myChart.convertToPixel('grid', scaleHandles),
@@ -413,7 +470,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         draggable: true,
                         ondrag: echarts.util.curry(onPointDragging, dataIndex),
                         onmousemove: echarts.util.curry(showTooltip, dataIndex),
-                        onclick: echarts.util.curry(mouseClick, dataIndex),
+                        //onclick: echarts.util.curry(mouseClick, dataIndex),
                         onmouseover: echarts.util.curry(showTooltip, dataIndex),
                         onmouseout: echarts.util.curry(hideTooltip, dataIndex),
                         z: 100
@@ -478,8 +535,7 @@ export class ContinousBidPricingComponent implements OnInit {
                 tooltip: {
                     show: true,
                     triggerOn: 'item',
-
-
+                    appendToBody: 'true',
                     //trigger: 'axis',
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     borderWidth: 2,
@@ -487,7 +543,7 @@ export class ContinousBidPricingComponent implements OnInit {
                     extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
                     padding: 5,
                     textStyle: {
-                        fontSize: 12,
+                        fontSize: 15,
                         color: '#000'
                     },
                     // axisPointer: {
@@ -504,16 +560,16 @@ export class ContinousBidPricingComponent implements OnInit {
                         let tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
 
                         if (params.length) {
-                            bucket = self.findMatchingBucketForBidPrice(this.activeCurve[params[0].dataIndex]).letter;
+                            bucket = self.findMatchingBucketForBidPrice(this.sharedDatasetService.activeCurve[params[0].dataIndex]).letter;
                             let testForSecond = ''
                             if (params[3]) {
                                 testForSecond = `${params[3].marker}Influenced: ${params[3].data}<br>`
                             }
                             tester = `${params[0].marker}Class: ${bucket}<br>${testForSecond}${params[2].marker}Modified: ${params[2].data}<br>${params[1].marker}Base: ${params[1].data}`;
                         } else {
-
-                            tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
-                            //console.log('letter ', params)
+                            //tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex + 1].Aus}::  ${params.dataIndex}:  ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
+                            // tester = `idx ${params.dataIndex}: Letter  ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}  |   P: ${self.sharedDatasetService.bucketDetails[params.dataIndex].protections}`;
+                            // console.log('letter ', params)
                         }
                         return tester;
                     }
@@ -564,6 +620,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         showMaxLabel: true
                     },
                     data: self.sharedDatasetService.dynamicBidPrices.map((bp, i) => {
+                        //console.log('bp ', bp, ' i ', i)
                         return self.sharedDatasetService.dynamicBidPrices.length - i
                     }),
                 },
@@ -571,7 +628,9 @@ export class ContinousBidPricingComponent implements OnInit {
                     silent: true,
                     type: 'value',
                     showGrid: false,
+                    //max: self.sharedDatasetService.dynamicBidPrices[0] + 10,
                     interval: 20,
+                    max: 220,
                     scale: false,
                     //boundaryGap: [0, '1%'],
                     splitLine: {
@@ -593,7 +652,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         silent: true,
                         z: 1,
                         data: self.barSeriesValuesColors.map((serie, i) => {
-                            //console.log('serie  i', i, ' serie ', serie)
+
 
                             return {
                                 value: serie.value,
@@ -626,48 +685,69 @@ export class ContinousBidPricingComponent implements OnInit {
                                 offset: [0, -25],
                             },
 
-                            data: self.sharedDatasetService.currAus.map((item, i) => {
-                                if (self.sharedDatasetService.currAus[i + 1]) {
-                                    incr += self.sharedDatasetService.currAus[i] - self.sharedDatasetService.currAus[i + 1]
-                                    //console.log(' currAus ', incr, ' item ', item, ' currAus ', self.sharedDatasetService.currAus[i])
-                                } else {
-                                    incr += self.sharedDatasetService.currAus[i];
-                                }
+                            data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+
+                                //console.log('Letter ', item.letter, ' currAus ', incr, ' item ', item, ' currAus ', self.sharedDatasetService.currAus[i])
+
                                 return [{
-                                    name: self.sharedDatasetService.bucketDetails[i].letter,
-                                    xAxis: self.sharedDatasetService.currAus[0] - item,
+                                    name: item.protections > 0 ? self.sharedDatasetService.bucketDetails[i].letter : '',
+                                    xAxis: self.sharedDatasetService.maxAuValue - item.Aus,
                                 }, {
                                     itemStyle: {
                                         borderColor: 'rgba(100,100,100,0.5)',
                                         borderWidth: 1,
                                         color: 'rgba(0,0,100,0)'
                                     },
-                                    xAxis: incr
+                                    xAxis: self.sharedDatasetService.bucketDetails[i + 1] ? self.sharedDatasetService.maxAuValue - self.sharedDatasetService.bucketDetails[i + 1].Aus : self.sharedDatasetService.maxAuValue
                                 }];
 
                             })
+
+                            // data: self.sharedDatasetService.currAus.map((item, i) => {
+
+                            //     if (self.sharedDatasetService.currAus[i + 1]) {
+                            //         incr += self.sharedDatasetService.currAus[i] - self.sharedDatasetService.currAus[i + 1]
+                            //         console.log('Letter ', self.sharedDatasetService.bucketDetails[i].letter, ' currAus ', incr, ' item ', item, ' currAus ', self.sharedDatasetService.currAus[i])
+
+                            //     } else {
+                            //         incr += self.sharedDatasetService.currAus[i];
+                            //     }
+
+                            //     return [{
+                            //         name: self.sharedDatasetService.bucketDetails[i].letter,
+                            //         xAxis: self.sharedDatasetService.currAus[0] - item,
+                            //     }, {
+                            //         itemStyle: {
+                            //             borderColor: 'rgba(100,100,100,0.5)',
+                            //             borderWidth: 1,
+                            //             color: 'rgba(0,0,100,0)'
+                            //         },
+                            //         xAxis: incr
+                            //     }];
+
+                            // })
                         },
                     },
-                    {
-                        id: 'e',
-                        type: 'line',
-                        //animation: true,
-                        silent: true,
-                        showSymbol: false,
-                        selectedMode: false,
-                        symbolSize: 10,
-                        itemStyle: {
-                            borderColor: 'red',
-                            borderWidth: 1,
-                            color: 'red'
-                        },
-                        lineStyle: {
-                            type: 'solid',
-                            color: 'red',
-                            width: 0
-                        },
-                        data: self.sharedDatasetService.dynamicBidPrices
-                    },
+                    // {
+                    //     id: 'e',
+                    //     type: 'line',
+                    //     //animation: true,
+                    //     silent: true,
+                    //     showSymbol: false,
+                    //     selectedMode: false,
+                    //     symbolSize: 10,
+                    //     itemStyle: {
+                    //         borderColor: 'red',
+                    //         borderWidth: 1,
+                    //         color: 'red'
+                    //     },
+                    //     lineStyle: {
+                    //         type: 'solid',
+                    //         color: 'red',
+                    //         width: 0
+                    //     },
+                    //     data: self.sharedDatasetService.dynamicBidPrices
+                    // },
                     {
                         id: 'd',
                         type: 'line',
@@ -747,23 +827,20 @@ export class ContinousBidPricingComponent implements OnInit {
 
 
 
+    // Au distribution metrics Right and Left
 
     // Fare class currently selling 
     public markPoint(): any {
 
         let coordinatesForMarkPoint = [];
-
-
         let sellingValues: any = {};
         let sellingPoint = null;
-
-
 
         if (this.sharedDatasetService.totalBookingsCollector > 0) {
 
             sellingPoint = this.sharedDatasetService.maxAuValue - this.sharedDatasetService.totalBookingsCollector;
-            coordinatesForMarkPoint = [sellingPoint, this.activeCurve[sellingPoint]];
-            sellingValues = this.findMatchingBucketForBidPrice(this.activeCurve[sellingPoint]);
+            coordinatesForMarkPoint = [sellingPoint, this.sharedDatasetService.activeCurve[sellingPoint]];
+            sellingValues = this.findMatchingBucketForBidPrice(this.sharedDatasetService.activeCurve[sellingPoint]);
             const activeColor = this.adjustedCurvePoints.length ? 'green' : this.sharedDatasetService.totalBookingsCollector > 0 ? 'navy' : 'transparent';
             this.markPointContainer = {
                 clickable: false,
@@ -825,7 +902,7 @@ export class ContinousBidPricingComponent implements OnInit {
         const baseCurve = this.sharedDatasetService.dynamicBidPrices;
 
         if (this.sharedDatasetService.totalBookingsCollector > 0) {
-            const rounded = Math.round(this.activeCurve[sellingPoint]);
+            const rounded = Math.round(this.sharedDatasetService.activeCurve[sellingPoint]);
             const fareClass = `Selling: ${rounded}`
 
             // Vertical Active Class/Value Selling Line
@@ -871,7 +948,7 @@ export class ContinousBidPricingComponent implements OnInit {
                     {
                         symbol: 'diamond',
                         symbolSize: 6,
-                        yAxis: this.activeCurve[sellingPoint],
+                        yAxis: this.sharedDatasetService.activeCurve[sellingPoint],
 
                         label: {
                             show: false,

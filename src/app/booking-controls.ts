@@ -1,7 +1,7 @@
 
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs'
-import { debounceTime, tap, filter } from 'rxjs/operators';
+import { debounceTime, tap } from 'rxjs/operators';
 import { SharedDatasetService } from './shared-datasets.service';
 
 @Injectable({
@@ -38,41 +38,42 @@ export class BookingControlService {
                 this.change(0);
             })
 
+
         this.bookingSlider$.pipe(
             debounceTime(120),
 
             tap((event) => {
-                //console.log('event ', event)
-                let collObj = [...this.tempBucketHolderStatic]
-                this.sharedDatasetService.totalBookingsCollector = event;
-                let counter = 0;
-                let activeElement = this.sharedDatasetService.bucketDetails.length - 1;
+                console.log('event ', event)
+                if (event > 0) {
 
-                this.loadFactorFillPercent(event);
 
-                for (let b = 0; b < this.tempBucketHolderStatic.length; b++) {
-                    collObj[b].bookings = 0;
-                    collObj[b].protections = this.tempBucketHolderStatic[b].protections;
-                    collObj[b].Sa = this.tempBucketHolderStatic[b].Aus;
-                }
+                    let collObj = [...this.tempBucketHolderStatic]
+                    this.sharedDatasetService.totalBookingsCollector = event;
+                    let counter = 0;
+                    let activeElement = this.sharedDatasetService.bucketDetails.length - 1;
 
-                for (let i = 0; i < this.sharedDatasetService.totalBookingsCollector; i++) {
-                    collObj[activeElement].bookings += 1;
-                    counter++;
-                    if (counter === collObj[activeElement].protections) {
-                        activeElement > 0 ? activeElement -= 1 : 0;
-                        counter = 0;
+                    this.loadFactorFillPercent(event);
+
+                    for (let b = 0; b < this.tempBucketHolderStatic.length; b++) {
+                        collObj[b].bookings = 0;
+                        collObj[b].protections = this.tempBucketHolderStatic[b].protections;
                     }
 
-                    collObj.forEach((bd, i) => {
-                        if (bd.Sa > 0) {
-                            bd.Sa -= 1;
+                    for (let i = 0; i < this.sharedDatasetService.totalBookingsCollector; i++) {
+                        collObj[activeElement].bookings += 1;
+                        counter++;
+                        if (counter === collObj[activeElement].protections) {
+                            activeElement > 0 ? activeElement -= 1 : 0;
+                            counter = 0;
                         }
-                    })
-                }
+                    }
+                    this.sharedDatasetService.bucketDetails = collObj
 
-                //console.log('totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
-                this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
+                    if (event > 0) {
+                        console.log('event >>>>>>>>>>>>>>>  0')
+                        this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
+                    }
+                }
             })
         )
             .subscribe();
@@ -82,13 +83,14 @@ export class BookingControlService {
         this.sharedDatasetService.totalBookingsCollector = element;
         this.bookingSlider$.next(element)
 
-        //console.log('totalBookingsCollector ', element, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
+        // console.log('|||||   change   totalBookingsCollector ', element, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
     }
 
     public loadFactorFillPercent(value: number) {
+        // console.log('loadFactorFillPercent ', value)
         const percent = Math.round((value / this.sharedDatasetService.maxAuValue) * 100);
-        var elem = document.getElementById("myBar");
-        //console.log('Move ', value, ' percent ', percent, ' elem ', elem)
+        const elem = document.getElementById("myBar");
+        // console.log('Move ', value, ' percent ', percent, ' elem ', elem)
         elem.style.width = percent + "%";
         elem.innerHTML = percent + "%";
     }

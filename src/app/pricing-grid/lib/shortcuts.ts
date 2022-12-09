@@ -6,7 +6,7 @@ import { distinctUntilChanged, share, filter, tap } from "rxjs/operators";
 
 export const shortcut = (shortcut: KeyCode[]) => {
 
-    console.log('KeyboardEvent  ', shortcut)
+    //console.log('KeyboardEvent  ', shortcut)
     const keyDown$ = fromEvent<KeyboardEvent>(document, "keydown");
     const keyUp$ = fromEvent<KeyboardEvent>(document, "keyup");
 
@@ -52,7 +52,7 @@ export const shortcut = (shortcut: KeyCode[]) => {
 };
 
 export function sequence() {
-    console.log('||||||  sequence ||||||  ')
+
     return (source: Observable<KeyboardEvent[]>) => {
         //  console.log('KeyboardEvent ', source)
         return source.pipe(
