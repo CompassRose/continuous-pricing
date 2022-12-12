@@ -63,6 +63,7 @@ export class SharedDatasetService {
     public interpolatedBidPriceSumSubject$ = new BehaviorSubject<any>(null);
     public steppedBidPriceSumSubject$ = new BehaviorSubject<any>(null);
 
+    public differenceValueSubject$ = new Subject<number>();
 
     public dragGrouping: any = [
         { name: 'Single', id: 0, selected: true, disabled: false },

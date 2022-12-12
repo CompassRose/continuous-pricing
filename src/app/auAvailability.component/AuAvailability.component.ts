@@ -108,16 +108,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
         const setChartOptions = function () {
 
             self.myChart.setOption({
-                // title: {
-                //     show: true,
-                //     left: 0,
-                //     top: 5,
-                //     textStyle: {
-                //         fontSize: 11,
-                //         fontWeight: 'bold'
-                //     },
-                //     text: '            DF       AU       SA     Book'
-                // },
                 backgroundColor: 'rgba(205,225,245,0.05)',
                 grid: {
                     show: false,
@@ -128,30 +118,19 @@ export class AuAvailabilityComponent implements AfterViewInit {
                 },
                 tooltip: {
                     show: true,
-                    //triggerOn: 'item',
-                    //appendToBody: 'true',
-                    //trigger: 'axis',
                     backgroundColor: 'rgba(255, 255, 255, 1)',
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: 'Blue',
                     extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
-                    padding: 5,
+                    padding: [5, 10],
                     textStyle: {
                         fontSize: 14,
                         color: '#000'
                     },
-                    // axisPointer: {
-                    //     // link: { xAxisIndex: 'all' },
-                    //     type: 'line',
-                    //     snap: true,
-                    //     label: {
-                    //         backgroundColor: '#6a7985'
-                    //     }
-                    // },
                     formatter: (params) => {
-                        //console.log('params ', params)
-                        let tester = `${params.marker}  ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}<br>Aus: ${self.sharedDatasetService.bucketDetails[params.dataIndex].Aus}<br>Fare: ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}`;
-                        return tester;
+                        const calc = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector;
+                        const saValue = calc > 0 ? `<br>Sa: ${calc}` : ``;
+                        return `Class: ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}<br>Fare: ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}<br>Aus: ${self.sharedDatasetService.bucketDetails[params.dataIndex].Aus}${saValue}`;
                     }
                 },
                 legend: {
@@ -331,14 +310,11 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     },
                     {
                         type: 'bar',
-                        //stack: 'total',
                         name: 'Bookings',
-                        //silent: true,
                         barGap: '-100%',
                         z: 7,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            //console.log('book ', item.bookings)
                             return item.bookings;
                         }),
                         // label: {
@@ -380,8 +356,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         z: 2,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            // console.log('item ', item.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? item.Aus - self.sharedDatasetService.totalBookingsCollector : 0)
-                            return item.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? item.Aus - self.sharedDatasetService.totalBookingsCollector : 0;
+                            return item.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? item.Aus - self.sharedDatasetService.totalBookingsCollector : '';
                         }),
                         itemStyle: {
                             color: 'rgba(32, 96, 248, 1)',

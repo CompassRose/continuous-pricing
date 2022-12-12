@@ -62,6 +62,12 @@ export interface ChartDisplayType {
   value: string;
   metric: string;
 }
+
+export interface BarSeries {
+  value: number;
+  barColor: string;
+}
+
 export interface ScriptContentItems {
   items: ScriptContent[]
 }

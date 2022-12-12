@@ -95,12 +95,6 @@ export class ContinousPricingComponent implements OnInit {
 
   public ngOnInit() {
 
-    // const gradientArray = new Gradient()
-    //   .setColorGradient("#3F2CAF", "#e9446a", "#edc988", "#607D8B")
-    //   .setMidpoint(20)
-    //   .getColors();
-
-    // console.log('||||  gradientArray ', gradientArray);
 
     const cmdJ = merge(
       shortcut([KeyCode.MetaRight, KeyCode.KeyJ]),
@@ -158,23 +152,20 @@ export class ContinousPricingComponent implements OnInit {
       // console.log('arr 0 ', arr[0], ' 1 ', arr[1])
 
       return arr.map((a) => {
-        //console.log('\n\n\na ', a.ctrlKey, ' code ', a.code, ' type ', a.type, ' this.lastSelectedMetric ', this.lastSelectedMetric)
         if (a.ctrlKey) {
 
           if (this.sharedDatasetService.selectedMetric !== 0) {
             this.lastSelectedMetric = this.sharedDatasetService.selectedMetric;
           }
-          //console.log('TRUE this.sharedDatasetService.selectedMetric ', this.sharedDatasetService.selectedMetric, ' this.lastSelectedMetric ', this.lastSelectedMetric)
+
           if (this.sharedDatasetService.selectedMetric !== 0) {
             this.sharedDatasetService.setGroupingMethod(0);
           }
 
         } else {
-          //console.log('FALSE this.sharedDatasetService.selectedMetric ', this.sharedDatasetService.selectedMetric)
           if (this.lastSelectedMetric !== 0) {
             this.sharedDatasetService.setGroupingMethod(this.lastSelectedMetric);
           }
-
         }
         return a.code
       }).join("+")
