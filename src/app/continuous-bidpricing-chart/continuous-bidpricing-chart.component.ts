@@ -135,6 +135,25 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
 
     }
 
+
+    public ngOnInit(): void {
+
+        this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
+        this.sharedDatasetService.applyDataChanges();
+
+        this.sharedDatasetService.archivedBucketDetails = JSON.parse(JSON.stringify(this.sharedDatasetService.bucketDetails));
+
+        this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
+        this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
+
+        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+
+        setTimeout(() => {
+            this.createSvg();
+        }, 0);
+    }
+
+
     public ngAfterViewInit(): void {
 
         this.sharedDatasetService.steppedBidPriceSumSubject$
@@ -191,25 +210,6 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
         //console.log('interpTotal  ', interpTotal, ' this.differenceCalulation ', this.differenceCalulation)
     }
 
-    ngOnInit(): void {
-
-        this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
-        this.sharedDatasetService.applyDataChanges();
-
-        this.sharedDatasetService.archivedBucketDetails = JSON.parse(JSON.stringify(this.sharedDatasetService.bucketDetails));
-
-        this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
-        this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
-
-        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
-
-        setTimeout(() => {
-            this.createSvg();
-        }, 0);
-    }
-
-
-    //public updatePosition: () => void;
 
 
     public refreshChartVisual = () => {
@@ -368,7 +368,7 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
 
         const setChartInstance = () => {
 
-            let incr = 0;
+            // let incr = 0;
 
             self.myChart.setOption({
                 grid: {
@@ -380,7 +380,7 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                 },
                 backgroundColor: 'rgba(205,225,245,0.05)',
                 toolbox: {
-                    show: true,
+                    show: false,
                     right: 60,
                     top: -7,
                     itemSize: 13,
@@ -415,43 +415,34 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                 },
                 tooltip: {
                     show: true,
-                    triggerOn: 'item',
-                    appendToBody: 'true',
-                    //trigger: 'axis',
+                    trigger: 'axis',
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     borderWidth: 2,
                     borderColor: 'Blue',
                     extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
                     padding: 5,
                     textStyle: {
-                        fontSize: 15,
+                        fontSize: 12,
                         color: '#000'
                     },
-                    // axisPointer: {
-                    //     link: { xAxisIndex: 'all' },
-                    //     type: 'cross',
-                    //     snap: true,
-                    //     label: {
-                    //         backgroundColor: '#6a7985'
-                    //     }
-                    // },
-                    formatter: (params) => {
-
-                        let bucket = null;
-                        let tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
-
-                        if (params.length) {
-                            bucket = self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.activeCurve[params[0].dataIndex]).letter;
-                            let testForSecond = ''
-                            if (params[3]) {
-                                testForSecond = `${params[3].marker}Influenced: ${params[3].data}<br>`
-                            }
-                            tester = `${params[0].marker}Class: ${bucket}<br>${testForSecond}${params[2].marker}Modified: ${params[2].data}<br>${params[1].marker}Base: ${params[1].data}`;
+                    position: function (pos, params, dom, rect, size) {
+                        if ((size.viewSize[0] - pos[0]) > 140) {
+                            pos[0] = pos[0] + 0
                         } else {
-                            //tester = `${self.sharedDatasetService.bucketDetails[params.dataIndex + 1].Aus}::  ${params.dataIndex}:  ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}`;
-                            // tester = `idx ${params.dataIndex}: Letter  ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}  |   P: ${self.sharedDatasetService.bucketDetails[params.dataIndex].protections}`;
-                            // console.log('letter ', params)
+                            pos[0] = pos[0] - 150
                         }
+                        pos[1] = pos[1] - 80;
+                        return pos;
+                    },
+                    formatter: (params) => {
+                        let bucket = null;
+                        let tester = '';
+                        if (self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.interpolateBidPriceCurvePoints[params[0].dataIndex])) {
+                            bucket = self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.interpolateBidPriceCurvePoints[params[0].dataIndex]).letter;
+                        }
+                        tester = `<div style="width: 110px;">
+                        <div>${params[2].marker}Continuous: <span style="float: right;">${this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex].toFixed(0)}</span></div>
+                        <div>${params[1].marker}Fixed: <span style="float: right;">${this.sharedDatasetService.dynamicBidPrices[params[2].dataIndex]}</span></div></div>`;
                         return tester;
                     }
                 },
@@ -501,7 +492,6 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                         showMaxLabel: true
                     },
                     data: self.sharedDatasetService.dynamicBidPrices.map((bp, i) => {
-                        //console.log('bp ', bp, ' i ', i)
                         return self.sharedDatasetService.dynamicBidPrices.length - i
                     }),
                 },
@@ -513,7 +503,6 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                     interval: 20,
                     max: 220,
                     scale: false,
-                    //boundaryGap: [0, '1%'],
                     splitLine: {
                         show: false
                     },
@@ -530,7 +519,7 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                         animationDuration: 1,
                         showBackground: true,
                         colorBy: 'series',
-                        silent: true,
+                        silent: false,
                         z: 1,
                         data: self.barSeriesValuesColors.map((serie, i) => {
 
@@ -586,19 +575,19 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                         id: 'e',
                         type: 'line',
                         animation: false,
-                        silent: true,
+                        silent: false,
                         showSymbol: false,
                         selectedMode: false,
                         symbolSize: 10,
                         itemStyle: {
                             borderColor: 'red',
-                            borderWidth: 1,
+                            borderWidth: 0,
                             color: 'red'
                         },
                         lineStyle: {
                             type: 'solid',
                             color: 'rgba(120, 0, 0, 0.3)',
-                            width: 1
+                            width: 0
                         },
                         data: self.sharedDatasetService.dynamicBidPrices
                     },
@@ -619,7 +608,7 @@ export class ContinousBidPricingComponent implements OnInit, AfterViewInit {
                         lineStyle: {
                             type: 'solid',
                             color: 'blue',
-                            width: 4
+                            width: 3
                         },
                         data: self.sharedDatasetService.interpolateBidPriceCurvePoints,
                         markPoint: self.markPoint()

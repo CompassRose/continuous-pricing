@@ -51,7 +51,6 @@
               {{diff | currency }}</div>
           </div> -->
         </div>
-
         <div class="d-flex me-3">
           <div class="d-flex mx-5">
             <button type="button"
@@ -69,14 +68,20 @@
           </div>
           <div class="d-flex me-3"
             *ngIf="(sharedDatasetService.metricGroupSubject$| async)?.length">
-            <div class="d-flex align-items-center me-3"
-              *ngFor="let item of (sharedDatasetService.metricGroupSubject$ | async) let $idx = index;">
-              <label class="me-2 font-12">{{item.name}}</label>
-              <input type="checkbox"
-                [checked]="item.selected === true"
-                [disabled]="item.disabled"
-                (change)="sharedDatasetService.setGroupingMethod($idx)" />
-            </div>
+            <section class="d-flex">
+              <div class="d-flex align-items-center me-3"
+                *ngFor="let item of (sharedDatasetService.metricGroupSubject$ | async) let $idx = index;">
+                <input type="radio"
+                  id={{$idx}}
+                  name="select"
+                  value="$idx"
+                  [checked]="item.selected === true"
+                  (change)="sharedDatasetService.setGroupingMethod($idx)">
+                <label for="{{item.id}}">
+                  <div class="noselect font-12">{{item.name}}</div>
+                </label>
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -85,10 +90,8 @@
       </div>
     </div>
   </div>
-
   <div class="bookings-inluence mx-2 mb-2">
     <div class="chart-container">
-
       <div class="d-flex text-header-area-full">
         <div class="status-col w-100">
           <div class="d-flex justify-content-between">

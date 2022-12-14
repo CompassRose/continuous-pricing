@@ -37,16 +37,11 @@ export class SharedDatasetService {
 
     public currAus: number[] = [];
     public colorCollections: ColorObject[] = ContinousColors;
-
     public archivedBucketDetails: BucketDetails[] = [];
-
     static roundMultiplierDecimals = 4;
     static roundFactor = Math.pow(10, SharedDatasetService.roundMultiplierDecimals);
-
     public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(true);
-
     public resetDefaultSubject$ = new Subject<boolean>();
-
     public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
 
     // Stepped(Fixed) BidPrices
@@ -153,35 +148,6 @@ export class SharedDatasetService {
         this.bucketDetailsBehaviorSubject$.next(true);
     }
 
-
-
-    public generateBookingCounts(metric): number {
-        let metricTemp = 0;
-        for (let i = 0; i < this.bucketDetails.length; i++) {
-            metricTemp += Number(this.bucketDetails[i][metric]);
-        }
-        return metricTemp;
-    }
-
-
-
-
-    public generateSeatsAvailable(): number {
-
-        let seatTemp = 0;
-        for (let i = 0; i < this.bucketDetails.length; i++) {
-            //  console.log('bookings ', this.bucketDetails[i].bookings, ' totalBookingsCollector ', this.totalBookingsCollector)
-
-            if (this.bucketDetails[i + 1]) {
-                const tempBooks = this.bucketDetails[i].Sa - this.bucketDetails[i].bookings;
-                seatTemp += (tempBooks - this.bucketDetails[i + 1].Sa);
-            } else {
-                seatTemp += this.bucketDetails[i].Sa
-            }
-        }
-        //console.log('seatTemp ', seatTemp)
-        return seatTemp
-    }
 
 
     // Returns Bucket Seat count for protection

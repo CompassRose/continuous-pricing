@@ -70,8 +70,6 @@ export class ContinousPricingComponent implements OnInit {
     map(arr => Math.round(arr.reduce((acc, cur) => acc + cur, 0) / arr.length))
   );
 
-  //public colorCollections: ColorObject[] = ContinousColors;
-
   public lastSelectedMetric = 0;
 
   public pathToAssets = '';
