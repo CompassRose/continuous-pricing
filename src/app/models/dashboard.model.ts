@@ -88,6 +88,13 @@ export interface BucketDetails {
   Sa?: number;
 }
 
+export interface InverseFareDetails {
+  percentOfTop: number;
+  inverseDistribute: number;
+  remaining?: number;
+  protections?: number;
+}
+
 export interface ODLocate {
   continent: string;
   coordinates: number[];

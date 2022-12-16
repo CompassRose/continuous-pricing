@@ -24,13 +24,7 @@ export class BipPriceConfigureComponent {
 
     public modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
     public staticModifiers = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
-    // public buckets: ApiBucketDetails[] = [];
-    // public initialMinBuckets: any[] = [];
-    // public activePosString: string;
-    // public adjustedFareHolder: string;
-    // public flightInfluencesForEachCabin: IFlightInfluencesByCabin[] = [];
-    // public savedFlightInfluencesForEachCabinFromApi: BidPriceInfluencers[] = [];
-    // public activeCabinInfluences: IFlightInfluencesByCabin = {};
+
     public savedInfluenceMods: any[] = [];
     public showInfluenceControls = true;
 
@@ -64,13 +58,13 @@ export class BipPriceConfigureComponent {
             distinctUntilChanged(),
             tap(([event, item, id]) => {
 
-                // Object.entries(this.modifierObj).forEach((d: any, i) => {
-                //     // console.log('       d ', d)
-                // })
-
-                //console.log('\n\ninfluenceInput ', event, ' item ', item, ' row ', id)
+                Object.entries(this.modifierObj).map((d: any, i) => {
+                    if (d[1] === null) {
+                        event = this.staticModifiers[d[0]];
+                        this.modifierObj[d[0]] = event
+                    }
+                })
                 this.sharedDatasetService.influenceInput$.next([event, item, id])
-
             })
         )
             .subscribe();

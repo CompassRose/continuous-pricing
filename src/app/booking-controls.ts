@@ -36,6 +36,7 @@ export class BookingControlService {
                 this.min = 0
                 this.value = 0
                 this.change(0);
+                this.loadFactorFillPercent(0)
             })
 
 
@@ -43,11 +44,12 @@ export class BookingControlService {
             debounceTime(120),
 
             tap((event) => {
-                console.log('event ', event)
+                console.log('Pipe event ', event, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
+
                 if (event > 0) {
 
-
                     let collObj = [...this.tempBucketHolderStatic]
+
                     this.sharedDatasetService.totalBookingsCollector = event;
                     let counter = 0;
                     let activeElement = this.sharedDatasetService.bucketDetails.length - 1;
@@ -69,21 +71,19 @@ export class BookingControlService {
                     }
                     this.sharedDatasetService.bucketDetails = collObj
 
-                    if (event > 0) {
-                        console.log('event >>>>>>>>>>>>>>>  0')
-                        this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
-                    }
                 }
+                this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
             })
         )
             .subscribe();
     }
 
     public change(element: any) {
+
         this.sharedDatasetService.totalBookingsCollector = element;
         this.bookingSlider$.next(element)
 
-        // console.log('|||||   change   totalBookingsCollector ', element, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
+        //console.log('|||||   change   totalBookingsCollector ', element, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector)
     }
 
     public loadFactorFillPercent(value: number) {

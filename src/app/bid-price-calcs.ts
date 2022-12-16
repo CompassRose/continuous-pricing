@@ -3,7 +3,7 @@ import { ColorManagerService } from './color-manager-service';
 import { BarSeries, BucketDetails } from './models/dashboard.model';
 import { SharedDatasetService } from './shared-datasets.service';
 import { ConstraintType } from './dashboard-constants';
-import { from } from 'rxjs';
+
 
 @Injectable({
     providedIn: 'root'
@@ -26,7 +26,6 @@ export class BidPriceCalcsService {
     public generateInterpolatedCurvePoints(): number[] {
 
         let stepper = 0;
-        let noProtections = false;
         let testIncr = 0;
 
         // @ts-ignore
@@ -55,7 +54,6 @@ export class BidPriceCalcsService {
         let rangeArray = [];
         let replacementEls = [];
 
-        console.log('\n\n\n')
         this.sharedDatasetService.bucketDetails.map((p, i) => {
 
             if (i === 0) {
@@ -72,160 +70,33 @@ export class BidPriceCalcsService {
                 rangeArray.shift();
             }
 
-
-
-            if (rangeArray.length !== 0) {
-                replacementEls = [];
-                if (replacementEls.length > 0) {
-                    console.log('POP ', replacementEls)
-                    replacementEls.pop()
-                }
-
-                // if (noProtections) {
-
-                // Removes zero element values in BP calcs
-
-                // rangeArray.forEach((r, a) => {
-                //     rangeArray[a] = this.sharedDatasetService.dynamicBidPrices[0];
-                // })
-
-                //noProtections = false;
-                //}
-
-                //console.log('i ', i, this.sharedDatasetService.bucketDetails[i].letter, '  rangeArray ', rangeArray)
-
-
-            } else {
-
+            if (rangeArray.length === 0) {
                 testIncr++
-                console.log('i ', i, this.sharedDatasetService.bucketDetails[i].letter, ' XXXX testIncr ', testIncr)
-
-
-                console.log('testIncr ', testIncr, ' Letter ', this.sharedDatasetService.bucketDetails[testIncr].letter, ' ', this.sharedDatasetService.bucketDetails[testIncr].protections)
+                //console.log('i ', i, this.sharedDatasetService.bucketDetails[i].letter, ' XXXX testIncr ', testIncr)
+                //console.log('testIncr ', testIncr, ' Letter ', this.sharedDatasetService.bucketDetails[testIncr].letter, ' ', this.sharedDatasetService.bucketDetails[testIncr].protections)
 
                 for (let m = 0; m < this.sharedDatasetService.bucketDetails[testIncr].protections; m++) {
-                    console.log(' XXXX testIncr ', testIncr)
-
+                    //console.log(' XXXX testIncr ', m, ' testIncr ', testIncr)
                     replacementEls.push(this.sharedDatasetService.dynamicBidPrices[0]);
-
                 }
-
-                console.log(' XXXX teams ', replacementEls)
             }
             result.push(...rangeArray);
-
-
         })
 
         if (replacementEls.length > 0) {
-            console.log(' XXXX \n ')
+
+            // console.log(' XXXX teams ', testIncr, ' replacementEls ', replacementEls)
             for (let f = 0; f < replacementEls.length; f++) {
 
-                if (f <= testIncr && this.sharedDatasetService.dynamicBidPrices[f] === this.sharedDatasetService.dynamicBidPrices[0]) {
-                    console.log('f ', f, ' testIncr ', testIncr, ' PRO: ', this.sharedDatasetService.dynamicBidPrices[f], ' dynamic ', this.sharedDatasetService.dynamicBidPrices[0])
+                if (this.sharedDatasetService.dynamicBidPrices[f] === this.sharedDatasetService.dynamicBidPrices[0]) {
+                    // console.log('f ', f, ' testIncr ', testIncr, ' PRO: ', this.sharedDatasetService.dynamicBidPrices[f], ' dynamic ', this.sharedDatasetService.dynamicBidPrices[0])
                     result[f] = this.sharedDatasetService.dynamicBidPrices[0];
-                    console.log('result ', result[f])
+                    //console.log('result ', result[f])
                 }
 
             }
         }
 
-
-        // replacementEls.forEach((r, e) => {
-
-        // })
-        //console.log('result ', result)
-
-
-
-        return result;
-    }
-
-    // Generates Bid Price Curve from adjustments
-    public generateInterpolatedCurvePoints2(): number[] {
-
-        let self = this;
-        let stepper = 0;
-        let disabled = 0;
-
-        let bucketCollection = [];
-
-        let bucketObject: any = {
-            idx: null,
-            disabled: false
-        };
-
-        this.sharedDatasetService.bucketDetails.map((p, i) => {
-            bucketCollection.push({ idx: i, disabled: false })
-        })
-
-        // @ts-ignore
-        function ranger(from, to, step, prec, i) {
-
-            //console.log('ranger ', from, '  to  ', to, ' i ', i)
-            if (typeof from == 'number') {
-
-                const A = [from];
-                step = typeof step === 'number' ? Math.abs(step) : 1;
-
-                if (!prec) {
-                    prec = (from + step) % 1 ? String((from + step) % 1).length + 1 : 0;
-                }
-                if (from > to) {
-                    while (+(from -= step).toFixed(prec) >= to) A.push(+from.toFixed(prec));
-                }
-                else {
-                    while (+(from += step).toFixed(prec) <= to) A.push(+from.toFixed(prec));
-                }
-
-                if (A.length === 1) {
-
-                    console.log('letter ', self.sharedDatasetService.bucketDetails[i].letter, ' A ', A)
-                }
-                //console.log('letter ', self.sharedDatasetService.bucketDetails[i].letter, ' A ', A)
-                return A;
-            }
-        }
-
-        let result = [];
-        let rangeArray = [];
-
-
-        function passDynamicValues(i): number[] {
-
-            for (let p = 0; p < self.sharedDatasetService.bucketDetails[i].protections; p++) {
-                rangeArray.push(self.sharedDatasetService.dynamicBidPrices[0])
-            }
-            //console.log('letter ', self.sharedDatasetService.bucketDetails[i].letter, ' rangeArray ', rangeArray) //, ' .currAus. ', self.sharedDatasetService.currAus[i])
-            return rangeArray;
-        }
-
-
-        this.sharedDatasetService.bucketDetails.map((p, i) => {
-            //console.log('i ', i)
-            if (i === 0) {
-                rangeArray = passDynamicValues(i);
-            } else {
-
-                if (this.sharedDatasetService.bucketDetails[i - 1].protections === 0 && self.sharedDatasetService.selectedMetric !== 0) {
-                    rangeArray = passDynamicValues(i);
-                } else {
-                    if (this.sharedDatasetService.bucketDetails[i]) {
-                        stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
-                        rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2, i);
-                        if (rangeArray.length > 1) {
-                            rangeArray.shift();
-                        }
-
-                    }
-                }
-            }
-            console.log(this.sharedDatasetService.bucketDetails[i].letter, ' rangeARray ', rangeArray)
-            result.push(...rangeArray);
-        })
-
-        //console.log('result ', result)
-        console.log(' \n\n\n\n',)
         return result;
     }
 
@@ -282,12 +153,13 @@ export class BidPriceCalcsService {
             sellingPoint = 0;
         }
 
-        const activeColor = this.sharedDatasetService.activeCurve.length ? 'green' : 'navy';
+        const activeColor = this.sharedDatasetService.adjustedCurvePoints.length ? 'green' : 'navy';
+
         const baseCurve = this.sharedDatasetService.dynamicBidPrices;
 
         if (this.sharedDatasetService.totalBookingsCollector > 0) {
             const rounded = Math.round(this.sharedDatasetService.activeCurve[sellingPoint]);
-            const fareClass = `Selling: ${rounded}`
+            const fareClass = `Selling: ${rounded}`;
 
             // Vertical Active Class/Value Selling Line
             return {
@@ -306,7 +178,7 @@ export class BidPriceCalcsService {
                     id: 'clickedLabel',
                     position: 'end',
                     show: true,
-                    distance: [0, -60],
+                    distance: [0, -100],
                     formatter: () => {
                         return `{a|${fareClass}\nBase: ${baseCurve[sellingPoint]}}`
                     },

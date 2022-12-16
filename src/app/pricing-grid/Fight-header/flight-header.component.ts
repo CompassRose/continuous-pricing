@@ -19,6 +19,6 @@ export class FlightHeaderComponent {
     public pathToAssets = '';
 
     constructor() {
-        this.pathToAssets = devPathToAssets;
+        this.pathToAssets = prodPathToAssets;
     }
 }

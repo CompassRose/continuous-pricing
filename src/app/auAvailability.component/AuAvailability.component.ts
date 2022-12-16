@@ -248,7 +248,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         }),
                         itemStyle: {
                             color: (params) => {
-                                return 'rgba(255, 245, 66, 0.65)'
+                                return 'rgba(155, 145, 156, 0.35)'
                             },
                         },
                         label: {
@@ -261,7 +261,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             fontSize: 10,
                             fontWeight: 'normal',
                             padding: 5,
-                            offset: [0, 10],
+                            offset: [0, -5],
                             position: 'top',
                         }
                     },
@@ -273,7 +273,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         z: 6,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            return self.sharedDatasetService.protectionLevel(i);
+                            return item.protections;
                         }),
 
                         itemStyle: {
@@ -288,25 +288,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 rotation: Math.PI / 6
                             },
                         },
-                        // label: {
-                        //     show: true,
-                        //     color: 'black',
-
-                        //     shadowBlur: 4,
-                        //     shadowOffsetX: 1,
-                        //     shadowOffsetY: 1,
-                        //     formatter: (params) => {
-                        //         if (self.sharedDatasetService.bucketDetails[params.dataIndex].protections !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
-                        //             return self.protectionYValue(params.dataIndex) - self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
-                        //         } else {
-                        //             return ''
-                        //         }
-                        //     },
-                        //     fontSize: 12,
-                        //     fontWeight: 'bold',
-                        //     offset: [-45, -15],
-                        //     position: 'bottom',
-                        // }
                     },
                     {
                         type: 'bar',
@@ -386,38 +367,36 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             formatter: (params) => {
                                 let labelString: any;
                                 self.sharedDatasetService.bucketDetails.map((bd, i) => {
-                                    // console.log('dis ', self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
-                                    const tom = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
+                                    const netAus = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
                                     if (self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 26) {
 
                                         labelString = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 0 ?
-                                            `${tom}`
+                                            `${netAus}`
                                             : self.sharedDatasetService.bucketDetails[params.dataIndex].fare;
-
                                     } else {
                                         labelString = ''
                                     }
-
                                 })
                                 return `{a|${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}}\n{b|${labelString}}`
-                                //return `{ a|${labelString}}`
                             },
                             rich: {
                                 a: {
                                     align: 'center',
                                     fontSize: 13,
-                                    fontWeight: 'bold',
-                                    color: 'white',
+                                    padding: [-3, 0],
+                                    fontWeight: 'normal',
+                                    color: 'black',
                                 },
                                 b: {
                                     align: 'center',
                                     fontSize: 12,
+                                    padding: [9, 0],
                                     fontWeight: 'normal',
                                     color: 'white',
                                 },
                             },
                             position: 'insideTop',
-                            //offset: [0, 0]
+                            offset: [0, -17]
                             // offset: self.sharedDatasetService.bucketDetails.map((bd, i) => {
                             //     console.log('lllll ', bd.Aus - self.sharedDatasetService.totalBookingsCollector)
                             //     return bd.Aus - self.sharedDatasetService.totalBookingsCollector > 0 ? [0, -40] : [0, -40]

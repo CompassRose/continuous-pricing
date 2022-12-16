@@ -33,24 +33,6 @@
     <div class="chart-container">
       <div class="d-flex justify-content-between text-header-area">
         <div class="">Continuous Pricing</div>
-        <div class="d-flex font-13">
-          <div class="me-3">Revenue: </div>
-          <div class="d-flex me-4">
-            <div class="me-2">Fixed: </div>
-            <div>
-              {{sharedDatasetService.steppedBidPriceSumSubject$ | async | currency }}</div>
-          </div>
-          <div class="d-flex">
-            <div class="me-2">Continuous: </div>
-            <div>
-              {{sharedDatasetService.interpolatedBidPriceSumSubject$ | async | currency }}</div>
-          </div>
-          <!-- <div class="d-flex ms-4">
-            <div class="me-2">Difference: </div>
-            <div *ngIf="sharedDatasetService.differenceValueSubject$ | async as diff">
-              {{diff | currency }}</div>
-          </div> -->
-        </div>
         <div class="d-flex me-3">
           <div class="d-flex mx-5">
             <button type="button"
@@ -94,18 +76,23 @@
     <div class="chart-container">
       <div class="d-flex text-header-area-full">
         <div class="status-col w-100">
-          <div class="d-flex justify-content-between">
+
+          <div class="d-flex justify-content-between w-100">
             <div class="">Bookings / Price Influences</div>
+
             <div class="d-flex">
-              <div class="font-12  fw-600 me-2">Load Factor:</div>
-              <div id="myProgress">
+              <div class="font-12 fw-600 me-2 mt-1">Load Factor:</div>
+              <div id="myProgress"
+                class="me-3">
                 <div id="myBar">0%</div>
               </div>
-            </div>
-            <div class="ml-auto">
               <bidprice-configure></bidprice-configure>
             </div>
+
+
+
           </div>
+
           <div class="slider">
             <mat-slider thumbLabel
               class="example-margin"

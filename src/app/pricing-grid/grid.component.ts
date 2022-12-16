@@ -1,9 +1,7 @@
 import { Component, OnInit, Inject, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { DOCUMENT } from "@angular/common";
-import { ContinousColors, ColorObject } from '../dashboard-constants';
-import { Subject, Subscription, fromEvent, take, distinctUntilChanged, map, merge, share, combineLatest, Observable, pairwise, scan } from 'rxjs';
+import { Subscription, map, merge, Observable, pairwise, scan } from 'rxjs';
 import { SharedDatasetService } from '../shared-datasets.service';
-import { debounceTime, tap, filter } from 'rxjs/operators';
 import { BookingControlService } from '../booking-controls';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -11,7 +9,6 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { KeyCode } from './lib/keycodes';
 import { shortcut, sequence } from './lib/shortcuts';
 
-import * as gradient from "javascript-color-gradient";
 
 export interface BidPriceCurvePoints {
   x: number;
@@ -88,7 +85,7 @@ export class ContinousPricingComponent implements OnInit {
     public overlay: Overlay,
     public viewContainerRef: ViewContainerRef) {
 
-    this.pathToAssets = devPathToAssets;
+    this.pathToAssets = prodPathToAssets;
   }
 
   public ngOnInit() {

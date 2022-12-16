@@ -1,7 +1,7 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs'
-import { BucketDetails } from './models/dashboard.model';
+import { BucketDetails, InverseFareDetails } from './models/dashboard.model';
 import { ContinousColors, ColorObject } from './dashboard-constants';
 
 @Injectable({
@@ -37,28 +37,34 @@ export class SharedDatasetService {
 
     public currAus: number[] = [];
     public colorCollections: ColorObject[] = ContinousColors;
-    public archivedBucketDetails: BucketDetails[] = [];
+
+
     static roundMultiplierDecimals = 4;
     static roundFactor = Math.pow(10, SharedDatasetService.roundMultiplierDecimals);
+
     public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(true);
     public resetDefaultSubject$ = new Subject<boolean>();
     public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
 
-    // Stepped(Fixed) BidPrices
-    public dynamicBidPrices: number[] = [];
 
-    // Interpolated Prices
-    public interpolateBidPriceCurvePoints: any[] = [];
+
+
     public totalBookingsCollector: number = 0;
     public maxAuValue: number = 0;
     public selectedMetric = 0;
+
+    // Stepped(Fixed) BidPrices
+    public dynamicBidPrices: number[] = [];
+    // Interpolated Prices
+    public interpolateBidPriceCurvePoints: any[] = [];
+
+    public adjustedCurvePoints: any[] = [];
     public activeCurve: number[] = [];
 
     public metricGroupSubject$ = new BehaviorSubject<any>([]);
-    public interpolatedBidPriceSumSubject$ = new BehaviorSubject<any>(null);
-    public steppedBidPriceSumSubject$ = new BehaviorSubject<any>(null);
 
-    public differenceValueSubject$ = new Subject<number>();
+    public inverseFareValues: InverseFareDetails[] = [];
+
 
     public dragGrouping: any = [
         { name: 'Single', id: 0, selected: true, disabled: false },
@@ -68,20 +74,51 @@ export class SharedDatasetService {
     ];
 
 
+
+
     constructor() {
 
         this.metricGroupSubject$.next(this.dragGrouping);
 
         this.resetDefaultSubject$
             .subscribe(response => {
-                //console.log('resetDefaultSubject$ archivedBucketDetails ', this.archivedBucketDetails, ' this.bucketDetails ', this.bucketDetails)
                 this.totalBookingsCollector = 0;
                 this.maxAuValue = this.getMaxAu();
                 this.selectedMetric = 0;
                 this.setGroupingMethod(0);
                 this.metricGroupSubject$.next(this.dragGrouping);
             });
+
+        this.generateInverseFareValues()
+
     }
+
+
+    public generateInverseFareValues() {
+
+        let percentOfTop = [];
+        let inverseDistribution = 0;
+        let inverseDistSum = 0;
+        let theTop = this.bucketDetails[0].fare;
+
+
+        this.bucketDetails.map((d: any, i) => {
+            percentOfTop.push(+((d.fare / theTop) * 100).toFixed(0));
+            inverseDistribution = +(1 / percentOfTop[i] * 100).toFixed(3);
+            inverseDistSum = inverseDistSum + inverseDistribution
+            this.inverseFareValues.push({ percentOfTop: percentOfTop[i], inverseDistribute: inverseDistribution, remaining: 0 })
+        })
+
+        let newArray = [];
+        this.inverseFareValues.forEach((iv, i) => {
+            const remain = +((iv.inverseDistribute / inverseDistribution) * 10).toFixed(1);
+            newArray.push({ percentOfTop: iv.percentOfTop, inverseDistribute: iv.inverseDistribute, remaining: remain });
+            // console.log(' ::: ', newArray[i])
+        })
+        this.inverseFareValues = newArray;
+    }
+
+
 
 
     public setGroupingMethod(model) {
@@ -98,11 +135,11 @@ export class SharedDatasetService {
 
 
     public resetFromArchivedBuckets() {
-
-        this.bucketDetails = JSON.parse(JSON.stringify(this.archivedBucketDetails));
-        //console.log('resetFromArchivedBuckets  bucketDetails  ', this.bucketDetails, ' archivedBucketDetails ', this.archivedBucketDetails)
+        this.bucketDetails = JSON.parse(window.localStorage.getItem('archivedBuckets'));
+        // console.log('resetFromArchivedBuckets  bucketDetails  ', this.bucketDetails)
         this.resetDefaultSubject$.next(true)
     }
+
 
 
     public getMaxAu(): number {
@@ -133,8 +170,6 @@ export class SharedDatasetService {
             }
         })
         this.maxAuValue = this.currAus[0];
-        //this.currAus = this.calculateBucketBands();
-        // console.log('currAus ', this.currAus, ' this.maxAuValue  ', this.maxAuValue)
         this.generateBucketValues();
     }
 
@@ -154,45 +189,8 @@ export class SharedDatasetService {
     public protectionMyLevel(idx: number) {
         const nextBucketValue = (idx === (this.currAus.length - 1)) ? 0 : this.currAus[idx + 1];
         const diff = this.currAus[idx] - nextBucketValue;
-        //console.log('diff idx ', idx, ' diff ', diff)
         return (diff > 0) ? diff : 0;
     }
-
-
-
-    // Returns Bucket Seat count for protection
-    public protectionLevel(idx: number) {
-        //console.log('protectionLevel ', idx)
-        const nextBucketValue = (idx === (this.bucketDetails.length - 1)) ? 0 : this.bucketDetails[idx + 1].Aus;
-
-        const diff = this.bucketDetails[idx].Aus - nextBucketValue;
-        // console.log('idx ', idx, ' diff ', diff)
-        return (diff > 0) ? diff : 0;
-    }
-
-
-
-    public calculateBucketBands(): number[] {
-        const arr = new Array<number>();
-        this.bucketDetails.forEach((d, i) => {
-            arr.push(0);
-        });
-
-        arr[0] = this.dynamicBidPrices.length;
-        this.dynamicBidPrices.forEach((d, i) => {
-            const bidPrice = this.dynamicBidPrices[i];
-            for (let bucketIdx = 1; bucketIdx < this.bucketDetails.length; bucketIdx++) {
-                const bucketInfo = this.bucketDetails[bucketIdx];
-                const fareValue = bucketInfo.fare;
-                if (fareValue >= bidPrice) {
-                    arr[bucketIdx]++;
-                }
-            }
-        });
-        //console.log('arr ', arr)
-        return arr;
-    }
-
 
 
 
@@ -247,7 +245,6 @@ export class SharedDatasetService {
                     if (this.bucketDetails[i].Aus < this.maxAuValue) {
                         groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx;
                         const bucketInfo = this.bucketDetails[i];
-
                         bucketInfo.Aus = bucketInfo.Aus += groupValueAuPercentage;
                         //console.log(' Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', this.bucketDetails[i].Aus.toFixed(2), ' Math ', (groupValueAuPercentage).toFixed(2))
                     } else {
@@ -280,6 +277,7 @@ export class SharedDatasetService {
         }
     }
 
+
     // From Linear Protection
     public updateDragPositionForLinearScale(values, targetAu, dir) {
         let val;
@@ -295,18 +293,17 @@ export class SharedDatasetService {
             }
 
         } else {
-            val = values;
+            //val = values;
             mult = ((this.maxAuValue - targetAu) / values);
-            //console.log('    mult ', mult, ' values ', values, ' this.maxAuValue - targetAu ', this.maxAuValue - targetAu)
             for (let i = 0; i < values; i++) {
 
                 if (this.bucketDetails[i].Aus < this.maxAuValue) {
                     this.bucketDetails[i].Aus = (this.maxAuValue - accum);
-                    //console.log('        UP Linear i ', i, ' Letter ', this.bucketDetails[i].letter, ' accum ', (this.maxAuValue - accum).toFixed(2), '  Aus ', this.bucketDetails[i].Aus.toFixed(2), ' accum ', accum.toFixed(2))
                 } else {
                     this.bucketDetails[i].Aus > this.maxAuValue ? this.bucketDetails[i].Aus = this.bucketDetails[i].Aus -= accum : this.maxAuValue;
                 }
                 accum += mult;
+                //console.log('accum ', accum)
             }
         }
     }
