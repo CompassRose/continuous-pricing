@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'OpenSans';
+  src: url('/assets/fonts/OpenSans.eot');
+
+  src: url('/assets/fonts/OpenSans.eot?#iefix') format('embedded-opentype'),
+
+    url('/assets/fonts/OpenSans.woff') format('woff'),
+
+    url('/assets/fonts/OpenSans.ttf') format('truetype'),
+
+    url('/assets/fonts/OpenSans.svg#svgFontName') format('svg');
+
+}
+
 .fw-600 {
   font-weight: $font-weight-lg;
 }

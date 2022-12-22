@@ -36,18 +36,16 @@ export class SharedDatasetService {
     ];
 
     public currAus: number[] = [];
+
     public colorCollections: ColorObject[] = ContinousColors;
 
-
     static roundMultiplierDecimals = 4;
+
     static roundFactor = Math.pow(10, SharedDatasetService.roundMultiplierDecimals);
 
     public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(true);
     public resetDefaultSubject$ = new Subject<boolean>();
     public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
-
-
-
 
     public totalBookingsCollector: number = 0;
     public maxAuValue: number = 0;
@@ -59,21 +57,20 @@ export class SharedDatasetService {
     public interpolateBidPriceCurvePoints: any[] = [];
 
     public adjustedCurvePoints: any[] = [];
+
     public activeCurve: number[] = [];
 
     public metricGroupSubject$ = new BehaviorSubject<any>([]);
 
-    public inverseFareValues: InverseFareDetails[] = [];
+    public inverseFareValues: any[] = [];
 
 
     public dragGrouping: any = [
-        { name: 'Single', id: 0, selected: true, disabled: false },
-        { name: 'Existing AU %', id: 1, selected: false, disabled: false },
-        { name: 'Linear Protection', id: 2, selected: false, disabled: false },
-        { name: 'Inverse Fare %', id: 3, selected: false, disabled: true }
+        { name: 'Single', id: 0 },
+        { name: 'Existing AU %', id: 1 },
+        { name: 'Linear Protection', id: 2 },
+        { name: 'Inverse Fare %', id: 3 }
     ];
-
-
 
 
     constructor() {
@@ -89,48 +86,52 @@ export class SharedDatasetService {
                 this.metricGroupSubject$.next(this.dragGrouping);
             });
 
-        this.generateInverseFareValues()
-
+        this.resetInverseDetailsFromBookings()
     }
 
 
-    public generateInverseFareValues() {
+    public resetInverseDetailsFromBookings() {
+        this.inverseFareValues = this.generateInverseDetails();
+        //console.log('this.inverseFareValues  ', this.inverseFareValues)
+    }
 
+
+    // Builds Inverse Fare % values, called onInit and Booking slider changes
+    public generateInverseDetails(): any[] {
+
+        const inverseFareValues = [];
+        let remainingSeats = this.bucketDetails[0].Aus - this.totalBookingsCollector;
+        //console.log('generateInverseDetails totalBookingsCollector ', this.totalBookingsCollector, ' remainingSeats ', remainingSeats)
         let percentOfTop = [];
         let inverseDistribution = 0;
-        let inverseDistSum = 0;
-        let theTop = this.bucketDetails[0].fare;
-
+        let theTop = this.bucketDetails[0].Aus;
+        let totalIFV = 0;
 
         this.bucketDetails.map((d: any, i) => {
             percentOfTop.push(+((d.fare / theTop) * 100).toFixed(0));
-            inverseDistribution = +(1 / percentOfTop[i] * 100).toFixed(3);
-            inverseDistSum = inverseDistSum + inverseDistribution
-            this.inverseFareValues.push({ percentOfTop: percentOfTop[i], inverseDistribute: inverseDistribution, remaining: 0 })
+            inverseDistribution = 1 / (percentOfTop[i] * 100);
+            totalIFV = totalIFV + inverseDistribution;
+            const remain = (((inverseDistribution / totalIFV)));
+            const protections = +(remainingSeats * remain).toFixed(2);
+            inverseFareValues.push({ inverseDistribute: inverseDistribution, protections: protections })
         })
-
+        //console.log(' totalIFV ', totalIFV)
         let newArray = [];
-        this.inverseFareValues.forEach((iv, i) => {
-            const remain = +((iv.inverseDistribute / inverseDistribution) * 10).toFixed(1);
-            newArray.push({ percentOfTop: iv.percentOfTop, inverseDistribute: iv.inverseDistribute, remaining: remain });
-            // console.log(' ::: ', newArray[i])
+
+
+        inverseFareValues.forEach((iv, i) => {
+            const remain = (((iv.inverseDistribute / totalIFV)));
+            const protections = +(remainingSeats * remain).toFixed(2);
+            //console.log('i ', i, ' protections ', protections)
+            newArray.push({ protections: protections });
+
         })
-        this.inverseFareValues = newArray;
+        return newArray;
     }
 
 
-
-
     public setGroupingMethod(model) {
-        //console.log('True', model, ' this.selected ', this.selectedMetric)
-
-        this.dragGrouping.map(s => {
-            return s.selected = false;
-        })
-        this.dragGrouping[model].selected = true;
         this.selectedMetric = model;
-
-        //console.log('setGroupingMethod model', model, ' dragGrouping ', this.dragGrouping)
     }
 
 
@@ -170,6 +171,7 @@ export class SharedDatasetService {
             }
         })
         this.maxAuValue = this.currAus[0];
+
         this.generateBucketValues();
     }
 
@@ -178,6 +180,7 @@ export class SharedDatasetService {
     public generateBucketValues() {
 
         this.bucketDetails.map((a, i) => {
+            // console.log('p ', a.protections)
             return a.protections = this.protectionMyLevel(i);
         })
         this.bucketDetailsBehaviorSubject$.next(true);
@@ -210,11 +213,14 @@ export class SharedDatasetService {
         if (targetAu >= currAu) {
             for (let i = bucketIdx; i >= 0; i--) {
                 const bucketInfo = this.bucketDetails[i];
+
                 if (bucketInfo.fare < targetBp) {
                     //console.log('UP currAu ', currAu, ' targetAu ', targetAu, ' letter ', this.bucketDetails[bucketIdx].letter, ' Aus ', this.bucketDetails[bucketIdx].Aus)
                     bucketInfo.Aus = targetAu;
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'up')
+                    } else {
+                        // bucketInfo.Aus = targetAu;
                     }
                 }
             }
@@ -223,63 +229,119 @@ export class SharedDatasetService {
                 const bucketInfo = this.bucketDetails[i];
 
                 if (bucketInfo.fare >= targetBp) {
-
-                    bucketInfo.Aus = targetAu;
                     //console.log('Down currAu ', currAu, ' targetAu ', targetAu, ' letter ', this.bucketDetails[bucketIdx].letter, ' Aus ', this.bucketDetails[bucketIdx].Aus)
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'down')
+                    } else {
+                        bucketInfo.Aus = targetAu;
                     }
                 }
             }
         }
     }
 
+    public distributeFromExistingAus(bucketIdx, targetAu, direction) {
 
+        let groupValueAuPercentage = 0;
+        if (direction === 'up') {
+            for (let i = bucketIdx; i >= 0; i--) {
+
+                if (this.bucketDetails[i].Aus < this.maxAuValue) {
+                    groupValueAuPercentage = this.bucketDetails[bucketIdx].Aus / (targetAu / bucketIdx) / bucketIdx;
+                    const bucketInfo = this.bucketDetails[i];
+                    bucketInfo.Aus = bucketInfo.Aus += groupValueAuPercentage;
+                    //console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+                }
+                else {
+                    this.bucketDetails[i].Aus = this.maxAuValue;
+                }
+            }
+        } else {
+            for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
+                let groupValueAuPercentage = 0;
+                if (this.bucketDetails[i].Aus > 0) {
+                    groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx;
+                    const bucketInfo = this.bucketDetails[i];
+                    bucketInfo.Aus = bucketInfo.Aus -= groupValueAuPercentage;
+                    // console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+                } else {
+                    this.bucketDetails[i].Aus = 0;
+                }
+            }
+
+        }
+
+    }
 
     public justifyDistributionFromDrag(bucketIdx, targetAu, direction) {
+
         if (direction === 'up') {
-            //console.log('       UP    targetAu ', targetAu, ' letter ', this.bucketDetails[bucketIdx].letter, ' Aus ', this.bucketDetails[bucketIdx].Aus)
+
             if (this.dragGrouping[this.selectedMetric].id === 1) {
-                for (let i = 0; i < bucketIdx; i++) {
-                    let groupValueAuPercentage = 0;
-                    if (this.bucketDetails[i].Aus < this.maxAuValue) {
-                        groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx;
-                        const bucketInfo = this.bucketDetails[i];
-                        bucketInfo.Aus = bucketInfo.Aus += groupValueAuPercentage;
-                        //console.log(' Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', this.bucketDetails[i].Aus.toFixed(2), ' Math ', (groupValueAuPercentage).toFixed(2))
-                    } else {
-                        this.bucketDetails[i].Aus = this.maxAuValue;
-                    }
-                }
-            } else if (this.dragGrouping[this.selectedMetric].id === 2) {
-                this.updateDragPositionForLinearScale(bucketIdx, targetAu, 'up')
+                this.distributeFromExistingAus(bucketIdx, targetAu, 'up')
+            } else if (this.selectedMetric === 2) {
+                this.distributeFromLinearScale(bucketIdx, targetAu, 'up');
+            } else if (this.selectedMetric === 3) {
+                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'up')
             }
 
         } else {
-            //console.log('       Down   targetAu ', targetAu, ' letter ', this.bucketDetails[bucketIdx].letter, ' Aus ', this.bucketDetails[bucketIdx].Aus)
+            // console.log('       Down ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus)
             if (this.dragGrouping[this.selectedMetric].id === 1) {
-                let increment = bucketIdx + 1
-                for (let i = increment; i < this.bucketDetails.length; i++) {
-                    let groupValueAuPercentage = 0;
-                    if (this.bucketDetails[i].Aus > 0) {
-                        groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / increment) / increment;
-                        const bucketInfo = this.bucketDetails[i];
-                        bucketInfo.Aus = bucketInfo.Aus -= groupValueAuPercentage;
-                        //console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
-                    } else {
-                        this.bucketDetails[i].Aus = 0;
-                    }
-                }
-            }
-            else if (this.dragGrouping[this.selectedMetric].id === 2) {
-                this.updateDragPositionForLinearScale(bucketIdx, targetAu, 'down')
+                this.distributeFromExistingAus(bucketIdx, targetAu, 'down')
+            } else if (this.dragGrouping[this.selectedMetric].id === 2) {
+                this.distributeFromLinearScale(bucketIdx, targetAu, 'down');
+
+            } else if (this.dragGrouping[this.selectedMetric].id === 3) {
+                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'down')
             }
         }
     }
 
 
-    // From Linear Protection
-    public updateDragPositionForLinearScale(values, targetAu, dir) {
+
+    public distributeFromInverseFareValues(targetAu, bucketIdx, direction) {
+
+        //console.log('generateInverseFareValues ', direction, ' bookings ', bookings, ' bucketIdx ', bucketIdx)
+        let groupValueAuPercentage = 0;
+
+        if (direction === 'up') {
+
+            //console.log('UP bucketDetails ', this.bucketDetails[bucketIdx].letter)
+            for (let i = bucketIdx; i >= 0; i--) {
+                if (this.bucketDetails[i].Aus < this.maxAuValue) {
+                    groupValueAuPercentage = this.bucketDetails[bucketIdx].Aus / (targetAu / this.inverseFareValues[i].protections) / bucketIdx;
+                    const bucketInfo = this.bucketDetails[i];
+                    bucketInfo.Aus = bucketInfo.Aus += groupValueAuPercentage;
+                    //console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+                }
+                else {
+                    this.bucketDetails[i].Aus = this.maxAuValue;;
+                }
+            }
+
+        } else {
+            // console.log('Down  letter ', this.bucketDetails[bucketIdx].letter)
+            let increment = bucketIdx + 1
+            for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
+                //console.log('Down  letter ', this.bucketDetails[i].letter, ' ip: ', targetAu / this.inverseFareValues[i].protections)
+                if (this.bucketDetails[i].Aus > 0) {
+                    groupValueAuPercentage = (targetAu / this.inverseFareValues[i].protections) / increment;
+                    //console.log('L', this.bucketDetails[i].letter, ' GP: ', groupValueAuPercentage.toFixed(2), ' prots ', this.inverseFareValues[i].protections)
+                    const bucketInfo = this.bucketDetails[i];
+                    bucketInfo.Aus = bucketInfo.Aus < 0 ? 0 : bucketInfo.Aus -= groupValueAuPercentage;
+                    //console.log('L', this.bucketDetails[i].letter, ' i ', i,  ' protections ', this.inverseFareValues[i].protections, ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+
+                } else {
+                    this.bucketDetails[i].Aus = 0;
+                }
+            }
+
+        }
+    }
+
+
+    public distributeFromLinearScale(values, targetAu, dir) {
         let val;
         let mult;
         let accum = 0;
@@ -303,11 +365,7 @@ export class SharedDatasetService {
                     this.bucketDetails[i].Aus > this.maxAuValue ? this.bucketDetails[i].Aus = this.bucketDetails[i].Aus -= accum : this.maxAuValue;
                 }
                 accum += mult;
-                //console.log('accum ', accum)
             }
         }
     }
 }
-
-
-

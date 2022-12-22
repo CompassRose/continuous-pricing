@@ -2,9 +2,9 @@
 @import "~@ng-select/ng-select/themes/default.theme.css";
 @import './styles/configuration.scss';
 @import "styles/fonts";
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+//@import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
-$font-family: "'Crimson Pro', sans-serif"; //"OpenSans-Semibold";
+//$font-family: "'Crimson Pro', sans-serif"; //"OpenSans-Semibold";
 $body-background: rgb(227, 231, 235);
 
 
@@ -12,8 +12,14 @@ html,
 body {
   height: 100%;
   overflow-x: hidden;
-  font-family: "OpenSans-Semibold", sans-serif !important;
+  //font-family: "Open Sans"sans-serif !important;
+  font-weight: 400;
+  font-size: 16px;
 }
+
+//* {
+//font-family: "Open Sans"sans-serif !important;
+//}
 
 // canvas {
 //   cursor: w-resize !important;

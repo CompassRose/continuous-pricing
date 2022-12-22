@@ -1,0 +1,7 @@
+{
+    "/api/*": {
+        "target": "https://fhbr2gjccj.execute-api.us-west-2.amazonaws.com/beta/flightsearch-express",
+        "secure": false,
+        "logLevel": "debug"
+    }
+}

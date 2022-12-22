@@ -72,6 +72,7 @@ export class BookingControlService {
                     this.sharedDatasetService.bucketDetails = collObj
 
                 }
+
                 this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
             })
         )

@@ -93,6 +93,7 @@ export interface InverseFareDetails {
   inverseDistribute: number;
   remaining?: number;
   protections?: number;
+  inverseFare?: number;
 }
 
 export interface ODLocate {

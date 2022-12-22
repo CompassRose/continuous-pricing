@@ -7,7 +7,7 @@
           style="width: 150px; height: 45px;"
           src={{pathToAssets}}accelyaTextLogo.jpg>
       </div>
-      <span class="font-16 fw-600 me-4">IB: &nbsp;6262 </span>
+      <span class="font-16 fw-600 me-4">DE: 6262 </span>
     </div>
     <div class="flight-specifics me-4 py-3">
       <app-flight-header></app-flight-header>
@@ -20,6 +20,15 @@
       </div>
     </div> -->
     <div class="fw-600">FPS: {{fps$ | async}}</div>
+
+    <div class="d-flex ms-5">
+      <div class="me-1">Total/Booked:</div>
+      <div class="me-3">
+        {{sharedDatasetService.bucketDetails[0].Aus}} /
+        {{sharedDatasetService.totalBookingsCollector}}
+      </div>
+    </div>
+
     <div class="d-flex ms-auto">
       <div style="margin-bottom: 0px; margin-right: -20px;">
         <img class="accelya-text-img"
@@ -27,6 +36,7 @@
           src={{pathToAssets}}furtherFaster.jpg>
       </div>
     </div>
+
   </div>
   <div *ngIf="shortcuts$ | async as shortcut"></div>
   <div class="pricing-window mx-2 my-2">
@@ -57,10 +67,12 @@
                   id={{$idx}}
                   name="select"
                   value="$idx"
-                  [checked]="item.selected === true"
-                  (change)="sharedDatasetService.setGroupingMethod($idx)">
-                <label for="{{item.id}}">
-                  <div class="noselect font-12">{{item.name}}</div>
+                  [checked]="item.id === sharedDatasetService.selectedMetric"
+                  (change)="
+                  sharedDatasetService.setGroupingMethod($idx)">
+                <label for="{{item.id}}"
+                  title="Shortcut key {{$idx + 1}}">
+                  <div class="noselect font-12">{{item.name}}: ({{$idx + 1}})</div>
                 </label>
               </div>
             </section>
@@ -76,10 +88,8 @@
     <div class="chart-container">
       <div class="d-flex text-header-area-full">
         <div class="status-col w-100">
-
           <div class="d-flex justify-content-between w-100">
             <div class="">Bookings / Price Influences</div>
-
             <div class="d-flex">
               <div class="font-12 fw-600 me-2 mt-1">Load Factor:</div>
               <div id="myProgress"
@@ -88,12 +98,22 @@
               </div>
               <bidprice-configure></bidprice-configure>
             </div>
-
-
-
           </div>
-
           <div class="slider">
+
+
+            <!-- <input type="range"
+              dir="rtl"
+              min="bookingControlService.min"
+              max="bookingControlService.max"
+              value="bookingControlService.value"
+              [(ngModel)]="bookingControlService.value"
+              class="slider"
+              id="myRange"
+              (change)="bookingControlService.change(bookingControlService.value)">
+            <p><span id="demo">{{sharedDatasetService.totalBookingsCollector}}</span></p> -->
+
+
             <mat-slider thumbLabel
               class="example-margin"
               dir="rtl"

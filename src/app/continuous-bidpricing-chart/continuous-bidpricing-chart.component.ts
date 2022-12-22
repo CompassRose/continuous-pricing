@@ -127,7 +127,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints]
                         this.sharedDatasetService.adjustedCurvePoints = this.bidPriceCalcsService.applyAllInfluences(staticArray, this.modifierCollection);
                         this.sharedDatasetService.activeCurve = this.sharedDatasetService.adjustedCurvePoints;
-                        console.log('adjustedCurvePoints. ', this.sharedDatasetService.adjustedCurvePoints)
+                        // console.log('adjustedCurvePoints. ', this.sharedDatasetService.adjustedCurvePoints)
                     } else {
                         this.sharedDatasetService.adjustedCurvePoints = [];
                         this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
@@ -254,7 +254,7 @@ export class ContinousBidPricingComponent implements OnInit {
 
 
         const showTooltip = (dataIndex, params) => {
-            // console.log('showTooltip ', params)
+            //console.log('showTooltip ', params.target.id)
             self.myChart.dispatchAction({
                 type: 'showTip',
                 position: [params.offsetX - 10, params.offsetY - 50],
@@ -311,7 +311,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         onmousemove: echarts.util.curry(showTooltip, dataIndex),
                         //onclick: echarts.util.curry(mouseClick, dataIndex),
                         onmouseover: echarts.util.curry(showTooltip, dataIndex),
-                        onmouseout: echarts.util.curry(hideTooltip, dataIndex),
+                        //onmouseout: echarts.util.curry(hideTooltip, dataIndex),
                         z: 100
                     }
                 })
@@ -387,13 +387,21 @@ export class ContinousBidPricingComponent implements OnInit {
                     formatter: (params) => {
                         let bucket = null;
                         let tester = '';
-                        if (self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.interpolateBidPriceCurvePoints[params[0].dataIndex])) {
-                            bucket = self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.interpolateBidPriceCurvePoints[params[0].dataIndex]).letter;
+                        const remain = self.sharedDatasetService.maxAuValue - this.sharedDatasetService.dynamicBidPrices[params[1].value]
+
+                        // if (self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex])) {
+
+                        //     bucket = self.bidPriceCalcsService.findMatchingBucketForBidPrice(remain).letter;
+                        // }
+                        if (self.sharedDatasetService.bucketDetails[params[1].dataIndex]) {
+                            bucket = self.sharedDatasetService.bucketDetails[params[1].dataIndex].letter;
+                            // console.log('bucket bucket', bucket, ' idx ', params[1].dataIndex)
                         }
-                        tester = `<div style="width: 110px;">
-                        <div>${params[2].marker}Continuous: <span style="float: right;">${this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex].toFixed(0)}</span></div>
-                        <div>${params[1].marker}Fixed: <span style="float: right;">${this.sharedDatasetService.dynamicBidPrices[params[2].dataIndex]}</span></div></div>`;
-                        return tester;
+
+                        // tester = `<div style="width: 110px;">
+                        // <div>${params[2].marker}Continuous: <span style="float: right;">${this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex].toFixed(0)}</span></div>
+                        // <div>${params[1].marker}Fixed: <span style="float: right;">${this.sharedDatasetService.dynamicBidPrices[params[2].dataIndex]}</span></div></div>`;
+                        return bucket;
                     }
                 },
                 // dataZoom: [
@@ -468,7 +476,7 @@ export class ContinousBidPricingComponent implements OnInit {
                         animationDuration: 1,
                         showBackground: true,
                         colorBy: 'series',
-                        silent: false,
+                        silent: true,
                         z: 2,
                         data: self.barSeriesValuesColors.map((serie, i) => {
 

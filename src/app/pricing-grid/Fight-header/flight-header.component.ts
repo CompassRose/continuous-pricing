@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
+import { PathToAssets } from '../../dashboard-constants';
 
-
-export const devPathToAssets = '../../assets/images/';
-export const prodPathToAssets = '';
 
 @Component({
     selector: 'app-flight-header',
@@ -16,9 +14,7 @@ export class FlightHeaderComponent {
 
     public originAirportMunicipality: string;
     public destinationAirportMunicipality: string;
-    public pathToAssets = '';
+    public pathToAssets = PathToAssets;
 
-    constructor() {
-        this.pathToAssets = prodPathToAssets;
-    }
+    constructor() { }
 }
