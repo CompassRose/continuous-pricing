@@ -92,7 +92,6 @@ export class SharedDatasetService {
 
     public resetInverseDetailsFromBookings() {
         this.inverseFareValues = this.generateInverseDetails();
-        //console.log('this.inverseFareValues  ', this.inverseFareValues)
     }
 
 
@@ -115,16 +114,12 @@ export class SharedDatasetService {
             const protections = +(remainingSeats * remain).toFixed(2);
             inverseFareValues.push({ inverseDistribute: inverseDistribution, protections: protections })
         })
-        //console.log(' totalIFV ', totalIFV)
         let newArray = [];
-
 
         inverseFareValues.forEach((iv, i) => {
             const remain = (((iv.inverseDistribute / totalIFV)));
             const protections = +(remainingSeats * remain).toFixed(2);
-            //console.log('i ', i, ' protections ', protections)
             newArray.push({ protections: protections });
-
         })
         return newArray;
     }
@@ -197,7 +192,6 @@ export class SharedDatasetService {
 
 
 
-
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
 
@@ -219,8 +213,6 @@ export class SharedDatasetService {
                     bucketInfo.Aus = targetAu;
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'up')
-                    } else {
-                        // bucketInfo.Aus = targetAu;
                     }
                 }
             }
@@ -236,6 +228,32 @@ export class SharedDatasetService {
                         bucketInfo.Aus = targetAu;
                     }
                 }
+            }
+        }
+    }
+
+
+
+    public justifyDistributionFromDrag(bucketIdx, targetAu, direction) {
+
+        if (direction === 'up') {
+
+            if (this.selectedMetric === 1) {
+                this.distributeFromExistingAus(bucketIdx, targetAu, 'up')
+            } else if (this.selectedMetric === 2) {
+                this.distributeFromLinearScale(bucketIdx, targetAu, 'up');
+            } else if (this.selectedMetric === 3) {
+                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'up')
+            }
+
+        } else {
+            // console.log('       Down ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus)
+            if (this.selectedMetric === 1) {
+                this.distributeFromExistingAus(bucketIdx, targetAu, 'down')
+            } else if (this.selectedMetric === 2) {
+                this.distributeFromLinearScale(bucketIdx, targetAu, 'down');
+            } else if (this.selectedMetric === 3) {
+                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'down')
             }
         }
     }
@@ -270,35 +288,7 @@ export class SharedDatasetService {
             }
 
         }
-
     }
-
-    public justifyDistributionFromDrag(bucketIdx, targetAu, direction) {
-
-        if (direction === 'up') {
-
-            if (this.dragGrouping[this.selectedMetric].id === 1) {
-                this.distributeFromExistingAus(bucketIdx, targetAu, 'up')
-            } else if (this.selectedMetric === 2) {
-                this.distributeFromLinearScale(bucketIdx, targetAu, 'up');
-            } else if (this.selectedMetric === 3) {
-                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'up')
-            }
-
-        } else {
-            // console.log('       Down ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus)
-            if (this.dragGrouping[this.selectedMetric].id === 1) {
-                this.distributeFromExistingAus(bucketIdx, targetAu, 'down')
-            } else if (this.dragGrouping[this.selectedMetric].id === 2) {
-                this.distributeFromLinearScale(bucketIdx, targetAu, 'down');
-
-            } else if (this.dragGrouping[this.selectedMetric].id === 3) {
-                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'down')
-            }
-        }
-    }
-
-
 
     public distributeFromInverseFareValues(targetAu, bucketIdx, direction) {
 

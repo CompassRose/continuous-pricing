@@ -1,19 +1,12 @@
-import { Component, OnInit, Inject, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from "@angular/common";
-import { Subscription, map, merge, Observable, pairwise, scan, BehaviorSubject, tap } from 'rxjs';
+import { Subscription, map, merge, Observable, pairwise, scan } from 'rxjs';
 import { SharedDatasetService } from '../shared-datasets.service';
 import { BookingControlService } from '../booking-controls';
-import { TemplatePortal } from '@angular/cdk/portal';
-//import { KeyCode } from '@ng-select/ng-select/lib/ng-select.types';
 import { KeyCode } from './lib/keycodes';
-import { shortcut, singleShortcut, sequence } from './lib/shortcuts';
+import { shortcut, sequence } from './lib/shortcuts';
 import { PathToAssets } from '../dashboard-constants';
-import { DashboardApi } from '../dashboard.api.service'
-
-export interface BidPriceCurvePoints {
-  x: number;
-  y: number;
-}
+//import { DashboardApi } from '../dashboard.api.service'
 
 
 export function animationFrame({
@@ -35,13 +28,6 @@ export function animationFrame({
     };
   });
 }
-
-export interface TempBucketDetails {
-  bookings: number;
-  Sa: number;
-  protections: number;
-}
-
 
 
 @Component({
@@ -68,28 +54,32 @@ export class ContinousPricingComponent implements OnInit {
     map(arr => Math.round(arr.reduce((acc, cur) => acc + cur, 0) / arr.length))
   );
 
+
+  // Holder for toggle single shortcut
   public lastSelectedMetric = 0;
 
   public pathToAssets = PathToAssets;
-
   sub: Subscription;
   shortcuts$: Observable<string>;
 
+  public frameRateCounterState = false;
 
 
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
-    private dashboardApi: DashboardApi,
+    //private dashboardApi: DashboardApi,
     public bookingControlService: BookingControlService,
-    public sharedDatasetService: SharedDatasetService,
-    public viewContainerRef: ViewContainerRef) {
+    public sharedDatasetService: SharedDatasetService) {
+  }
 
+  public toggleFrameRate() {
+    this.frameRateCounterState = !this.frameRateCounterState;
   }
 
   public ngOnInit() {
 
 
-    this.dashboardApi.postToFlightClient()
+    //this.dashboardApi.postToFlightClient()
 
     this.bookingControlService.bookingSlider$
       .subscribe(response => {

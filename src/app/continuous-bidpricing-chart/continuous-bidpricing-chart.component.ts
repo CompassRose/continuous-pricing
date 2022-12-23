@@ -48,7 +48,6 @@ export class ContinousBidPricingComponent implements OnInit {
             .subscribe((state) => {
 
                 if (this.myChart) {
-                    // console.log('$$$$$$$$  bucketDetailsBehaviorSubject$$ response ', this.sharedDatasetService.bucketDetails, ' currAus ', this.sharedDatasetService.currAus)
                     this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
 
                     if (state) {
@@ -68,19 +67,15 @@ export class ContinousBidPricingComponent implements OnInit {
                     }
                     this.loadInterpolatedBidPriceValues('activeCurve');
                     this.loadDynamicBidPriceValues('dynamicBidPrices');
-
                 }
             })
 
+
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
-
-                console.log('response ', response)
                 this.sharedDatasetService.totalBookingsCollector = 0;
                 this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
-
                 this.sharedDatasetService.applyDataChanges();
-
                 this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
                 this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
                 this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
@@ -98,7 +93,6 @@ export class ContinousBidPricingComponent implements OnInit {
             .subscribe(([response, mod, id]) => {
 
                 if (response !== null) {
-                    console.log('response ', response, ' idx ', mod, ' id ', id)
                     this.modifierObj[mod] = response;
                     const staticModifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 };
 
@@ -385,23 +379,23 @@ export class ContinousBidPricingComponent implements OnInit {
                         return pos;
                     },
                     formatter: (params) => {
-                        let bucket = null;
-                        let tester = '';
-                        const remain = self.sharedDatasetService.maxAuValue - this.sharedDatasetService.dynamicBidPrices[params[1].value]
+                        //let bucket = null;
+                        let tooltipString = '';
+                        //const remain = self.sharedDatasetService.maxAuValue - this.sharedDatasetService.dynamicBidPrices[params[1].value]
 
                         // if (self.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex])) {
 
                         //     bucket = self.bidPriceCalcsService.findMatchingBucketForBidPrice(remain).letter;
                         // }
-                        if (self.sharedDatasetService.bucketDetails[params[1].dataIndex]) {
-                            bucket = self.sharedDatasetService.bucketDetails[params[1].dataIndex].letter;
-                            // console.log('bucket bucket', bucket, ' idx ', params[1].dataIndex)
-                        }
+                        // if (self.sharedDatasetService.bucketDetails[params[1].dataIndex]) {
+                        //     bucket = self.sharedDatasetService.bucketDetails[params[1].dataIndex].letter;
+                        // console.log('bucket bucket', bucket, ' idx ', params[1].dataIndex)
+                        // }
 
-                        // tester = `<div style="width: 110px;">
-                        // <div>${params[2].marker}Continuous: <span style="float: right;">${this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex].toFixed(0)}</span></div>
-                        // <div>${params[1].marker}Fixed: <span style="float: right;">${this.sharedDatasetService.dynamicBidPrices[params[2].dataIndex]}</span></div></div>`;
-                        return bucket;
+                        tooltipString = `<div style="width: 110px;">
+                        <div>${params[2].marker}Continuous: <span style="float: right;">${this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex].toFixed(0)}</span></div>
+                        <div>${params[1].marker}Fixed: <span style="float: right;">${this.sharedDatasetService.dynamicBidPrices[params[2].dataIndex]}</span></div></div>`;
+                        return tooltipString;
                     }
                 },
                 // dataZoom: [

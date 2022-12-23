@@ -152,7 +152,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             name: 'AUs',
                             icon: 'roundRect',
                             itemStyle: {
-                                color: 'rgba(241, 255, 135, 0.75)'
+                                color: 'rgba(155, 145, 156, 0.35)'
                             }
                         },
                         {
@@ -194,7 +194,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         type: 'category',
 
                         axisLabel: {
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: 'bold',
                         },
                         inverse: false,
@@ -214,7 +214,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         nameGap: 25,
                         nameTextStyle: {
                             fontSize: 14,
-                            fontWeight: 'bold'
+                            fontWeight: 'normal'
                         },
 
                         axisLabel: {
@@ -298,25 +298,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
                             return item.bookings;
                         }),
-                        // label: {
-                        //     show: true,
-                        //     color: 'green',
-
-                        //     shadowBlur: 4,
-                        //     shadowOffsetX: 1,
-                        //     shadowOffsetY: 1,
-                        //     formatter: (params) => {
-                        //         // if (self.sharedDatasetService.bucketDetails[params.dataIndex].protections !== self.sharedDatasetService.bucketDetails[params.dataIndex].bookings) {
-                        //         return self.sharedDatasetService.bucketDetails[params.dataIndex].bookings
-                        //         // } else {
-                        //         //     return ''
-                        //         //}
-                        //     },
-                        //     fontSize: 12,
-                        //     fontWeight: 'bold',
-                        //     offset: [-45, -20],
-                        //     position: 'bottom',
-                        // },
                         itemStyle: {
                             color: 'rgba(12, 163, 85, 0.75)',
                             decal: {
