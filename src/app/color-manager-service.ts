@@ -13,8 +13,6 @@ export class ColorManagerService {
 
     public genColors(numClasses): any[] {
 
-
-        //console.log('genColors ', numClasses)
         numClasses = numClasses + 1;
         function adjustHue(val) {
             if (val < 0) val += Math.ceil(-val / 360) * 360;
@@ -22,16 +20,17 @@ export class ColorManagerService {
         }
 
         function map(n, start1, end1, start2, end2) {
-            //  console.log('genColors ', numClasses)
+            // console.log('genColors ', numClasses)
             return ((n - start1) / (end1 - start1)) * (end2 - start2) + start2;
         }
 
         function createHueShiftPalette(opts) {
-            //  console.log('createHueShiftPalette ', opts)
+            // console.log('createHueShiftPalette ', opts)
             const { base, minLightness, maxLightness, hueStep } = opts;
 
             const palette = [base];
             const test = (numClasses / 2);
+
             for (let i = 1; i < test; i++) {
                 const incr = i + 2;
                 const hueDark = adjustHue(base.h - hueStep * i);
@@ -72,7 +71,7 @@ export class ColorManagerService {
         });
 
         const hueShiftPaletteHex = hueShiftPalette.map((color) => formatHex(color));
-        // console.log('hueShiftPaletteHex ', hueShiftPaletteHex)
+        console.log('hueShiftPaletteHex ', hueShiftPaletteHex)
         return hueShiftPaletteHex
 
     }

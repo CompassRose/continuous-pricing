@@ -3,6 +3,7 @@ import * as echarts from 'echarts';
 import { SharedDatasetService } from '../shared-datasets.service';
 import { ContinousColors, ColorObject } from '../dashboard-constants';
 import { end } from '@popperjs/core';
+import { ThemeControlService } from '../theme-control.service';
 
 
 @Component({
@@ -22,17 +23,28 @@ export class AuAvailabilityComponent implements AfterViewInit {
     // Width observer
     public targetElement: any;
     public bidPriceObserver: any;
+    public themeSelect = 'light';
 
-    constructor(public sharedDatasetService: SharedDatasetService, private host: ElementRef) {
+    constructor(public sharedDatasetService: SharedDatasetService, public themeControlService: ThemeControlService, private host: ElementRef) {
+
+        this.themeControlService.resetThemeSubject$
+            .subscribe((theme: string) => {
+                this.themeSelect = theme;
+                this.createSvg();
+            })
 
 
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
             .subscribe((state) => {
+
                 if (this.myChart) {
+                    //  console.log('Au Chart ', this.sharedDatasetService.bucketDetails)
+                    // this.createSvg('draggable-available')
                     this.createChartElement();
                 }
             })
     }
+
 
 
     updatePosition: () => void;
@@ -52,15 +64,19 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
 
     public ngAfterViewInit(): void {
-        this.createSvg('draggable-available')
+        this.createSvg()
     }
 
 
     // Initialize Chart Node
-    public createSvg(type) {
+    public createSvg() {
 
-        const chart: HTMLCanvasElement = document.getElementById(type) as HTMLCanvasElement;
-        this.myChart = echarts.init(chart, 'light');
+        if (echarts.init(document.getElementById('draggable-available'))) {
+            echarts.init(document.getElementById('draggable-available')).dispose();
+        }
+
+        const chart: HTMLCanvasElement = document.getElementById('draggable-available') as HTMLCanvasElement;
+        this.myChart = echarts.init(chart, this.themeSelect);
 
         setTimeout(() => {
             this.createChartElement();
@@ -108,7 +124,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
         const setChartOptions = function () {
 
             self.myChart.setOption({
-                backgroundColor: 'rgba(205,225,245,0.05)',
+                // backgroundColor: 'rgba(205,225,245,0.05)',
                 grid: {
                     show: false,
                     left: 55,
@@ -128,6 +144,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         color: '#000'
                     },
                     formatter: (params) => {
+
                         const calc = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector;
                         const saValue = calc > 0 ? `<br>Sa: ${calc}` : ``;
                         return `Class: ${self.sharedDatasetService.bucketDetails[params.dataIndex].letter}<br>Fare: ${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}<br>Aus: ${self.sharedDatasetService.bucketDetails[params.dataIndex].Aus}${saValue}`;
@@ -192,7 +209,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                     {
                         show: true,
                         type: 'category',
-
                         axisLabel: {
                             fontSize: 14,
                             fontWeight: 'bold',
@@ -219,8 +235,8 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
                         axisLabel: {
                             fontSize: 13,
-                            fontWeight: 'normal',
-                            color: 'green'
+                            fontWeight: 'bold',
+                            color: 'rgba(12, 163, 85, 1)',
                         },
 
                         inverse: false,
@@ -254,8 +270,14 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         label: {
                             show: true,
                             formatter: (params) => {
-                                const auDiff = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector);
-                                return auDiff < self.sharedDatasetService.bucketDetails[params.dataIndex].Aus ? Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus) : ''
+                                // console.log('params ', params, ' BD ', self.sharedDatasetService.bucketDetails[params.dataIndex])
+                                let active;
+
+                                if (self.sharedDatasetService.bucketDetails[params.dataIndex]) {
+                                    const auDiff = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector);
+                                    active = auDiff < self.sharedDatasetService.bucketDetails[params.dataIndex].Aus ? Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus) : '';
+                                }
+                                return active;
                             },
                             color: 'black',
                             fontSize: 10,
@@ -299,7 +321,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             return item.bookings;
                         }),
                         itemStyle: {
-                            color: 'rgba(12, 163, 85, 0.75)',
+                            color: 'rgba(12, 163, 85, 1)',
                             decal: {
                                 symbol: 'rect',
                                 color: 'rgba(0, 0, 0, 0.12)',
@@ -315,6 +337,9 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         stack: 'total',
                         name: 'Seat Availability',
                         showBackground: true,
+                        backgroundStyle: {
+                            color: 'rgba(180, 130, 10, 0.05)'
+                        },
                         z: 2,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
@@ -346,27 +371,37 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             fontSize: 12,
                             fontWeight: 'normal',
                             formatter: (params) => {
-                                let labelString: any;
-                                self.sharedDatasetService.bucketDetails.map((bd, i) => {
-                                    const netAus = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
-                                    if (self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 26) {
 
-                                        labelString = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 0 ?
-                                            `${netAus}`
-                                            : self.sharedDatasetService.bucketDetails[params.dataIndex].fare;
-                                    } else {
-                                        labelString = ''
+                                let labelString: any;
+                                let fareString = '';
+                                self.sharedDatasetService.bucketDetails.map((bd, i) => {
+
+                                    //  console.log('bd ', bd)
+                                    if (self.sharedDatasetService.bucketDetails[params.dataIndex]) {
+                                        const netAus = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector)
+
+                                        // 26 is so numbers don't overlap TODO
+                                        if (self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 26) {
+
+                                            labelString = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector > 0 ?
+                                                `${netAus}` : self.sharedDatasetService.bucketDetails[params.dataIndex].fare;
+                                            fareString = `${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}`
+                                        } else {
+                                            labelString = ''
+                                        }
                                     }
+
                                 })
-                                return `{a|${self.sharedDatasetService.bucketDetails[params.dataIndex].fare}}\n{b|${labelString}}`
+
+                                return `{a|${fareString}}\n{b|${labelString}}`
                             },
                             rich: {
                                 a: {
                                     align: 'center',
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     padding: [-3, 0],
                                     fontWeight: 'normal',
-                                    color: 'black',
+                                    color: self.themeControlService.chartTextColor,
                                 },
                                 b: {
                                     align: 'center',

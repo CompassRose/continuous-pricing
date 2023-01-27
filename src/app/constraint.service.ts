@@ -62,8 +62,6 @@ export class ConstraintService {
 
             // constraint.originalValue = Math.round((constraint.value) * 100) / 100;
 
-
-
         } else if (idx === 4 || idx === 5) {
             if (!constraint.updValue) {
 

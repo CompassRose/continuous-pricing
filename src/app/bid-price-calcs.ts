@@ -25,6 +25,7 @@ export class BidPriceCalcsService {
     // Generates Bid Price Curve from adjustments
     public generateInterpolatedCurvePoints(): number[] {
 
+        // console.log('((((((((((((( generateInterpolatedCurvePoints )))))))  ',)
         let stepper = 0;
         let testIncr = 0;
 
@@ -56,36 +57,44 @@ export class BidPriceCalcsService {
 
         this.sharedDatasetService.bucketDetails.map((p, i) => {
 
-            if (i === 0) {
+            // console.log('Letter ', p.letter)
+            if (p.fare) {
+                if (i === 0) {
 
-                for (let m = 0; m < this.sharedDatasetService.bucketDetails[0].protections; m++) {
-                    if (this.sharedDatasetService.bucketDetails[0].protections > 0) {
-                        rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
+                    for (let m = 0; m < this.sharedDatasetService.bucketDetails[0].protections; m++) {
+                        if (this.sharedDatasetService.bucketDetails[0].protections > 0) {
+                            rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
+                        }
                     }
-                }
 
-            } else {
-                stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
-                rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2);
-                rangeArray.shift();
+                } else {
+                    stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
+                    rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2);
+                    //console.log('rangeArray ', rangeArray)
+                    if (rangeArray) {
+                        rangeArray.shift();
+                    }
+
+                }
             }
 
             if (rangeArray.length === 0) {
-                testIncr++
-                //console.log('i ', i, this.sharedDatasetService.bucketDetails[i].letter, ' XXXX testIncr ', testIncr)
-                //console.log('testIncr ', testIncr, ' Letter ', this.sharedDatasetService.bucketDetails[testIncr].letter, ' ', this.sharedDatasetService.bucketDetails[testIncr].protections)
+                testIncr++;
+                //  console.log('i ', i, this.sharedDatasetService.bucketDetails[i].letter, ' XXXX testIncr ', this.sharedDatasetService.bucketDetails[i])
+                // console.log('testIncr ', testIncr, ' Letter ', this.sharedDatasetService.bucketDetails[testIncr].letter, ' ', this.sharedDatasetService.bucketDetails[testIncr].protections)
 
                 for (let m = 0; m < this.sharedDatasetService.bucketDetails[testIncr].protections; m++) {
-                    //console.log(' XXXX testIncr ', m, ' testIncr ', testIncr)
+
                     replacementEls.push(this.sharedDatasetService.dynamicBidPrices[0]);
                 }
             }
+            // console.log('               rangeArray ', rangeArray)
             result.push(...rangeArray);
         })
 
         if (replacementEls.length > 0) {
 
-            // console.log(' XXXX teams ', testIncr, ' replacementEls ', replacementEls)
+            //console.log(' XXXX teams ', testIncr, ' replacementEls ', replacementEls)
             for (let f = 0; f < replacementEls.length; f++) {
 
                 if (this.sharedDatasetService.dynamicBidPrices[f] === this.sharedDatasetService.dynamicBidPrices[0]) {
@@ -96,12 +105,16 @@ export class BidPriceCalcsService {
 
             }
         }
-
+        this.sharedDatasetService.maxFareValue = this.sharedDatasetService.getMaxFare();
+        // console.log('generateInterpolatedCurvePoints ', ' result', result)
         return result;
     }
 
+
+
     // Set up bar colors 
     public adjustPieceColorForBookingUpdates(): BarSeries[] {
+
         let barSeries: BarSeries[] = [];
         this.sharedDatasetService.dynamicBidPrices = [];
         let counter = 0;
@@ -116,8 +129,13 @@ export class BidPriceCalcsService {
                 }
             }
         })
+        //console.log('dynamicBidPrices ', this.sharedDatasetService.dynamicBidPrices)
+
         return barSeries;
     }
+
+
+
 
 
     // Generates and returns each bar color
@@ -178,7 +196,7 @@ export class BidPriceCalcsService {
                     id: 'clickedLabel',
                     position: 'end',
                     show: true,
-                    distance: [0, -100],
+                    distance: [0, -120],
                     formatter: () => {
                         return `{a|${fareClass}\nBase: ${baseCurve[sellingPoint]}}`
                     },
@@ -226,6 +244,7 @@ export class BidPriceCalcsService {
             return {}
         }
     }
+
 
     public applyAllInfluences(bpVector: number[], args: any[]): number[] {
 

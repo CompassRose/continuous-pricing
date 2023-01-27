@@ -6,7 +6,8 @@ import { BookingControlService } from '../booking-controls';
 import { KeyCode } from './lib/keycodes';
 import { shortcut, sequence } from './lib/shortcuts';
 import { PathToAssets } from '../dashboard-constants';
-//import { DashboardApi } from '../dashboard.api.service'
+import { environment } from 'src/environments/environment.prod';
+import { ThemeControlService } from '../theme-control.service';
 
 
 export function animationFrame({
@@ -42,6 +43,7 @@ export class ContinousPricingComponent implements OnInit {
 
   public slider: any = document.getElementById("myRange");
   public output: any = document.getElementById("demo");
+  public currentApplicationVersion = environment.appVersion;
 
   readonly fps$ = animationFrame(this.documentRef.defaultView).pipe(
     pairwise(),
@@ -62,30 +64,55 @@ export class ContinousPricingComponent implements OnInit {
   sub: Subscription;
   shortcuts$: Observable<string>;
 
+  public selectedFlightValues: any = {};
+
   public frameRateCounterState = false;
 
+  public selectedFlightKey = 1294409;
+  public selectedIndex = 0;
 
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
     //private dashboardApi: DashboardApi,
     public bookingControlService: BookingControlService,
+    public themeControlService: ThemeControlService,
     public sharedDatasetService: SharedDatasetService) {
+
+    this.selectedFlightValues = sharedDatasetService.mockFlightValues[0];
+    this.selectedFlightKey = this.sharedDatasetService.mockFlightValues[0].masterKey;
+
   }
 
   public toggleFrameRate() {
     this.frameRateCounterState = !this.frameRateCounterState;
   }
 
+
+  public flightSelectControl(ev) {
+
+    this.sharedDatasetService.totalBookingsCollector = 0;
+    this.selectedFlightKey = ev;
+    const index = this.sharedDatasetService.mockFlightValues.findIndex(mk => mk.masterKey === ev.masterKey);
+    this.selectedIndex = index;
+    this.selectedFlightValues = this.sharedDatasetService.mockFlightValues[index];
+    this.selectedFlightKey = ev.masterKey;
+    this.sharedDatasetService.setFlightClient(index);
+
+    this.bookingControlService.tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails];
+
+    this.bookingControlService.change(this.sharedDatasetService.totalBookingsCollector)
+    this.bookingControlService.bookingSlider$.next(this.sharedDatasetService.totalBookingsCollector);
+
+  }
+
   public ngOnInit() {
 
-
-    //this.dashboardApi.postToFlightClient()
+    this.sharedDatasetService.updatedClientFlight$.next(this.sharedDatasetService.mockFlightValues);
 
     this.bookingControlService.bookingSlider$
       .subscribe(response => {
         // console.log('BOOK response ', response)
-        this.sharedDatasetService.generateInverseDetails()
-
+        this.sharedDatasetService.generateInverseDetails();
       })
 
     const cmdJ = merge(

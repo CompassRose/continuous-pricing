@@ -181,6 +181,10 @@ sans-serif;
   font-size: $font-size-base-xs !important;
 }
 
+:host ::ng-deep .ng-option {
+  font-size: $font-size-base-xs !important;
+}
+
 .ng-select .ng-select-container .ng-value-container .ng-placeholder {
   margin-top: 0px !important;
   color: rgb(70, 70, 70) !important;

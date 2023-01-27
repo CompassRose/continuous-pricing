@@ -1,29 +1,18 @@
 
-import { Component, Input } from '@angular/core';
-import { BidPriceInfluencers, IFlightInfluencesByCabin } from '../models/dashboard.model';
-// import { DataService } from '../../services/config-data.service';
+import { Component } from '@angular/core';
+import { IFlightInfluencesByCabin } from '../models/dashboard.model';
 import { ConstraintService } from '../constraint.service';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { SharedDatasetService } from '../shared-datasets.service';
-import { debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
-// import { bpHeaderAbbrev } from '../../shared/dashboard-constants';
-// import { DateFormatterPipe } from '../../shared/pipes/dateModifierPipe';
-// import { AirlineConfig } from '../../api/bidPrice_client';
-
 
 
 @Component({
     selector: 'bidprice-configure',
     templateUrl: './bid-price-configure.component.html',
-    styleUrls: ['./bid-price-configure.component.scss'],
-    //providers: [DateFormatterPipe]
+    styleUrls: ['./bid-price-configure.component.scss']
 })
 
 
 export class BipPriceConfigureComponent {
-
-    public modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
-    public staticModifiers = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
 
     public savedInfluenceMods: any[] = [];
     public showInfluenceControls = true;
@@ -35,39 +24,12 @@ export class BipPriceConfigureComponent {
     public applyModifiedToAdjusted = false;
     public currentCaptureDate: any;
 
-    // async pipe in template
-    // public $activeInfluenceBehaviorSubject = new BehaviorSubject<any>(null);
-
-
-    public influenceInput = new Subject<any[]>();
-
     public activeCabinInfluences: IFlightInfluencesByCabin = {};
-
 
     constructor(
         public sharedDatasetService: SharedDatasetService,
-        // public dataService: DataService,
-        public constraintService: ConstraintService,
-        // public dateFormatterPipe: DateFormatterPipe
+        public constraintService: ConstraintService
     ) {
-
-
-        this.influenceInput.pipe(
-            filter(Boolean),
-            debounceTime(900),
-            distinctUntilChanged(),
-            tap(([event, item, id]) => {
-
-                Object.entries(this.modifierObj).map((d: any, i) => {
-                    if (d[1] === null) {
-                        event = this.staticModifiers[d[0]];
-                        this.modifierObj[d[0]] = event
-                    }
-                })
-                this.sharedDatasetService.influenceInput$.next([event, item, id])
-            })
-        )
-            .subscribe();
 
 
         // this.dataService.dashboardFacade.getActiveCabin()

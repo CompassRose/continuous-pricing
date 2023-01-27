@@ -1,3 +1,51 @@
+
+
+export interface FlightClientDetails {
+  masterKey?: number;
+  prevYearMasterKey?: number | undefined;
+  airlineCode?: string | undefined;
+  origin?: string | undefined;
+  destination?: string | undefined;
+  equipment?: string | undefined;
+  flightNumber?: number;
+  departureDateTime?: Date;
+  arrivalDateTime?: Date;
+  lid?: number;
+  capacity?: number;
+  cabinDetails?: CabinDetails[] | undefined;
+  bookings?: number[] | undefined;
+}
+
+
+
+export interface CabinDetails {
+  cabinLetter?: string | undefined;
+  cabinName?: string | undefined;
+  lid?: number;
+  capacity?: number;
+  adjustedBidPrices?: number[];
+  originalBidPrices?: number[] | undefined;
+  bucketConfigs?: ApiBucketDetails[] | undefined;
+  bookings?: number;
+}
+
+export interface ApiBucketDetails {
+  bucketLetter?: string;
+  bucketOrder?: number;
+  fare?: number;
+  adjustedFare?: number;
+  bookings?: number;
+  multiplier?: number;
+  modifiedFare?: number;
+  adjustedFareES?: number;
+  adjustedFareOE?: number;
+  esPos?: string;
+  oePos?: string;
+  sa?: number;
+  oeSa?: number;
+  esSa?: number;
+}
+
 export interface SeasonalItems {
   OriginalRASM: string;
   Time;

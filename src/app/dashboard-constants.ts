@@ -19,7 +19,7 @@ export enum ImagePath {
 
 
 
-export const PathToAssets = ImagePath.devPathToAssets;
+export const PathToAssets = ImagePath.prodPathToAssets;
 
 export const ContinousColors: ColorObject[] = [
     { key: 'Blue Green Red', value: ['rgb(255, 255, 241)', 'rgb(255, 255, 201)', 'rgb(255, 255, 170)', 'rgb(255, 255, 147)', 'rgb(255, 255, 132)', 'rgb(255, 221, 124)', 'rgb(255, 185, 122)', 'rgb(255, 149, 124)', 'rgb(255, 114, 127)', 'rgb(255, 80, 131)', 'rgb(240, 47, 135)', 'rgb(199, 0, 132)', 'rgb(154, 0, 127)', 'rgb(106, 0, 118)', 'rgb(51, 0, 107)', 'rgb(0, 0, 92)', 'rgb(0, 0, 75)', 'rgb(0, 0, 55)', 'rgb(0, 0, 35)', 'rgb(0, 0, 5)', 'rgb(0, 0, 0)'] },

@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5000/api/'
-  //apiUrl: 'https://localhost:5001/api/'
+  appVersion: require('../../package.json').version + '-dev',
+  apiUrl: 'http://localhost:5000'
 };
 
 /*
