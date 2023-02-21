@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { IFlightInfluencesByCabin } from '../models/dashboard.model';
 import { ConstraintService } from '../constraint.service';
 import { SharedDatasetService } from '../shared-datasets.service';
@@ -25,6 +25,22 @@ export class BipPriceConfigureComponent {
     public currentCaptureDate: any;
 
     public activeCabinInfluences: IFlightInfluencesByCabin = {};
+    public showInfluenceBody = true;
+    public themeSwitchMode = 'light';
+
+    @Input()
+    set collapseIndfluences(state: boolean) {
+        this.showInfluenceBody = !this.showInfluenceBody;
+        //console.log('state ', state)
+
+    }
+
+    @Input()
+    set themeSwitch(state: string) {
+        this.themeSwitchMode = state;
+        console.log('themeSwitch ', state)
+
+    }
 
     constructor(
         public sharedDatasetService: SharedDatasetService,

@@ -62,9 +62,6 @@ export const ThemeCollection = [
 
 
 
-
-export const jsonContent2 = '{"resourceNames":["ODMasterKey", "FlightNumber", "DepartureDate", "Origin", "Destination","LegSnapshot:Au/FC1","LegSnapshot:Au/FC2", "LegInventory:CapacityLF","LegInventory:LidLF", "LegInventory:LidLF/Cabin3", "LegInventory:FlightBk", "LegInventory:CabinBk/Cabin3"], "recordLimit": 1500}';
-
 export const nTile = "M 39.766 0 L 39.766 56.875 L 28.281 56.875 L 11.484 19.57 L 11.484 56.875 L 0 56.875 L 0 0 L 11.484 0 L 28.32 37.344 L 28.32 0 L 39.766 0 Z M 85.82 0 L 85.82 9.57 L 71.758 9.57 L 71.758 56.875 L 60.234 56.875 L 60.234 9.57 L 46.406 9.57 L 46.406 0 L 85.82 0 Z";
 
 export const loadFactor = "M 67.617 24.141 L 67.617 33.672 L 49.766 33.672 L 49.766 56.875 L 38.281 56.875 L 38.281 0 L 69.766 0 L 69.766 9.57 L 49.766 9.57 L 49.766 24.141 L 67.617 24.141 Z M 11.484 0 L 11.484 47.344 L 31.641 47.344 L 31.641 56.875 L 0 56.875 L 0 0 L 11.484 0 Z";

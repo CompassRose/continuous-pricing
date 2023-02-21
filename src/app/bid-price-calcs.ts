@@ -25,13 +25,12 @@ export class BidPriceCalcsService {
     // Generates Bid Price Curve from adjustments
     public generateInterpolatedCurvePoints(): number[] {
 
-        // console.log('((((((((((((( generateInterpolatedCurvePoints )))))))  ',)
         let stepper = 0;
         let testIncr = 0;
 
         // @ts-ignore
         function ranger(from, to, step, prec) {
-
+            // console.log('      from: ', from, ' to ', to, ' step ', step, ' prec ', prec)
             if (typeof from == 'number') {
 
                 const A = [from];
@@ -56,8 +55,6 @@ export class BidPriceCalcsService {
         let replacementEls = [];
 
         this.sharedDatasetService.bucketDetails.map((p, i) => {
-
-            // console.log('Letter ', p.letter)
             if (p.fare) {
                 if (i === 0) {
 
@@ -66,47 +63,35 @@ export class BidPriceCalcsService {
                             rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
                         }
                     }
-
                 } else {
                     stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
                     rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2);
-                    //console.log('rangeArray ', rangeArray)
                     if (rangeArray) {
                         rangeArray.shift();
                     }
-
                 }
             }
 
             if (rangeArray.length === 0) {
                 testIncr++;
-                //  console.log('i ', i, this.sharedDatasetService.bucketDetails[i].letter, ' XXXX testIncr ', this.sharedDatasetService.bucketDetails[i])
-                // console.log('testIncr ', testIncr, ' Letter ', this.sharedDatasetService.bucketDetails[testIncr].letter, ' ', this.sharedDatasetService.bucketDetails[testIncr].protections)
-
                 for (let m = 0; m < this.sharedDatasetService.bucketDetails[testIncr].protections; m++) {
-
                     replacementEls.push(this.sharedDatasetService.dynamicBidPrices[0]);
                 }
             }
-            // console.log('               rangeArray ', rangeArray)
             result.push(...rangeArray);
         })
 
         if (replacementEls.length > 0) {
 
-            //console.log(' XXXX teams ', testIncr, ' replacementEls ', replacementEls)
             for (let f = 0; f < replacementEls.length; f++) {
 
                 if (this.sharedDatasetService.dynamicBidPrices[f] === this.sharedDatasetService.dynamicBidPrices[0]) {
-                    // console.log('f ', f, ' testIncr ', testIncr, ' PRO: ', this.sharedDatasetService.dynamicBidPrices[f], ' dynamic ', this.sharedDatasetService.dynamicBidPrices[0])
                     result[f] = this.sharedDatasetService.dynamicBidPrices[0];
-                    //console.log('result ', result[f])
                 }
 
             }
         }
         this.sharedDatasetService.maxFareValue = this.sharedDatasetService.getMaxFare();
-        // console.log('generateInterpolatedCurvePoints ', ' result', result)
         return result;
     }
 
@@ -129,8 +114,6 @@ export class BidPriceCalcsService {
                 }
             }
         })
-        //console.log('dynamicBidPrices ', this.sharedDatasetService.dynamicBidPrices)
-
         return barSeries;
     }
 
@@ -141,7 +124,7 @@ export class BidPriceCalcsService {
     // Generates and returns each bar color
     public setBookingElementsColor(value, j): string {
         const len = this.sharedDatasetService.maxAuValue - this.sharedDatasetService.totalBookingsCollector;
-        return j <= len ? this.colorRange[value] : 'green';
+        return j <= len ? this.colorRange[value] : 'rgb(55, 165, 55)'
     }
 
 
@@ -166,19 +149,15 @@ export class BidPriceCalcsService {
     public markVerticalLineSellingValues() {
 
         let sellingPoint = this.sharedDatasetService.maxAuValue - this.sharedDatasetService.totalBookingsCollector;
-
         if (sellingPoint < 0) {
             sellingPoint = 0;
         }
-
-        const activeColor = this.sharedDatasetService.adjustedCurvePoints.length ? 'green' : 'navy';
-
+        const activeColor = this.sharedDatasetService.adjustedCurvePoints.length ? 'green' : 'blue';
         const baseCurve = this.sharedDatasetService.dynamicBidPrices;
 
         if (this.sharedDatasetService.totalBookingsCollector > 0) {
             const rounded = Math.round(this.sharedDatasetService.activeCurve[sellingPoint]);
             const fareClass = `Selling: ${rounded}`;
-
             // Vertical Active Class/Value Selling Line
             return {
                 name: 'current',
@@ -188,7 +167,7 @@ export class BidPriceCalcsService {
                 silent: true,
                 lineStyle: {
                     type: 'dashed',
-                    color: '#001871',
+                    color: 'blue',
                     width: 2,
                 },
                 label: {
@@ -234,8 +213,8 @@ export class BidPriceCalcsService {
                             borderRadius: 2,
                             color: '#e7e7e7',
                             padding: [4, 6, 2, 8],
-                            borderColor: 'navy',
-                            backgroundColor: 'navy',
+                            borderColor: 'blue',
+                            backgroundColor: 'blue',
                             borderWidth: 0
                         }
                     }]
@@ -247,9 +226,11 @@ export class BidPriceCalcsService {
 
 
     public applyAllInfluences(bpVector: number[], args: any[]): number[] {
+        //  console.log('applyAllInfluences ', bpVector)
 
         const applyMultiplication = (bpVector, multiplier: any): number[] => {
             return bpVector.map((bp, i) => {
+
                 const num = Number(multiplier)
                 return bp * num > 0 ? Math.round(bp * num) : bp;
             })

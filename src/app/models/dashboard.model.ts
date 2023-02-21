@@ -136,6 +136,15 @@ export interface BucketDetails {
   Sa?: number;
 }
 
+export interface xAxisTextValue {
+  value?: string | undefined;
+  textStyle?: textColor | undefined;
+}
+
+export interface textColor {
+  color?: string | undefined;
+}
+
 export interface InverseFareDetails {
   percentOfTop: number;
   inverseDistribute: number;

@@ -22,6 +22,7 @@ import {
   providedIn: 'root'
 })
 
+
 export class DashboardApi {
   readonly airportCodes_URL = './assets/csv/airports_small.csv';
   private bidPriceInfluences: BidPriceInfluencesClient;
@@ -32,11 +33,11 @@ export class DashboardApi {
 
   constructor(@Inject(HttpClient) protected http: HttpClient, public configurationLoader: ConfigurationLoader) {
 
-    this.airlineConfigClient = new AirlineConfigClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
-    this.bidPriceInfluences = new BidPriceInfluencesClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
-    this.flightClient = new FlightClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
+    //this.airlineConfigClient = new AirlineConfigClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
+    //this.bidPriceInfluences = new BidPriceInfluencesClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
+    //this.flightClient = new FlightClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
     //console.log('configurationLoader ', this.configurationLoader)
-    this.receivedUserId = window.localStorage.getItem('UserID');
+    //this.receivedUserId = window.localStorage.getItem('UserID');
     //console.log('From Dashboard API   receivedUserId ', this.receivedUserId)
   }
 

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+//import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { ContinousPricingComponent } from './pricing-grid/grid.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -17,6 +17,25 @@ import { MatSliderModule } from '@angular/material/slider';
 import { BipPriceConfigureComponent } from './bid-price-configure/bid-price-configure.component';
 import { ContinousBidPricingComponent } from './continuous-bidpricing-chart/continuous-bidpricing-chart.component';
 /// import { ConfigurationModule } from "./configuration/configuration.module";
+import { NgxBootstrapIconsModule } from 'ngx-bootstrap-icons';
+
+import { arrowRepeat } from 'ngx-bootstrap-icons';
+import { caretDownSquare } from 'ngx-bootstrap-icons';
+import { caretUpSquare } from 'ngx-bootstrap-icons';
+import { caretRightFill } from 'ngx-bootstrap-icons';
+import { caretLeftFill } from 'ngx-bootstrap-icons';
+import { boxArrowRight } from 'ngx-bootstrap-icons';
+import { boxArrowLeft } from 'ngx-bootstrap-icons';
+
+const icons = {
+  arrowRepeat,
+  caretDownSquare,
+  caretUpSquare,
+  caretLeftFill,
+  caretRightFill,
+  boxArrowRight,
+  boxArrowLeft
+}
 
 @NgModule({
   declarations: [
@@ -38,7 +57,10 @@ import { ContinousBidPricingComponent } from './continuous-bidpricing-chart/cont
     CommonModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    NgMultiSelectDropDownModule.forRoot(),
+    NgxBootstrapIconsModule.pick(icons, {
+      width: '1.25em',
+      height: '1.25em'
+    }),
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
     })

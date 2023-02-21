@@ -2,6 +2,7 @@
 @import "~@ng-select/ng-select/themes/default.theme.css";
 @import './styles/configuration.scss';
 @import "styles/fonts";
+
 //@import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
 //$font-family: "'Crimson Pro', sans-serif"; //"OpenSans-Semibold";
@@ -25,8 +26,19 @@ body {
 //   cursor: w-resize !important;
 // }
 
-body {
-  background: rgb(188, 208, 255) !important;
+//body {
+//background: rgb(188, 208, 255) !important;
+//}
+
+.slider {
+  display: flex;
+  align-items: center;
+  background-color: $accelya-blue;
+  //height: 100%;
+
+  .example-margin {
+    width: 100%;
+  }
 }
 
 .mat-slider-horizontal {
@@ -35,20 +47,16 @@ body {
 }
 
 .mat-slider.mat-slider-horizontal .mat-slider-track-fill {
-  background-color: rgb(255, 255, 255) !important;
+  background-color: rgb(55, 255, 55) !important;
 }
 
-// .mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
-//   //background-color: red;
-// }
-
 .mat-slider.mat-slider-horizontal .mat-slider-track-wrapper {
-  height: 10px;
+  height: 6px;
   border-radius: 10px
 }
 
 .mat-slider-track-background {
-  background-color: rgb(255, 255, 255) !important;
+  background-color: rgb(55, 255, 55) !important;
 }
 
 .mat-slider.mat-slider-horizontal .mat-slider-track-background,
@@ -73,7 +81,8 @@ body {
 }
 
 .mat-slider.mat-accent .mat-slider-thumb-label {
-  top: -25px !important;
+  top: -27px !important;
+  right: -16px;
   background-color: transparent !important;
 }
 
@@ -82,14 +91,14 @@ body {
   width: 20px;
   background-color: white;
   border: solid 2px gray;
-  bottom: -14px;
+  bottom: -11px;
   right: -12px;
 }
 
-mat-slider {
-  margin: auto;
-  padding: 4px !important;
-}
+// mat-slider {
+//   margin: auto;
+//   //padding: 4px !important;
+// }
 
 
 

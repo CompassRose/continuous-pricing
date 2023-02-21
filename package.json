@@ -1,6 +1,6 @@
 {
   "name": "angular-rm-overview",
-  "version": "1.1.0",
+  "version": "1.2.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -23,7 +23,8 @@
     "@ng-select/ng-select": "^9.0.2",
     "@popperjs/core": "^2.10.2",
     "bootstrap": "^5.2.0",
-    "cardinal-spline-js": "^2.3.10",
+    "bootstrap-icons": "^1.8.1",
+    "ngx-bootstrap-icons": "^1.9.1",
     "culori": "^2.0.3",
     "echarts": "^5.3.3",
     "ng-multiselect-dropdown": "^1.0.0-beta.19",

@@ -71,7 +71,7 @@ export class ColorManagerService {
         });
 
         const hueShiftPaletteHex = hueShiftPalette.map((color) => formatHex(color));
-        console.log('hueShiftPaletteHex ', hueShiftPaletteHex)
+        // console.log('hueShiftPaletteHex ', hueShiftPaletteHex)
         return hueShiftPaletteHex
 
     }

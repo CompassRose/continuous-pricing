@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BucketDetails, InverseFareDetails } from './models/dashboard.model';
 import { Observable, BehaviorSubject, Subject, of, combineLatest, throwError } from 'rxjs';
-import { switchMap, debounceTime } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { distinctUntilChanged, tap, filter } from 'rxjs/operators';
 
 //import { DashboardApi } from './api/dashboard.api.service';
@@ -77,9 +77,9 @@ export class SharedDatasetService {
             { letter: 'N', fare: 44, protections: 0, Aus: 100, bookings: 0 },
             { letter: 'O', fare: 34, protections: 0, Aus: 85, bookings: 0 },
             { letter: 'P', fare: 29, protections: 0, Aus: 70, bookings: 0 },
-            { letter: 'Q', fare: 24, protections: 0, Aus: 60, bookings: 0 },
-            { letter: 'R', fare: 20, protections: 0, Aus: 50, bookings: 0 },
-            { letter: 'S', fare: 17, protections: 0, Aus: 30, bookings: 0 }
+            { letter: 'Q', fare: 24, protections: 0, Aus: 50, bookings: 0 },
+            { letter: 'R', fare: 20, protections: 0, Aus: 30, bookings: 0 },
+            { letter: 'S', fare: 17, protections: 0, Aus: 20, bookings: 0 }
         ],
         [
             { letter: 'C', fare: 219, protections: 0, Aus: 189, bookings: 0 },
@@ -98,7 +98,7 @@ export class SharedDatasetService {
             { letter: 'P', fare: 39, protections: 0, Aus: 70, bookings: 0 },
             { letter: 'Q', fare: 31, protections: 0, Aus: 60, bookings: 0 },
             { letter: 'R', fare: 14, protections: 0, Aus: 50, bookings: 0 },
-            { letter: 'S', fare: 9, protections: 0, Aus: 30, bookings: 0 }
+            { letter: 'S', fare: 9, protections: 0, Aus: 20, bookings: 0 }
         ],
         [
             { letter: 'C', fare: 399, protections: 0, Aus: 199, bookings: 0 },
@@ -117,9 +117,10 @@ export class SharedDatasetService {
             { letter: 'P', fare: 139, protections: 0, Aus: 75, bookings: 0 },
             { letter: 'Q', fare: 131, protections: 0, Aus: 65, bookings: 0 },
             { letter: 'R', fare: 124, protections: 0, Aus: 50, bookings: 0 },
-            { letter: 'S', fare: 119, protections: 0, Aus: 30, bookings: 0 }
+            { letter: 'S', fare: 119, protections: 0, Aus: 10, bookings: 0 }
         ]
     ];
+
 
     public bucketDetails: BucketDetails[] = [];
 
@@ -135,7 +136,11 @@ export class SharedDatasetService {
     // Boolean from trigger
     public resetDefaultSubject$ = new Subject<boolean>();
 
+
+
     public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
+
+    public influenceInput = new Subject<any[]>();
 
     public totalBookingsCollector: number = 0;
 
@@ -168,8 +173,6 @@ export class SharedDatasetService {
 
     public updatedClientFlight$ = new BehaviorSubject<any>(null);
 
-    public influenceInput = new Subject<any[]>();
-
     public modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
 
     public staticModifiers = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
@@ -183,12 +186,11 @@ export class SharedDatasetService {
 
     public apiBucketDetails: any[][];
 
-    public fromApiBucketDetails: BucketDetails[] = []
-    // public dashboardAPI: DashboardApi
     constructor() {
 
         const tempBucketCollection = [...this.bucketCollection]
 
+        // prior versions are for resetting values
         tempBucketCollection.map((bc, i) => {
             this.calculateAusPriorToUse(bc)
         })
@@ -197,21 +199,20 @@ export class SharedDatasetService {
             return bc = this.setProtectionsPriorToUse(bc, i);
         })
 
-        console.log('tempBucketCollection  ', tempBucketCollection)
+
+        ///////////////////
 
         window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(tempBucketCollection))));
-
         window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(tempBucketCollection))));
 
-        // window.localStorage.setItem('archivedBuckets', JSON.stringify(JSON.parse(JSON.stringify(this.bucketDetails))));
 
-        //this.bucketDetails = JSON.parse(window.localStorage.getItem('archivedBuckets'));
         this.bucketDetails = [...this.bucketCollection[0]];
 
         this.metricGroupSubject$.next(this.dragGrouping);
 
         this.resetDefaultSubject$
             .subscribe(response => {
+                console.log('response ', response)
                 this.totalBookingsCollector = 0;
                 this.maxAuValue = this.getMaxAu();
                 this.selectedMetric = 0;
@@ -235,49 +236,23 @@ export class SharedDatasetService {
             })
         )
             .subscribe();
-
         this.resetInverseDetailsFromBookings();
     }
 
+
     // Updates Flight Behavior Subject and triggers return FlightClient with setting cabin to Economy(Y)
     public setFlightClient(idx: number): void {
-
         const tempSavedCollection = JSON.parse(window.localStorage.getItem('savedBucketCollection'));
         this.bucketDetails = tempSavedCollection[idx];
         this.toggleTargetToApi();
-
-    }
-
-
-
-    // For setting API flight values to bucket Details formattting
-    public setApiValuesToBucketDetails() {
-
-        this.totalBookingsCollector = 0;
-        let apiBookingTotal = 0;
-        let tempArray = [];
-
-        this.apiBucketDetails.map((abd: any, i) => {
-            //console.log('this.fromApiBucketDetails ', )
-
-            if (abd.esAdjustedFare && abd.esAu) {
-                tempArray.push({
-                    letter: abd.bucketLetter,
-                    fare: abd.esAdjustedFare,
-                    protections: 0,
-                    Aus: abd.esAu,
-                    bookings: abd.bookings
-                })
-            }
-        })
-        tempArray.shift()
     }
 
 
     //  Reset Default button press
     public resetFromArchivedBuckets(idx: number) {
-        const tempCollection = JSON.parse(window.localStorage.getItem('archivedBucketCollection'));
 
+        const tempCollection = JSON.parse(window.localStorage.getItem('archivedBucketCollection'));
+        console.log('resetFromArchivedBuckets ', idx, ' tempCollection ', tempCollection)
         this.bucketDetails = tempCollection[idx];
 
         console.log('resetFromArchivedBuckets  bucketDetails  ', this.bucketDetails)
@@ -307,6 +282,7 @@ export class SharedDatasetService {
         })
 
         this.totalBookingsCollector = apiBookingTotal;
+        //  console.log(' this.totalBookingsCollector  ', this.totalBookingsCollector)
         this.apiFlightActiveSubject$.next(true);
 
     }
@@ -333,22 +309,33 @@ export class SharedDatasetService {
 
 
     public applyDataChanges() {
-
         this.currAus = [];
         this.maxAuValue = this.bucketDetails[0].Aus;
         this.calculateAus();
-
-        // console.log('this.maxAuValue ', this.maxAuValue)
     }
 
 
 
     // Returns Derived AU breakpoints
     public calculateAus() {
-        // console.log('  this.maxAuValue ', this.maxAuValue);
-
+        //this.bucketDetails = this.getAuValues();
         this.bucketDetails.map((a, i) => {
-            //console.log('  a ', a);
+            // console.log('a ', a)
+            if (a.Aus > this.maxAuValue) {
+                a.Aus = this.maxAuValue;
+            }
+            if (a.Aus >= 0) {
+                this.currAus.push(Math.round(Math.floor(a.Aus)));
+            }
+
+            return a
+        })
+        this.generateBucketValues();
+        // console.log('this.currAus ', this.currAus)
+    }
+
+    private getAuValues(): BucketDetails[] {
+        return this.bucketDetails.map((a, i) => {
             if (a.Aus >= 0) {
                 this.currAus.push(Math.round(Math.floor(a.Aus)));
             }
@@ -357,27 +344,20 @@ export class SharedDatasetService {
             }
             return a
         })
-        // this.maxAuValue = this.currAus[0];
-
-        this.generateBucketValues();
     }
-
 
     // Generates protections from Aus
     public generateBucketValues() {
-
         this.bucketDetails.map((a, i) => {
-            // console.log('  a ', a);
             return a.protections = this.protectionMyLevel(i);
         })
-        this.bucketDetailsBehaviorSubject$.next(true)
+        this.bucketDetailsBehaviorSubject$.next(true);
     }
 
     // Returns Bucket Seat count for protection
     public protectionMyLevel(idx: number): number {
         const nextBucketValue = (idx === (this.currAus.length - 1)) ? 0 : this.currAus[idx + 1];
         const diff = this.currAus[idx] - nextBucketValue;
-        //console.log('  this.currAus idx ', this.currAus[idx], ' nextBucketValue ', nextBucketValue, ' diff ', diff);
         return (diff > 0) ? diff : 0;
     }
 
@@ -403,14 +383,14 @@ export class SharedDatasetService {
         this.maxAuValue = this.storedAus[idx][0];
 
         tempBuckets = set.map((a: any, i) => {
-            //  console.log('  a ', a);
             if (a.Aus > this.maxAuValue) {
                 a.Aus = this.maxAuValue;
             }
-            a.protections = this.protectionMyLevelPriorToUse(i, idx);
+            a.protections = this.protectionMyLevelPriorToUse(i, idx) - a.bookings;
+            //console.log('  a  ', a)
             return a
         })
-        // console.log('  tempBuckets  ', tempBuckets, ' this.maxAuValue ', this.maxAuValue);
+        //  console.log('  tempBuckets  ', tempBuckets, ' this.maxAuValue ', this.maxAuValue);
         return tempBuckets
 
     }
@@ -422,7 +402,7 @@ export class SharedDatasetService {
         const nextBucketValue = (idx === (this.storedAus[i].length - 1)) ? 0 : this.storedAus[i][idx + 1];
 
         const diff = this.storedAus[i][idx] - nextBucketValue;
-        //console.log('  this.currAus idx ', this.storedAus[i], ' nextBucketValue ', nextBucketValue, ' diff ', diff);
+        // console.log('  this.currAus idx  nextBucketValue ', nextBucketValue, ' diff ', diff);
         return (diff > 0) ? diff : 0;
     }
 
@@ -448,27 +428,9 @@ export class SharedDatasetService {
     }
 
 
-    // Gets Influences from API and triggers returnBidPriceInfluences
-    // public getBidPriceInfluencesFromApi(masterKey): void {
-    //     this.dashboardAPI
-    //         .getBidPriceInfluences(masterKey)
-    //         .pipe(
-    //             catchError(() => {
-    //                 //this.isLoadingErrorBehaviorSubject$.next(true);
-    //                 return throwError(() => new Error('Error Setting Influences'));
-    //             })
-    //         )
-    //         .subscribe((res: BidPriceInfluencers[]) => {
-    //             // console.log('res ', res)
-    //             //this.dashboardState.setBidPriceInfluences(res);
-    //         });
-    // }
-
-
     public resetInverseDetailsFromBookings() {
         this.inverseFareValues = this.generateInverseDetails();
     }
-
 
 
 
@@ -477,13 +439,14 @@ export class SharedDatasetService {
 
         const inverseFareValues = [];
         let remainingSeats = this.bucketDetails[0].Aus - this.totalBookingsCollector;
-        //console.log('generateInverseDetails totalBookingsCollector ', this.totalBookingsCollector, ' remainingSeats ', remainingSeats)
+        //console.log('generateInverseDetails Length ', this.bucketDetails.length, ' remainingSeats ', remainingSeats)
         let percentOfTop = [];
         let inverseDistribution = 0;
         let theTop = this.bucketDetails[0].Aus;
         let totalIFV = 0;
 
         this.bucketDetails.map((d: any, i) => {
+            // console.log('Letter ', d)
             percentOfTop.push(+((d.fare / theTop) * 100).toFixed(0));
             inverseDistribution = 1 / (percentOfTop[i] * 100);
             totalIFV = totalIFV + inverseDistribution;
@@ -491,13 +454,17 @@ export class SharedDatasetService {
             const protections = +(remainingSeats * remain).toFixed(2);
             inverseFareValues.push({ inverseDistribute: inverseDistribution, protections: protections })
         })
+
         let newArray = [];
 
         inverseFareValues.forEach((iv, i) => {
+            // console.log('inverseFareValues ', i)
             const remain = (((iv.inverseDistribute / totalIFV)));
             const protections = +(remainingSeats * remain).toFixed(2);
             newArray.push({ protections: protections });
         })
+
+        // console.log('generateInverseDetails newArray ', newArray)
         return newArray;
     }
 
@@ -511,6 +478,8 @@ export class SharedDatasetService {
 
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
+
+        // console.log('calculateBidPriceForAu bucketIdx ', bucketIdx)
 
         let targetBp: number;
         if (targetAu === 0) {
@@ -526,7 +495,8 @@ export class SharedDatasetService {
                 const bucketInfo = this.bucketDetails[i];
 
                 if (bucketInfo.fare < targetBp) {
-                    //console.log('UP currAu ', currAu, ' targetAu ', targetAu, ' letter ', this.bucketDetails[bucketIdx].letter, ' Aus ', this.bucketDetails[bucketIdx].Aus)
+                    //       console.log('U: bucketInfo ', bucketInfo)
+                    //     console.log('UP letter ', this.bucketDetails[bucketIdx].letter, '\ncurrAu ', currAu, '\ntargetAu ', targetAu, '\nAus ', this.bucketDetails[bucketIdx].Aus, '\n dragGroup ', this.dragGrouping[this.selectedMetric])
                     bucketInfo.Aus = targetAu;
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'up')
@@ -538,7 +508,8 @@ export class SharedDatasetService {
                 const bucketInfo = this.bucketDetails[i];
 
                 if (bucketInfo.fare >= targetBp) {
-                    //console.log('Down currAu ', currAu, ' targetAu ', targetAu, ' letter ', this.bucketDetails[bucketIdx].letter, ' Aus ', this.bucketDetails[bucketIdx].Aus)
+                    // console.log('D: bucketInfo ', bucketInfo)
+                    // console.log('Down currAu ', currAu, '\ntargetAu ', targetAu, '\nletter ', this.bucketDetails[bucketIdx].letter, '\nAus ', this.bucketDetails[bucketIdx].Aus)
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'down')
                     } else {
@@ -554,23 +525,23 @@ export class SharedDatasetService {
     public justifyDistributionFromDrag(bucketIdx, targetAu, direction) {
 
         if (direction === 'up') {
-
+            //console.log('Up ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus)
             if (this.selectedMetric === 1) {
                 this.distributeFromExistingAus(bucketIdx, targetAu, 'up')
             } else if (this.selectedMetric === 2) {
                 this.distributeFromLinearScale(bucketIdx, targetAu, 'up');
             } else if (this.selectedMetric === 3) {
-                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'up')
+                this.distributeFromInverseFareValues(bucketIdx, targetAu, 'up')
             }
 
         } else {
-            // console.log('       Down ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus)
+            //console.log(' Down ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus)
             if (this.selectedMetric === 1) {
                 this.distributeFromExistingAus(bucketIdx, targetAu, 'down')
             } else if (this.selectedMetric === 2) {
                 this.distributeFromLinearScale(bucketIdx, targetAu, 'down');
             } else if (this.selectedMetric === 3) {
-                this.distributeFromInverseFareValues(targetAu, bucketIdx, 'down')
+                this.distributeFromInverseFareValues(bucketIdx, targetAu, 'down')
             }
         }
     }
@@ -608,17 +579,18 @@ export class SharedDatasetService {
         }
     }
 
-    public distributeFromInverseFareValues(targetAu, bucketIdx, direction) {
+    public distributeFromInverseFareValues(bucketIdx, targetAu, direction) {
 
-        //console.log('generateInverseFareValues ', direction, ' bookings ', bookings, ' bucketIdx ', bucketIdx)
+        //console.log('\n\n\n generateInverseFareValues ', this.bucketDetails[bucketIdx].letter, ' direction ', direction, ' bucketIdx ', bucketIdx, ' targetAu ', targetAu)
         let groupValueAuPercentage = 0;
 
         if (direction === 'up') {
 
             //console.log('UP bucketDetails ', this.bucketDetails[bucketIdx].letter)
             for (let i = bucketIdx; i >= 0; i--) {
+
                 if (this.bucketDetails[i].Aus < this.maxAuValue) {
-                    groupValueAuPercentage = this.bucketDetails[bucketIdx].Aus / (targetAu / this.inverseFareValues[i].protections) / bucketIdx;
+                    groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / this.inverseFareValues[i].protections) / bucketIdx;
                     const bucketInfo = this.bucketDetails[i];
                     bucketInfo.Aus = bucketInfo.Aus += groupValueAuPercentage;
                     //console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
@@ -629,17 +601,16 @@ export class SharedDatasetService {
             }
 
         } else {
-            // console.log('Down  letter ', this.bucketDetails[bucketIdx].letter)
-            let increment = bucketIdx + 1
+            //console.log('Down  letter ', this.bucketDetails[bucketIdx].letter)
+            let increment = bucketIdx + 1;
             for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
-                //console.log('Down  letter ', this.bucketDetails[i].letter, ' ip: ', targetAu / this.inverseFareValues[i].protections)
+                //console.log('i ', i, '   Down  letter ', this.bucketDetails[i].letter, ' ip: ', targetAu / this.inverseFareValues[i].protections)
                 if (this.bucketDetails[i].Aus > 0) {
-                    groupValueAuPercentage = (targetAu / this.inverseFareValues[i].protections) / increment;
-                    //console.log('L', this.bucketDetails[i].letter, ' GP: ', groupValueAuPercentage.toFixed(2), ' prots ', this.inverseFareValues[i].protections)
+                    // console.log('i ', i)
+
+                    groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / this.inverseFareValues[i].protections) / increment;
                     const bucketInfo = this.bucketDetails[i];
                     bucketInfo.Aus = bucketInfo.Aus < 0 ? 0 : bucketInfo.Aus -= groupValueAuPercentage;
-                    //console.log('L', this.bucketDetails[i].letter, ' i ', i,  ' protections ', this.inverseFareValues[i].protections, ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
-
                 } else {
                     this.bucketDetails[i].Aus = 0;
                 }
@@ -650,6 +621,7 @@ export class SharedDatasetService {
 
 
     public distributeFromLinearScale(values, targetAu, dir) {
+        // console.log('\n\n\n gdistributeFromLinearScale ', this.bucketDetails[values].letter, ' direction ', dir, ' values ', values, ' targetAu ', targetAu)
         let val;
         let mult;
         let accum = 0;
@@ -657,19 +629,19 @@ export class SharedDatasetService {
         if (dir === 'down') {
             val = this.bucketDetails.length - values;
             mult = targetAu / val;
+
             for (let i = (this.bucketDetails.length - 1); i >= values; i--) {
                 accum += mult
                 this.bucketDetails[i].Aus = accum;
             }
 
         } else {
-            //val = values;
-            mult = ((this.maxAuValue - targetAu) / values);
+            mult = ((this.maxAuValue - targetAu) / (values + 1));
             for (let i = 0; i < values; i++) {
-
                 if (this.bucketDetails[i].Aus < this.maxAuValue) {
                     this.bucketDetails[i].Aus = (this.maxAuValue - accum);
                 } else {
+
                     this.bucketDetails[i].Aus > this.maxAuValue ? this.bucketDetails[i].Aus = this.bucketDetails[i].Aus -= accum : this.maxAuValue;
                 }
                 accum += mult;

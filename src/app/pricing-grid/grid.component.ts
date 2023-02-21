@@ -67,7 +67,7 @@ export class ContinousPricingComponent implements OnInit {
   public selectedFlightValues: any = {};
 
   public frameRateCounterState = false;
-
+  public influencesExpanded = true;
   public selectedFlightKey = 1294409;
   public selectedIndex = 0;
 
@@ -89,7 +89,7 @@ export class ContinousPricingComponent implements OnInit {
 
 
   public flightSelectControl(ev) {
-
+    console.log('flightSelectControl ', ev)
     this.sharedDatasetService.totalBookingsCollector = 0;
     this.selectedFlightKey = ev;
     const index = this.sharedDatasetService.mockFlightValues.findIndex(mk => mk.masterKey === ev.masterKey);
@@ -101,6 +101,7 @@ export class ContinousPricingComponent implements OnInit {
     this.bookingControlService.tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails];
 
     this.bookingControlService.change(this.sharedDatasetService.totalBookingsCollector)
+
     this.bookingControlService.bookingSlider$.next(this.sharedDatasetService.totalBookingsCollector);
 
   }
@@ -111,7 +112,7 @@ export class ContinousPricingComponent implements OnInit {
 
     this.bookingControlService.bookingSlider$
       .subscribe(response => {
-        // console.log('BOOK response ', response)
+        console.log('BOOK response ', response)
         this.sharedDatasetService.generateInverseDetails();
       })
 
@@ -179,10 +180,10 @@ export class ContinousPricingComponent implements OnInit {
       //controlAlt,
       //  abc,
       ctrlLeft,
-      key1,
-      key2,
-      key4,
-      key3
+      // key1,
+      // key2,
+      // key4,
+      // key3
       // commaDot,
       //  shiftNext,
       //  altK,
@@ -192,7 +193,7 @@ export class ContinousPricingComponent implements OnInit {
       return arr.map((a) => {
         if (this.sharedDatasetService.selectedMetric !== 0) {
           this.lastSelectedMetric = this.sharedDatasetService.selectedMetric;
-        } 2
+        }
         if (a.ctrlKey) {
           if (this.sharedDatasetService.selectedMetric === 0) {
             this.lastSelectedMetric = 0
@@ -215,6 +216,11 @@ export class ContinousPricingComponent implements OnInit {
         return a.code
       }).join("+")
     }))
+  }
+
+  public collapseInfluences() {
+    console.log('collapseInfluences ', this.influencesExpanded)
+    this.influencesExpanded = !this.influencesExpanded;
   }
 };
 
