@@ -1,13 +1,13 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from "@angular/common";
 import { Subscription, map, merge, Observable, pairwise, scan } from 'rxjs';
-import { SharedDatasetService } from '../shared-datasets.service';
-import { BookingControlService } from '../booking-controls';
+import { SharedDatasetService } from '../services/shared-datasets.service';
+import { BookingControlService } from '../services/booking-control-service';
 import { KeyCode } from './lib/keycodes';
 import { shortcut, sequence } from './lib/shortcuts';
 import { PathToAssets } from '../dashboard-constants';
 import { environment } from 'src/environments/environment.prod';
-import { ThemeControlService } from '../theme-control.service';
+import { ThemeControlService } from '../services/theme-control.service';
 
 
 export function animationFrame({
@@ -32,7 +32,7 @@ export function animationFrame({
 
 
 @Component({
-  selector: 'draggable-aus',
+  selector: 'screen-content',
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.scss']
 })
@@ -64,12 +64,14 @@ export class ContinousPricingComponent implements OnInit {
   sub: Subscription;
   shortcuts$: Observable<string>;
 
-  public selectedFlightValues: any = {};
-
   public frameRateCounterState = false;
   public influencesExpanded = true;
-  public selectedFlightKey = 1294409;
-  public selectedIndex = 0;
+
+  public selectedFlightKey: number // = 1294409;
+  public selectedFlightValues: any = {};
+
+  public selectedFlightIndex = 0;
+  public selectedCabinIndex = 2;
 
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
@@ -78,22 +80,29 @@ export class ContinousPricingComponent implements OnInit {
     public themeControlService: ThemeControlService,
     public sharedDatasetService: SharedDatasetService) {
 
-    this.selectedFlightValues = sharedDatasetService.mockFlightValues[0];
-    this.selectedFlightKey = this.sharedDatasetService.mockFlightValues[0].masterKey;
-
+    //this.selectedFlightValues = {} //sharedDatasetService.mockFlightValues[0];
+    //this.selectedFlightKey = this.sharedDatasetService.mockFlightValues[0].masterKey;
+    this.flightSelectControl(this.sharedDatasetService.mockFlightValues[0]);
   }
 
   public toggleFrameRate() {
     this.frameRateCounterState = !this.frameRateCounterState;
   }
 
+  public cabinSelection(ev) {
+    this.selectedCabinIndex = ev.id
+    console.log('cabinSelection ', ev, ' this.selectedCabinIndex ', this.selectedCabinIndex)
+  }
 
+
+  // Called onStart and from flight dropdown
   public flightSelectControl(ev) {
+
     console.log('flightSelectControl ', ev)
     this.sharedDatasetService.totalBookingsCollector = 0;
     this.selectedFlightKey = ev;
     const index = this.sharedDatasetService.mockFlightValues.findIndex(mk => mk.masterKey === ev.masterKey);
-    this.selectedIndex = index;
+    this.selectedFlightIndex = index;
     this.selectedFlightValues = this.sharedDatasetService.mockFlightValues[index];
     this.selectedFlightKey = ev.masterKey;
     this.sharedDatasetService.setFlightClient(index);
@@ -108,11 +117,13 @@ export class ContinousPricingComponent implements OnInit {
 
   public ngOnInit() {
 
+
+
     this.sharedDatasetService.updatedClientFlight$.next(this.sharedDatasetService.mockFlightValues);
 
     this.bookingControlService.bookingSlider$
       .subscribe(response => {
-        console.log('BOOK response ', response)
+        //console.log('BOOK response ', response)
         this.sharedDatasetService.generateInverseDetails();
       })
 
@@ -219,7 +230,7 @@ export class ContinousPricingComponent implements OnInit {
   }
 
   public collapseInfluences() {
-    console.log('collapseInfluences ', this.influencesExpanded)
+    //console.log('collapseInfluences ', this.influencesExpanded)
     this.influencesExpanded = !this.influencesExpanded;
   }
 };

@@ -9,7 +9,7 @@
 
   //border: 1px solid rgb(110, 109, 109);
   .static-widget-header {
-    background-color: $accelya-blue;
+    background-color: $brand-primary-background;
     min-width: 0;
     padding: 0px 20px;
     @include flexbox();
@@ -44,7 +44,7 @@
     //border: 1px solid rgb(110, 109, 109);
 
     .widget-header {
-      background-color: $accelya-blue;
+      background-color: $brand-primary-background;
       min-width: 0;
       padding: 0px 20px;
       @include flexbox();

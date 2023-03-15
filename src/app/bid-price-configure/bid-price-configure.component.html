@@ -1,7 +1,7 @@
-<div class="bp-inf-column">
-  <div class="bp-inf-row ">
-    <div class="title-block">
-      <div class="bpi-header font-11">
+<div class="bp-inf-column px-3">
+  <div class="bp-inf-row mt-2">
+    <div class="title-block py-3">
+      <div class="bpi-header font-11 fw-600">
         {{constraintService.bpHeaderAbbrev[0].name}}</div>
     </div>
     <div class="bp-inf-value-group w-100">
@@ -31,7 +31,7 @@
     </div>
   </div>
   <div class="bp-inf-row">
-    <div class="title-block">
+    <div class="title-block fw-600 py-3">
       <div class="bpi-header font-11">
         {{constraintService.bpHeaderAbbrev[1].name}}</div>
     </div>
@@ -62,113 +62,16 @@
       </div>
     </div>
   </div>
-
   <div class="bp-inf-row">
-    <div class="title-block">
-      <div class="bpi-header font-11">
-        {{constraintService.bpHeaderAbbrev[2].name}}</div>
-    </div>
-    <div class="bp-inf-value-group w-100 dark-gray-text">
-      <div class="centered-group seperator"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-1">{{constraintService.bpCategory[0].name}}:</div>
-        <div class="font-11">{{sharedDatasetService.staticModifiers.addSub}}</div>
-      </div>
-      <div class="centered-group seperator"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-2">{{constraintService.bpCategory[1].name}}</div>
-        <input class="center-input font-11"
-          disabled
-          type="number"
-          id="influence-id-1"
-          step="1"
-          [(ngModel)]="sharedDatasetService.modifierObj.addSub"
-          onClick="this.select();"
-          (ngModelChange)="sharedDatasetService.influenceInput.next([$event,'addSub',1])">
-      </div>
-      <div class="centered-group"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-2">{{constraintService.bpCategory[2].name}}:</div>
-        <div class="font-11">
-          {{sharedDatasetService.modifierObj.addSub}}
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="bp-inf-row">
-    <div class="title-block">
-      <div class="bpi-header font-11">
-        {{constraintService.bpHeaderAbbrev[3].name}}</div>
-    </div>
-    <div class="bp-inf-value-group w-100">
-      <div class="centered-group seperator"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-1">{{constraintService.bpCategory[0].name}}:</div>
-        <div class="font-11">{{sharedDatasetService.staticModifiers.addSub}}</div>
-      </div>
-      <div class="centered-group seperator font-11"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-2">{{constraintService.bpCategory[1].name}}</div>
-        <input class="center-input font-11"
-          disabled
-          type="number"
-          id="influence-id-1"
-          step="1"
-          [(ngModel)]="sharedDatasetService.modifierObj.addSub"
-          onClick="this.select();"
-          (ngModelChange)="sharedDatasetService.influenceInput.next([$event,'addSub',1])">
-      </div>
-      <div class="centered-group"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-2">{{constraintService.bpCategory[2].name}}:</div>
-        <div class="font-11">
-          {{sharedDatasetService.modifierObj.addSub}}
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="bp-inf-row">
-    <div class="title-block">
-      <div class="bpi-header font-11">
-        {{constraintService.bpHeaderAbbrev[4].name}}</div>
-    </div>
-    <div class="bp-inf-value-group w-100">
-      <div class="centered-group seperator"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-1">{{constraintService.bpCategory[0].name}}:</div>
-        <div class="font-11">{{sharedDatasetService.staticModifiers.addSub}}</div>
-      </div>
-      <div class="centered-group seperator font-11"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-2">{{constraintService.bpCategory[1].name}}</div>
-        <input class="center-input font-11"
-          disabled
-          type="number"
-          id="influence-id-1"
-          step="1"
-          [(ngModel)]="sharedDatasetService.modifierObj.addSub"
-          onClick="this.select();"
-          (ngModelChange)="sharedDatasetService.influenceInput.next([$event,'addSub',1])">
-      </div>
-      <div class="centered-group"
-        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
-        <div class="font-11 me-2">{{constraintService.bpCategory[2].name}}:</div>
-        <div class="font-11">
-          {{sharedDatasetService.modifierObj.addSub}}
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="bp-inf-row">
-    <div class="title-block">
-      <div class="bpi-header font-11">
+    <div class="title-block py-3">
+      <div class="bpi-header font-11 fw-600">
         {{constraintService.bpHeaderAbbrev[5].name}}</div>
     </div>
     <div class="bp-inf-value-group w-100">
       <div class="centered-group seperator"
         [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
         <div class="font-11 me-1">{{constraintService.bpCategory[0].name}}:</div>
-        <div class="font-11">{{sharedDatasetService.staticModifiers.addSub}}</div>
+        <div class="font-11">{{sharedDatasetService.staticModifiers.partialMax}}</div>
       </div>
       <div class="centered-group seperator font-11"
         [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
@@ -178,15 +81,15 @@
           type="number"
           id="influence-id-1"
           step="1"
-          [(ngModel)]="sharedDatasetService.modifierObj.addSub"
+          [(ngModel)]="sharedDatasetService.modifierObj.partialMax"
           onClick="this.select();"
-          (ngModelChange)="sharedDatasetService.influenceInput.next([$event,'addSub',1])">
+          (ngModelChange)="sharedDatasetService.influenceInput.next([$event,'partialMax',1])">
       </div>
       <div class="centered-group font-11"
         [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
         <div class="me-2">{{constraintService.bpCategory[2].name}}:</div>
         <div class="">
-          {{sharedDatasetService.modifierObj.addSub}}
+          {{sharedDatasetService.modifierObj.partialMax}}
         </div>
       </div>
     </div>

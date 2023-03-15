@@ -3,108 +3,25 @@
 @import './styles/configuration.scss';
 @import "styles/fonts";
 
-//@import "~@angular/material/prebuilt-themes/indigo-pink.css";
-
+$body-background: rgb(201, 211, 219);
 //$font-family: "'Crimson Pro', sans-serif"; //"OpenSans-Semibold";
-$body-background: rgb(227, 231, 235);
 
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
+  //height: calc(100vh);
   overflow-x: hidden;
-  //font-family: "Open Sans"sans-serif !important;
   font-weight: 400;
   font-size: 16px;
+  background-color: $body-background !important;
+
 }
 
-//* {
-//font-family: "Open Sans"sans-serif !important;
-//}
-
-// canvas {
-//   cursor: w-resize !important;
-// }
-
-//body {
-//background: rgb(188, 208, 255) !important;
-//}
-
-.slider {
+.horiz-centered-flex {
   display: flex;
   align-items: center;
-  background-color: $accelya-blue;
-  //height: 100%;
-
-  .example-margin {
-    width: 100%;
-  }
-}
-
-.mat-slider-horizontal {
-  min-width: 90% !important;
-  margin-left: auto;
-}
-
-.mat-slider.mat-slider-horizontal .mat-slider-track-fill {
-  background-color: rgb(55, 255, 55) !important;
-}
-
-.mat-slider.mat-slider-horizontal .mat-slider-track-wrapper {
-  height: 6px;
-  border-radius: 10px
-}
-
-.mat-slider-track-background {
-  background-color: rgb(55, 255, 55) !important;
-}
-
-.mat-slider.mat-slider-horizontal .mat-slider-track-background,
-.mat-slider.mat-slider-horizontal .mat-slider-track-fill {
-  height: 100%;
-}
-
-.mat-slider-thumb-label {
-  transform: rotate(45deg) !important;
-  border-radius: 50% 50% 0 !important;
-}
-
-.mat-slider-thumb {
-  transform: scale(0.75) !important;
-}
-
-.mat-slider-thumb-label-text {
-  font-size: 12px !important;
-  font-weight: bold !important;
-  color: rgb(255, 255, 255) !important;
-  opacity: 1 !important;
-}
-
-.mat-slider.mat-accent .mat-slider-thumb-label {
-  top: -27px !important;
-  right: -16px;
-  background-color: transparent !important;
-}
-
-.mat-accent .mat-slider-thumb {
-  height: 20px;
-  width: 20px;
-  background-color: white;
-  border: solid 2px gray;
-  bottom: -11px;
-  right: -12px;
-}
-
-// mat-slider {
-//   margin: auto;
-//   //padding: 4px !important;
-// }
-
-
-
-.grid-placement {
-  display: flex;
-  justify-content: center;
+  flex-wrap: nowrap !important;
 }
 
 .status-col {
@@ -116,8 +33,6 @@ body {
     align-self: flex-end;
   }
 }
-
-
 
 .contrast-blue-background {
   background-color: $brand-primary-background3;
@@ -134,6 +49,13 @@ body {
   box-sizing: border-box
 }
 
+.mat-slide-toggle {
+  transform: scale(0.7);
+}
+
+.mat-slide-toggle-bar {
+  background-color: $brand-link-blue-text !important;
+}
 
 .input-number {
   width: 80px;
@@ -198,4 +120,77 @@ input::-webkit-inner-spin-button {
   user-select: none !important;
   /* Non-prefixed version, currently
     supported by Chrome, Opera and Firefox */
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  width: $screen-width-modifier;
+
+  .example-margin {
+    width: 97%;
+  }
+
+  &.light-mode {
+    background-color: rgb(243, 243, 252);
+  }
+
+  &.dark-mode {
+    background-color: $brand-primary-background;
+
+  }
+}
+
+.mat-slider-horizontal {
+  min-width: 90% !important;
+  margin-left: auto;
+}
+
+.mat-slider.mat-slider-horizontal .mat-slider-track-fill {
+  background-color: $brand-booking-green !important;
+}
+
+.mat-slider.mat-slider-horizontal .mat-slider-track-wrapper {
+  height: 6px;
+  border-radius: 10px
+}
+
+.mat-slider-track-background {
+  background-color: $brand-booking-green !important;
+}
+
+.mat-slider.mat-slider-horizontal .mat-slider-track-background,
+.mat-slider.mat-slider-horizontal .mat-slider-track-fill {
+  height: 100%;
+}
+
+.mat-slider-thumb-label {
+  transform: rotate(45deg) !important;
+  border-radius: 50% 50% 0 !important;
+}
+
+.mat-slider-thumb {
+  transform: scale(0.75) !important;
+}
+
+.mat-slider-thumb-label-text {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: rgb(255, 255, 255) !important;
+  opacity: 1 !important;
+}
+
+.mat-slider.mat-accent .mat-slider-thumb-label {
+  top: -27px !important;
+  right: -16px;
+  background-color: transparent !important;
+}
+
+.mat-accent .mat-slider-thumb {
+  height: 20px;
+  width: 20px;
+  background-color: white;
+  border: solid 2px gray;
+  bottom: -11px;
+  right: -12px;
 }

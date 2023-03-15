@@ -1,4 +1,5 @@
-<div class="flex-basis-main px-1">
+<div class="flex-basis-main px-1"
+  [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
   <div class="header navy-background px-4">
     <div class="logo-flight-nfo d-flex align-items-center ml-5">
       <div>
@@ -38,30 +39,49 @@
         </div>
       </div>
     </div>
-    <span class="font-14 fw-600 me-4 ml-auto">Departure: &nbsp;8:05am</span>
-    <div class="booking-container ms-5 font-14 fw-600">
-      <div class="me-2">Total/Booked:</div>
-      <div class="me-3">
-        {{sharedDatasetService.bucketDetails[0].Aus}} /
-        {{sharedDatasetService.totalBookingsCollector}}
+    <div class="status-col me-3">
+      <span class="font-14 fw-600 me-4 ml-auto">Departure: &nbsp;8:05am</span>
+      <div class="booking-container font-14 fw-600">
+        <div class="me-2">Total/Booked:</div>
+        <div class="me-3">
+          {{sharedDatasetService.bucketDetails[0].Aus}} /
+          {{sharedDatasetService.totalBookingsCollector}}
+        </div>
       </div>
     </div>
-    <div class="d-flex me-5">
-      <div id="myProgress">
-        <div id="myBar">0%</div>
+    <div class="status-col">
+      <div class="font-13 fw-600 me-3">Load Factor:</div>
+      <div class="d-flex me-5">
+        <div id="myProgress">
+          <div id="myBar">0%</div>
+        </div>
       </div>
     </div>
-    <a type="button"
-      class="label-btn longer-versions me-2 text-nowrap"
-      (click)="themeControlService.toggleLightMode()"
-      title="Use API Values">
-      {{themeControlService.chartThemeText}} Mode
-    </a>
+    <div class="status-col me-4">
+      <div class="font-13 fw-600 me-3">Theme:</div>
+      <div class="horiz-centered-flex me-3">
+        <div class="font-13 me-2">Light</div>
+        <mat-slide-toggle [(ngModel)]="themeControlService.isThemeChange"
+          (toggleChange)="themeControlService.onThemeChange()"></mat-slide-toggle>
+        <div class="font-13 ms-2">Dark</div>
+      </div>
+    </div>
+
+    <div class="status-col">
+      <div class="font-13 fw-600  me-2">Bid Price Curve:</div>
+      <div class="horiz-centered-flex me-3">
+        <div class="font-13 me-2">Off</div>
+        <mat-slide-toggle [(ngModel)]="frameRateCounterState"
+          (toggleChange)="toggleFrameRate()"></mat-slide-toggle>
+        <div class="font-13 ms-2">On</div>
+      </div>
+    </div>
+
     <div *ngIf="frameRateCounterState"
       class="font-13 fw-600">FPS: {{fps$ | async}}</div>
 
     <!-- <div class="d-flex font-11 fw-600 ms-auto"> v:{{currentApplicationVersion}}</div> -->
-    <div class="d-flex cursor-pointer ms-auto">
+    <!-- <div class="d-flex cursor-pointer ms-auto">
       <div style="margin-bottom: -20px; margin-right: -20px;"
         title="Toggle Frame Rate"
         (click)="toggleFrameRate()">
@@ -69,22 +89,23 @@
           style="width: 60px; height: 40px;"
           src={{pathToAssets}}furtherFaster.jpg>
       </div>
-    </div>
+    </div> -->
   </div>
   <div *ngIf="shortcuts$ | async as shortcut"></div>
   <div class="pricing-window mx-1 my-1">
     <div class="chart-container">
-      <div class="d-flex justify-content-between text-header-area">
+      <div class="d-flex justify-content-between text-header-area"
+        [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
         <div class="font-16">AU Visualization</div>
         <div class="d-flex">
-          <div class="d-flex mx-5">
-            <div class="d-flex align-items-center me-5">
-              <div class="noselect font-14 me-2">Flight:</div>
+          <div class="d-flex mx-4">
+            <div class="d-flex align-items-center me-2">
+              <div class="noselect font-14 fw-600 me-2">Flight:</div>
               <div class="ng-select.primary-background"
                 *ngIf="(sharedDatasetService.updatedClientFlight$ | async) as apiAirlineFlight">
                 <ng-select class="custom-select me-2"
                   title="Select Metric"
-                  [ngModel]="apiAirlineFlight[selectedIndex]"
+                  [ngModel]="apiAirlineFlight[selectedFlightIndex]"
                   (change)="flightSelectControl($event)"
                   [clearable]="false"
                   [searchable]="false"
@@ -97,48 +118,77 @@
                 </ng-select>
               </div>
             </div>
+
+            <div class="d-flex align-items-center me-2">
+              <div class="noselect font-14 fw-600 me-2">Cabin:</div>
+              <div class="ng-select.primary-background"
+                *ngIf="sharedDatasetService.cabinOptions">
+                <ng-select class="custom-select me-2"
+                  title="Select Cabin"
+                  [ngModel]="sharedDatasetService.cabinOptions[selectedCabinIndex].name"
+                  (change)="cabinSelection($event)"
+                  [clearable]="false"
+                  [searchable]="false"
+                  [items]="sharedDatasetService.cabinOptions"
+                  [bindLabel]="'name'">
+                  <ng-template ng-option-tmp
+                    let-item="item">
+                    <div>{{ item.name }}</div>
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+
             <button type="button"
               class="label-btn me-2 text-nowrap"
-              (click)="sharedDatasetService.resetFromArchivedBuckets(selectedIndex)"
+              (click)="sharedDatasetService.resetFromArchivedBuckets(selectedFlightIndex)"
               title="Reset Selected Flights Values to Default">
               Reset Default
             </button>
             <button type="button"
               class="label-btn"
-              (click)="sharedDatasetService.saveBucketSet(selectedIndex)">
+              (click)="sharedDatasetService.saveBucketSet(selectedFlightIndex)">
               Save
             </button>
+
           </div>
-          <div class="d-flex me-2"
-            *ngIf="(sharedDatasetService.metricGroupSubject$| async)?.length">
-            <section class="d-flex">
-              <div class="d-flex align-items-center me-3"
-                *ngFor="let item of (sharedDatasetService.metricGroupSubject$ | async) let $idx = index;">
-                <input type="radio"
-                  id={{$idx}}
-                  name="select"
-                  value="$idx"
-                  [checked]="item.id === sharedDatasetService.selectedMetric"
-                  (change)="sharedDatasetService.setGroupingMethod($idx)">
-                <label for="{{item.id}}"
-                  title="Shortcut key {{$idx + 1}}">
-                  <div class="noselect font-12">{{item.name}}</div>
-                </label>
-              </div>
-            </section>
+          <div class="d-flex align-items-center">
+            <div class="noselect font-14 fw-600 me-2">Mode:</div>
+
+            <div class="d-flex"
+              *ngIf="(sharedDatasetService.metricGroupSubject$| async)?.length">
+              <section class="d-flex">
+                <div class="d-flex align-items-center me-2"
+                  *ngFor="let item of (sharedDatasetService.metricGroupSubject$ | async) let $idx = index;">
+                  <input type="radio"
+                    class=""
+                    id={{$idx}}
+                    name="select"
+                    value="$idx"
+                    [checked]="item.id === sharedDatasetService.selectedMetric"
+                    (change)="sharedDatasetService.setGroupingMethod($idx)">
+                  <label for="{{item.id}}"
+                    title="Shortcut key {{$idx + 1}}">
+                    <div class="noselect font-12">{{item.name}}</div>
+                  </label>
+                </div>
+              </section>
+            </div>
           </div>
         </div>
       </div>
-      <div class='noselect container-body'>
-        <continuous-bid-pricing></continuous-bid-pricing>
+      <div class='noselect container-body'
+        [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
+        <continuous-bid-pricing [showBidPriceCurve]="frameRateCounterState"></continuous-bid-pricing>
       </div>
     </div>
   </div>
   <div class='chart-container mb-1'
-    [ngClass]="themeControlService.chartThemeToggle === 'light' ? 'light-mode' : 'dark-mode'">
-    <div class="slider">
+    [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
+    <div class="slider m-auto"
+      [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
       <mat-slider thumbLabel
-        class="example-margin"
+        class="example-margin m-auto"
         dir="rtl"
         [max]="bookingControlService.max"
         [min]="bookingControlService.min"
@@ -149,48 +199,51 @@
       </mat-slider>
     </div>
   </div>
-  <div class="d-flex w-100 h-100 mb-1">
+  <div class="influence-aus">
     <div class="bookings-influence"
       [ngClass]="influencesExpanded ? 'me-1' : ''"
       [style.width]="!influencesExpanded ? '0%' : '25%'">
       <div class="chart-container">
-        <div class="d-flex justify-content-between text-header-area">
+        <div class="d-flex justify-content-between text-header-area button-included"
+          [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
           <div *ngIf="influencesExpanded"
             class="font-16">Bid Price Influences</div>
+
           <div title="Collapse Bid Prices Influences"
             class="ml-auto"
             (click)="collapseInfluences()">
             <button type="button"
               class="label-btn icon-button"
               *ngIf="influencesExpanded">
-              <i-bs name="box-arrow-left"></i-bs>
+              <mat-icon>chevron_left</mat-icon>
             </button>
           </div>
         </div>
         <div class='noselect container-body h-100'
           *ngIf="influencesExpanded"
-          [ngClass]="themeControlService.chartThemeToggle === 'light' ? 'light-mode' : 'dark-mode'">
-          <bidprice-configure [themeSwitch]="themeControlService.chartThemeToggle"
+          [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
+          <bidprice-configure [themeSwitch]="themeControlService.chartThemeSelect"
             [collapseIndfluences]='influencesExpanded'></bidprice-configure>
         </div>
       </div>
     </div>
-    <div class="noselect sa-au-window"
+    <div class="noselect  sa-au-window"
       [style.width]="influencesExpanded ? '75%' : '100%'">
       <div class="chart-container">
-        <div class="d-flex  text-header-area">
+        <div class="d-flex text-header-area"
+          [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
           <div title="Collapse Bid Prices Influences"
             (click)="collapseInfluences()">
             <button type="button"
               class="label-btn icon-button me-3"
               *ngIf="!influencesExpanded">
-              <i-bs name="box-arrow-right"></i-bs>
+              <mat-icon>chevron_right</mat-icon>
             </button>
           </div>
           <div class="font-16 me-5">Seat Availability / Aus</div>
         </div>
         <div class='container-body'
-          [ngClass]="themeControlService.chartThemeToggle === 'light' ? 'light-mode' : 'dark-mode'">
+          [ngClass]="themeControlService.chartThemeSelect === 'light' ? 'light-mode' : 'dark-mode'">
           <draggable-available></draggable-available>
         </div>
       </div>

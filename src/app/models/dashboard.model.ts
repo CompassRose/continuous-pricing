@@ -58,10 +58,10 @@ export interface SeasonalItems {
 export interface BidPriceInfluencers {
   legMasterKey?: number;
   cabinLetter?: string | undefined;
-  min?: number;
-  max?: number;
+
   mult?: number;
   addSub?: number;
+  partialMax?: string
 }
 
 export interface IFlightInfluencesByCabin {
@@ -134,6 +134,7 @@ export interface BucketDetails {
   protections: number;
   Aus?: number;
   Sa?: number;
+  discrete?: boolean;
 }
 
 export interface xAxisTextValue {

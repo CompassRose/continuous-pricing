@@ -1,12 +1,12 @@
 
 import { Injectable } from '@angular/core';
-import { BucketDetails, InverseFareDetails } from './models/dashboard.model';
+import { BucketDetails, InverseFareDetails } from '../models/dashboard.model';
 import { Observable, BehaviorSubject, Subject, of, combineLatest, throwError } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { distinctUntilChanged, tap, filter } from 'rxjs/operators';
 
 //import { DashboardApi } from './api/dashboard.api.service';
-import { FlightClientDetails, ApiBucketDetails, BidPriceInfluencers } from '../app/models/dashboard.model';
+import { FlightClientDetails, ApiBucketDetails, BidPriceInfluencers } from '../models/dashboard.model';
 
 @Injectable({
     providedIn: 'root',
@@ -64,60 +64,62 @@ export class SharedDatasetService {
 
     public bucketCollection: BucketDetails[][] = [
         [
-            { letter: 'D', fare: 194, protections: 0, Aus: 190, bookings: 0 },
-            { letter: 'E', fare: 169, protections: 0, Aus: 185, bookings: 0 },
-            { letter: 'F', fare: 149, protections: 0, Aus: 180, bookings: 0 },
-            { letter: 'G', fare: 129, protections: 0, Aus: 175, bookings: 0 },
-            { letter: 'H', fare: 114, protections: 0, Aus: 170, bookings: 0 },
-            { letter: 'I', fare: 99, protections: 0, Aus: 165, bookings: 0 },
-            { letter: 'J', fare: 86, protections: 0, Aus: 160, bookings: 0 },
-            { letter: 'K', fare: 74, protections: 0, Aus: 150, bookings: 0 },
-            { letter: 'L', fare: 64, protections: 0, Aus: 140, bookings: 0 },
-            { letter: 'M', fare: 54, protections: 0, Aus: 120, bookings: 0 },
-            { letter: 'N', fare: 44, protections: 0, Aus: 100, bookings: 0 },
-            { letter: 'O', fare: 34, protections: 0, Aus: 85, bookings: 0 },
-            { letter: 'P', fare: 29, protections: 0, Aus: 70, bookings: 0 },
-            { letter: 'Q', fare: 24, protections: 0, Aus: 50, bookings: 0 },
-            { letter: 'R', fare: 20, protections: 0, Aus: 30, bookings: 0 },
-            { letter: 'S', fare: 17, protections: 0, Aus: 20, bookings: 0 }
+            { letter: 'D', fare: 194, protections: 0, Aus: 190, bookings: 0, discrete: false },
+            { letter: 'E', fare: 169, protections: 0, Aus: 185, bookings: 0, discrete: false },
+            { letter: 'F', fare: 149, protections: 0, Aus: 180, bookings: 0, discrete: false },
+            { letter: 'G', fare: 129, protections: 0, Aus: 175, bookings: 0, discrete: false },
+            { letter: 'H', fare: 114, protections: 0, Aus: 170, bookings: 0, discrete: false },
+            { letter: 'I', fare: 99, protections: 0, Aus: 165, bookings: 0, discrete: false },
+            { letter: 'J', fare: 86, protections: 0, Aus: 160, bookings: 0, discrete: false },
+            { letter: 'K', fare: 74, protections: 0, Aus: 150, bookings: 0, discrete: false },
+            { letter: 'L', fare: 64, protections: 0, Aus: 140, bookings: 0, discrete: false },
+            { letter: 'M', fare: 54, protections: 0, Aus: 120, bookings: 0, discrete: false },
+            { letter: 'N', fare: 44, protections: 0, Aus: 100, bookings: 0, discrete: false },
+            { letter: 'O', fare: 34, protections: 0, Aus: 85, bookings: 0, discrete: false },
+            { letter: 'P', fare: 29, protections: 0, Aus: 70, bookings: 0, discrete: false },
+
+            { letter: 'Q', fare: 24, protections: 0, Aus: 60, bookings: 0, discrete: true },
+            { letter: 'R', fare: 20, protections: 0, Aus: 40, bookings: 0, discrete: true },
+            { letter: 'S', fare: 10, protections: 0, Aus: 30, bookings: 0, discrete: true }
         ],
         [
-            { letter: 'C', fare: 219, protections: 0, Aus: 189, bookings: 0 },
-            { letter: 'D', fare: 194, protections: 0, Aus: 184, bookings: 0 },
-            { letter: 'E', fare: 169, protections: 0, Aus: 180, bookings: 0 },
-            { letter: 'F', fare: 149, protections: 0, Aus: 175, bookings: 0 },
-            { letter: 'G', fare: 129, protections: 0, Aus: 170, bookings: 0 },
-            { letter: 'H', fare: 120, protections: 0, Aus: 165, bookings: 0 },
-            { letter: 'I', fare: 110, protections: 0, Aus: 160, bookings: 0 },
-            { letter: 'J', fare: 100, protections: 0, Aus: 150, bookings: 0 },
-            { letter: 'K', fare: 86, protections: 0, Aus: 140, bookings: 0 },
-            { letter: 'L', fare: 74, protections: 0, Aus: 130, bookings: 0 },
-            { letter: 'M', fare: 64, protections: 0, Aus: 110, bookings: 0 },
-            { letter: 'N', fare: 54, protections: 0, Aus: 95, bookings: 0 },
-            { letter: 'O', fare: 44, protections: 0, Aus: 85, bookings: 0 },
-            { letter: 'P', fare: 39, protections: 0, Aus: 70, bookings: 0 },
-            { letter: 'Q', fare: 31, protections: 0, Aus: 60, bookings: 0 },
-            { letter: 'R', fare: 14, protections: 0, Aus: 50, bookings: 0 },
-            { letter: 'S', fare: 9, protections: 0, Aus: 20, bookings: 0 }
+            { letter: 'D', fare: 219, protections: 0, Aus: 189, bookings: 0, discrete: false },
+            { letter: 'E', fare: 194, protections: 0, Aus: 184, bookings: 0, discrete: false },
+            { letter: 'F', fare: 169, protections: 0, Aus: 180, bookings: 0, discrete: false },
+            { letter: 'G', fare: 149, protections: 0, Aus: 175, bookings: 0, discrete: false },
+            { letter: 'H', fare: 129, protections: 0, Aus: 170, bookings: 0, discrete: false },
+            { letter: 'I', fare: 120, protections: 0, Aus: 165, bookings: 0, discrete: false },
+            { letter: 'J', fare: 110, protections: 0, Aus: 160, bookings: 0, discrete: false },
+            { letter: 'K', fare: 100, protections: 0, Aus: 150, bookings: 0, discrete: false },
+            { letter: 'L', fare: 86, protections: 0, Aus: 140, bookings: 0, discrete: false },
+            { letter: 'M', fare: 74, protections: 0, Aus: 130, bookings: 0, discrete: false },
+            { letter: 'N', fare: 64, protections: 0, Aus: 110, bookings: 0, discrete: false },
+            { letter: 'O', fare: 54, protections: 0, Aus: 95, bookings: 0, discrete: false },
+            { letter: 'P', fare: 44, protections: 0, Aus: 85, bookings: 0, discrete: false },
+
+            { letter: 'Q', fare: 34, protections: 0, Aus: 60, bookings: 0, discrete: true },
+            { letter: 'R', fare: 20, protections: 0, Aus: 40, bookings: 0, discrete: true }
+
         ],
         [
-            { letter: 'C', fare: 399, protections: 0, Aus: 199, bookings: 0 },
-            { letter: 'D', fare: 294, protections: 0, Aus: 188, bookings: 0 },
-            { letter: 'E', fare: 269, protections: 0, Aus: 175, bookings: 0 },
-            { letter: 'F', fare: 249, protections: 0, Aus: 160, bookings: 0 },
-            { letter: 'G', fare: 229, protections: 0, Aus: 155, bookings: 0 },
-            { letter: 'H', fare: 220, protections: 0, Aus: 150, bookings: 0 },
-            { letter: 'I', fare: 210, protections: 0, Aus: 145, bookings: 0 },
-            { letter: 'J', fare: 196, protections: 0, Aus: 140, bookings: 0 },
-            { letter: 'K', fare: 186, protections: 0, Aus: 130, bookings: 0 },
-            { letter: 'L', fare: 174, protections: 0, Aus: 120, bookings: 0 },
-            { letter: 'M', fare: 164, protections: 0, Aus: 110, bookings: 0 },
-            { letter: 'N', fare: 154, protections: 0, Aus: 90, bookings: 0 },
-            { letter: 'O', fare: 144, protections: 0, Aus: 80, bookings: 0 },
-            { letter: 'P', fare: 139, protections: 0, Aus: 75, bookings: 0 },
-            { letter: 'Q', fare: 131, protections: 0, Aus: 65, bookings: 0 },
-            { letter: 'R', fare: 124, protections: 0, Aus: 50, bookings: 0 },
-            { letter: 'S', fare: 119, protections: 0, Aus: 10, bookings: 0 }
+            { letter: 'D', fare: 399, protections: 0, Aus: 199, bookings: 0, discrete: false },
+            { letter: 'E', fare: 294, protections: 0, Aus: 188, bookings: 0, discrete: false },
+            { letter: 'F', fare: 269, protections: 0, Aus: 175, bookings: 0, discrete: false },
+            { letter: 'G', fare: 249, protections: 0, Aus: 160, bookings: 0, discrete: false },
+            { letter: 'H', fare: 229, protections: 0, Aus: 155, bookings: 0, discrete: false },
+            { letter: 'I', fare: 220, protections: 0, Aus: 150, bookings: 0, discrete: false },
+            { letter: 'J', fare: 210, protections: 0, Aus: 145, bookings: 0, discrete: false },
+            { letter: 'K', fare: 196, protections: 0, Aus: 140, bookings: 0, discrete: false },
+            { letter: 'L', fare: 186, protections: 0, Aus: 130, bookings: 0, discrete: false },
+            { letter: 'M', fare: 174, protections: 0, Aus: 120, bookings: 0, discrete: false },
+            { letter: 'N', fare: 164, protections: 0, Aus: 110, bookings: 0, discrete: false },
+            { letter: 'O', fare: 154, protections: 0, Aus: 90, bookings: 0, discrete: false },
+            { letter: 'P', fare: 144, protections: 0, Aus: 80, bookings: 0, discrete: false },
+
+            { letter: 'Q', fare: 131, protections: 0, Aus: 65, bookings: 0, discrete: true },
+            { letter: 'R', fare: 124, protections: 0, Aus: 50, bookings: 0, discrete: true },
+            { letter: 'S', fare: 119, protections: 0, Aus: 10, bookings: 0, discrete: true },
+
         ]
     ];
 
@@ -131,14 +133,10 @@ export class SharedDatasetService {
 
     static roundFactor = Math.pow(10, SharedDatasetService.roundMultiplierDecimals);
 
-    public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(true);
+    public bucketDetailsBehaviorSubject$ = new BehaviorSubject<boolean>(false);
 
     // Boolean from trigger
-    public resetDefaultSubject$ = new Subject<boolean>();
-
-
-
-    public influenceInput$ = new BehaviorSubject<[number, string, number]>([null, '', null]);
+    public resetDefaultSubject$ = new BehaviorSubject<boolean>(false);
 
     public influenceInput = new Subject<any[]>();
 
@@ -173,9 +171,17 @@ export class SharedDatasetService {
 
     public updatedClientFlight$ = new BehaviorSubject<any>(null);
 
-    public modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
+    public modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
 
-    public staticModifiers = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
+    public staticModifiers = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
+
+    public modifierCollection = [];
+
+    public cabinOptions: any = [
+        { name: 'Business', id: 0, state: false },
+        { name: 'Prem Econ', id: 1, state: false },
+        { name: 'Economy', id: 2, state: true },
+    ];
 
     public dragGrouping: any = [
         { name: 'Single', id: 0 },
@@ -191,6 +197,7 @@ export class SharedDatasetService {
         const tempBucketCollection = [...this.bucketCollection]
 
         // prior versions are for resetting values
+
         tempBucketCollection.map((bc, i) => {
             this.calculateAusPriorToUse(bc)
         })
@@ -212,7 +219,10 @@ export class SharedDatasetService {
 
         this.resetDefaultSubject$
             .subscribe(response => {
-                console.log('response ', response)
+                console.log('SHARED DATA resetDefaultSubject$ response ', response)
+
+                this.modifierObj = { mult: 1.00, addSub: 0, partialMax: '' };
+
                 this.totalBookingsCollector = 0;
                 this.maxAuValue = this.getMaxAu();
                 this.selectedMetric = 0;
@@ -226,13 +236,38 @@ export class SharedDatasetService {
             debounceTime(900),
             distinctUntilChanged(),
             tap(([event, item, id]) => {
+                console.log('influenceInput event ', event, ' item ', item, ' id ', id)
+
                 Object.entries(this.modifierObj).map((d: any, i) => {
+
                     if (event === null || d[1] === null) {
                         event = this.staticModifiers[d[0]];
                         this.modifierObj[d[0]] = event
                     }
+
                 })
-                this.influenceInput$.next([event, item, id])
+
+                this.modifierObj[item] = event;
+                const staticModifierObj = { mult: 1.00, addSub: 0, partialMax: '' };
+                Object.entries(staticModifierObj).forEach((d: any, i) => {
+
+                    if (staticModifierObj[item] !== this.modifierObj[item]) {
+                        if (!this.modifierCollection.some(influence => influence.key === item)) {
+
+                            this.modifierCollection.push({ key: item, value: this.modifierObj[item] });
+                        } else {
+                            const index = this.modifierCollection.findIndex(r => r.key === item);
+                            if (this.modifierCollection[index].value !== event) {
+                                this.modifierCollection[index].value = event;
+                            }
+                        }
+                    } else {
+                        this.modifierCollection.splice(this.modifierCollection.findIndex(idx => idx === idx), 1);
+                    }
+                });
+
+                // console.log('sharedDatasetService modifierObj ', this.modifierObj, '   this.modifierCollection ', this.modifierCollection)
+                this.bucketDetailsBehaviorSubject$.next(true);
             })
         )
             .subscribe();
@@ -240,8 +275,10 @@ export class SharedDatasetService {
     }
 
 
+
     // Updates Flight Behavior Subject and triggers return FlightClient with setting cabin to Economy(Y)
     public setFlightClient(idx: number): void {
+        console.log('setFlightClient ', idx)
         const tempSavedCollection = JSON.parse(window.localStorage.getItem('savedBucketCollection'));
         this.bucketDetails = tempSavedCollection[idx];
         this.toggleTargetToApi();
@@ -262,18 +299,13 @@ export class SharedDatasetService {
 
     //  Reset Default button press
     public saveBucketSet(idx: number) {
-
         const tempSavedCollection = JSON.parse(window.localStorage.getItem('savedBucketCollection'));
         tempSavedCollection[idx] = this.bucketDetails;
-        // console.log('resetFromArchivedBuckets  bucketDetails  ', tempSavedCollection[idx]);
         window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(tempSavedCollection))));
-        //  console.log('resetFromArchivedBuckets  bucketDetails  ', this.bucketDetails);
-
-        // this.resetDefaultSubject$.next(true)
     }
 
     public toggleTargetToApi() {
-
+        console.log('toggleTargetToApi ')
         let apiBookingTotal = 0;
         this.applyDataChanges();
 
@@ -283,7 +315,7 @@ export class SharedDatasetService {
 
         this.totalBookingsCollector = apiBookingTotal;
         //  console.log(' this.totalBookingsCollector  ', this.totalBookingsCollector)
-        this.apiFlightActiveSubject$.next(true);
+        //this.apiFlightActiveSubject$.next(true);
 
     }
 
@@ -302,7 +334,7 @@ export class SharedDatasetService {
         const AuList = this.bucketDetails.map(object => {
             return object.Aus;
         });
-
+        console.log('|||||||||||||||||||||||||||||||| Math.max(...AuList) ', Math.max(...AuList))
         return Math.max(...AuList)
     }
 
@@ -310,7 +342,7 @@ export class SharedDatasetService {
 
     public applyDataChanges() {
         this.currAus = [];
-        this.maxAuValue = this.bucketDetails[0].Aus;
+        // this.maxAuValue = this.bucketDetails[0].Aus;
         this.calculateAus();
     }
 
@@ -320,30 +352,19 @@ export class SharedDatasetService {
     public calculateAus() {
         //this.bucketDetails = this.getAuValues();
         this.bucketDetails.map((a, i) => {
-            // console.log('a ', a)
+
             if (a.Aus > this.maxAuValue) {
                 a.Aus = this.maxAuValue;
             }
             if (a.Aus >= 0) {
                 this.currAus.push(Math.round(Math.floor(a.Aus)));
             }
-
-            return a
+            return a;
         })
+
+        console.log('this.currAus ', this.currAus)
         this.generateBucketValues();
-        // console.log('this.currAus ', this.currAus)
-    }
 
-    private getAuValues(): BucketDetails[] {
-        return this.bucketDetails.map((a, i) => {
-            if (a.Aus >= 0) {
-                this.currAus.push(Math.round(Math.floor(a.Aus)));
-            }
-            if (a.Aus > this.maxAuValue) {
-                a.Aus = this.maxAuValue;
-            }
-            return a
-        })
     }
 
     // Generates protections from Aus
@@ -362,9 +383,23 @@ export class SharedDatasetService {
     }
 
 
+    private getAuValues(): BucketDetails[] {
+        return this.bucketDetails.map((a, i) => {
+            if (a.Aus >= 0) {
+                this.currAus.push(Math.round(Math.floor(a.Aus)));
+            }
+            if (a.Aus > this.maxAuValue) {
+                a.Aus = this.maxAuValue;
+            }
+            return a
+        })
+    }
+
+
+
     // Returns Derived AU breakpoints
     private calculateAusPriorToUse(set: BucketDetails[]) {
-        //console.log('  this.maxAuValue ', this.maxAuValue);
+        // console.log('calculateAusPriorToUse  this.maxAuValue ', this.maxAuValue);
         const tempAus = [];
         set.map((a, i) => {
             if (a.Aus >= 0) {
@@ -379,7 +414,6 @@ export class SharedDatasetService {
 
     private setProtectionsPriorToUse(set: BucketDetails[], idx: number): BucketDetails[] {
         let tempBuckets = [];
-
         this.maxAuValue = this.storedAus[idx][0];
 
         tempBuckets = set.map((a: any, i) => {
@@ -390,9 +424,7 @@ export class SharedDatasetService {
             //console.log('  a  ', a)
             return a
         })
-        //  console.log('  tempBuckets  ', tempBuckets, ' this.maxAuValue ', this.maxAuValue);
         return tempBuckets
-
     }
 
 
@@ -417,9 +449,8 @@ export class SharedDatasetService {
     }
 
 
-    // Returns Flight Observable
+    // Returns Flight Observable Not Used
     public getFlightClient(): Observable<FlightClientDetails> {
-
         return this.getApiFlightClient();
     }
 
@@ -479,7 +510,6 @@ export class SharedDatasetService {
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(currAu: number, bucketIdx: number, targetAu: number) {
 
-        // console.log('calculateBidPriceForAu bucketIdx ', bucketIdx)
 
         let targetBp: number;
         if (targetAu === 0) {
@@ -488,6 +518,7 @@ export class SharedDatasetService {
             targetBp = targetAu >= this.dynamicBidPrices.length ? this.dynamicBidPrices[0] : this.dynamicBidPrices[this.dynamicBidPrices.length - targetAu];
         }
 
+        console.log('calculateBidPriceForAu bucketIdx ', this.bucketDetails[bucketIdx].letter, ' bucketIdx ', bucketIdx, ' targetAu ', targetAu)
         // How many handles to bring along on the way up -->
 
         if (targetAu >= currAu) {
@@ -496,7 +527,7 @@ export class SharedDatasetService {
 
                 if (bucketInfo.fare < targetBp) {
                     //       console.log('U: bucketInfo ', bucketInfo)
-                    //     console.log('UP letter ', this.bucketDetails[bucketIdx].letter, '\ncurrAu ', currAu, '\ntargetAu ', targetAu, '\nAus ', this.bucketDetails[bucketIdx].Aus, '\n dragGroup ', this.dragGrouping[this.selectedMetric])
+                    //console.log('UP letter ', this.bucketDetails[bucketIdx].letter, '\ncurrAu ', currAu, '\ntargetAu ', targetAu, '\nAus ', this.bucketDetails[bucketIdx].Aus, '\n dragGroup ', this.dragGrouping[this.selectedMetric])
                     bucketInfo.Aus = targetAu;
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'up')
@@ -509,7 +540,7 @@ export class SharedDatasetService {
 
                 if (bucketInfo.fare >= targetBp) {
                     // console.log('D: bucketInfo ', bucketInfo)
-                    // console.log('Down currAu ', currAu, '\ntargetAu ', targetAu, '\nletter ', this.bucketDetails[bucketIdx].letter, '\nAus ', this.bucketDetails[bucketIdx].Aus)
+                    //console.log('Down currAu ', currAu, '\ntargetAu ', targetAu, '\nletter ', this.bucketDetails[bucketIdx].letter, '\nAus ', this.bucketDetails[bucketIdx].Aus)
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'down')
                     } else {

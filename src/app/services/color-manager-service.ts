@@ -11,6 +11,7 @@ const culori = require('culori')
 export class ColorManagerService {
 
 
+
     public genColors(numClasses): any[] {
 
         numClasses = numClasses + 1;

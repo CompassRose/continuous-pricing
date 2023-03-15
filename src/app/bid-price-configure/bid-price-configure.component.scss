@@ -10,15 +10,14 @@
   align-items: center;
   height: calc(100vh * 0.37) !important;
   width: 100%;
-  padding: 8px;
+  padding: 4px;
 
 
   .bp-inf-row {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 8px;
-    //padding: 6px 0;
+    margin-bottom: 0.3rem;
     width: 100%;
     border: 1px solid rgb(194, 194, 194);
 
@@ -26,25 +25,23 @@
       display: flex;
       min-width: 20%;
       align-items: center;
-      padding: 13px 0;
-      background-color: #18315a;
+      padding: 0.45rem 0;
+      background-color: $brand-gray-contrast-background !important; // #18315a;
+
 
       .bpi-header {
         padding-left: 8px;
         flex: 1 1 auto;
-        color: white;
+        color: $brand-primary-background;
+        //color: white;
       }
     }
 
     .bp-inf-value-group {
       display: flex;
       align-items: center;
-      //padding: 2px 0;
       justify-content: space-between;
       height: 100% !important;
-      //color: white;
-      // background-color: #100C2A; //$Brand-off-white-background;
-      //border: 1px solid white;
 
       .dark-mode {
         background-color: #100C2A; //$Brand-off-white-background;

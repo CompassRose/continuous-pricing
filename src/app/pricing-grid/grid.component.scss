@@ -2,7 +2,170 @@
 @import '../../styles/configuration.scss';
 @import 'src/styles/selection-frame';
 
-$screen-width-modifier: 100%;
+
+.flex-basis-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100% !important;
+
+  &.dark-mode {
+    //background-color: #100C2A;
+  }
+
+  &.light-mode {
+    //background-color: rgb(255, 255, 255);
+  }
+
+  .header {
+    z-index: 100;
+    width: 100%;
+    height: 70px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .booking-container {
+      display: flex;
+      flex-wrap: wrap;
+      width: 180px;
+    }
+
+    .header-body {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      align-items: center;
+
+      .logo-flight-nfo {
+        flex-wrap: nowrap;
+        padding: 10px;
+
+        .accelya-text-img {
+          width: 10px;
+          height: 20px;
+          display: flex;
+        }
+      }
+
+      .flight-specifics {
+        align-items: center;
+        flex-basis: initial;
+      }
+
+      .cabin-pos-details {
+        align-items: center;
+        flex-basis: initial;
+      }
+
+      .flight-statistics {
+        display: flex;
+        flex-direction: row;
+
+        .status-col-to-row {
+          display: flex;
+          flex-direction: row;
+
+          // @media(max-width: 1050px) {
+          //   flex-direction: column;
+          //   align-items: center;
+          // }
+        }
+      }
+    }
+  }
+
+  .chart-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+
+    .text-header-area-full {
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+      border-radius: $chart-corner-radius;
+      padding: 8px 8px;
+      color: white !important;
+      background-color: $brand-primary-background;
+    }
+
+    .text-header-area {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      color: white !important;
+
+      border-bottom: 1px solid rgb(128, 128, 128);
+
+      &.button-included {
+        padding: 2px 8px;
+      }
+
+      &.light-mode {
+        background-color: rgb(243, 243, 252);
+        border-bottom: 1px solid rgb(212, 212, 212);
+        color: black !important;
+      }
+
+      &.dark-mode {
+        background-color: $brand-primary-background;
+        color: white !important;
+
+      }
+    }
+
+    .container-body {
+      height: 100% !important;
+      //background-color: white;
+      width: 100% !important;
+      border-bottom: 1px solid rgb(126, 126, 126);
+      border-right: 1px solid rgb(126, 126, 126);
+      border-left: 1px solid rgb(126, 126, 126);
+
+      &.dark-mode {
+        background-color: #100C2A;
+      }
+
+      &.light-mode {
+        background-color: rgb(255, 255, 255);
+        border-bottom: 1px solid rgb(126, 126, 126);
+      }
+    }
+  }
+
+
+
+  .pricing-window {
+    width: $screen-width-modifier;
+
+  }
+
+  .influence-aus {
+    width: $screen-width-modifier;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+
+  .sa-au-window {
+
+    .sa-open {
+      width: 70%;
+    }
+
+    .sa-collapsed {
+      width: 90%;
+    }
+  }
+}
 
 #myProgress {
   width: 100px;
@@ -102,8 +265,13 @@ $screen-width-modifier: 100%;
 }
 
 .navy-background {
+  background-color: $brand-primary-background;
+  color: $brand-off-white-lt;
+}
 
-  background-color: $accelya-blue;
+.navy-background {
+
+  background-color: $brand-primary-background;
   color: $brand-off-white-lt;
 
   &.corner-radius {
@@ -111,68 +279,12 @@ $screen-width-modifier: 100%;
   }
 
   &.top-corner-radius {
-    border-top-right-radius: $chart-corner-radius;
-    border-top-left-radius: $chart-corner-radius;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
   }
 }
 
-.chart-container {
-  display: flex;
-  flex-direction: column;
-  //height: 100% !important;
-  border-top-right-radius: $chart-corner-radius;
-  border-top-left-radius: $chart-corner-radius;
-  width: 100%;
 
-  //&.will-rotate {
-  //   transform: rotate(-90deg);
-
-  // }
-
-
-
-  .text-header-area-full {
-    display: flex;
-    align-items: center;
-    font-size: 0.95rem;
-    border-radius: $chart-corner-radius;
-    padding: 8px 8px;
-    color: white !important;
-    background-color: $accelya-blue;
-  }
-
-  .text-header-area {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    font-size: 0.8rem;
-    border-top-right-radius: $chart-corner-radius;
-    border-top-left-radius: $chart-corner-radius;
-    padding: 8px 8px;
-    color: white !important;
-    background-color: $accelya-blue;
-    border-bottom: 1px solid rgb(163, 163, 163);
-  }
-
-  .container-body {
-    height: 100% !important;
-    background-color: white;
-    width: 100% !important;
-    border-bottom: 1px solid rgb(126, 126, 126);
-    border-right: 1px solid rgb(126, 126, 126);
-    border-left: 1px solid rgb(126, 126, 126);
-
-    &.dark-mode {
-      background-color: #100C2A;
-    }
-
-    &.light-mode {
-      background-color: rgb(255, 255, 255);
-    }
-  }
-
-
-}
 
 .cursor-pointer {
   z-index: 102;
@@ -180,119 +292,12 @@ $screen-width-modifier: 100%;
 }
 
 
-.flex-basis-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: rgb(218, 218, 255);
-  width: 100%;
-  height: 100%;
 
-  .header {
-    z-index: 100;
-    width: 100%;
-    height: 70px !important;
-    display: flex;
-    align-items: center;
-
-    .booking-container {
-      display: flex;
-      flex-wrap: wrap;
-      width: 180px;
-    }
-
-    .header-body {
-      width: 100%;
-      display: flex;
-      justify-content: flex-start;
-      flex-wrap: wrap;
-      align-items: center;
-
-      .logo-flight-nfo {
-        flex-wrap: nowrap;
-        padding: 10px;
-
-        .accelya-text-img {
-          width: 10px;
-          height: 20px;
-          display: flex;
-        }
-      }
-
-      .flight-specifics {
-        align-items: center;
-        flex-basis: initial;
-      }
-
-      .cabin-pos-details {
-        align-items: center;
-        flex-basis: initial;
-      }
-
-      .flight-statistics {
-        display: flex;
-        flex-direction: row;
-
-        .status-col-to-row {
-          display: flex;
-          flex-direction: row;
-
-          // @media(max-width: 1050px) {
-          //   flex-direction: column;
-          //   align-items: center;
-          // }
-        }
-      }
-    }
-  }
-
-  .icon-button {
-    padding: 0px 4px 3px 7px;
-
-    i-bs {
-      color: white;
-      font-size: 12px;
-    }
-  }
-
-
-
-  .pricing-window {
-    width: $screen-width-modifier;
-    //height: calc(100vh * 0.47) !important;
-    // height: 50% !important;
-  }
-
-  .bookings-influence {
-    // &.will-translate {
-    //   //transform: translate(55px, -50px);
-    // }
-  }
-
-  .sa-au-window {
-
-    .sa-open {
-      width: 70%;
-    }
-
-    .sa-collapsed {
-      width: 90%;
-    }
-  }
-
-
-  .footer {
-    margin: 0 auto;
-    min-width: 100%;
-    //height: calc(100vh * 0.035);
-  }
-
-}
 
 ::ng-deep .ng-select-container {
 
   color: white !important;
-  background-color: #0d6efd !important;
+  background-color: $brand-primary-background !important;
   border-radius: 2px;
   border: 1px solid hsla(150, 75%, 50%, 0.5) !important;
   min-height: .85rem !important;
@@ -313,21 +318,49 @@ $screen-width-modifier: 100%;
 
 .label-btn {
   display: block;
-  background: #0d6efd;
+  background: $brand-primary-background;
   color: hsla(215, 0%, 100%, 1);
   border: 1px solid hsla(150, 75%, 50%, 0.5);
   border-radius: 4px;
   font-size: 13px;
   text-align: center;
   position: relative;
-  padding-right: 5px !important;
-  padding-left: 5px;
+  //padding-right: 5px !important;
+  //padding-left: 5px;
   text-decoration: none;
 
   &:hover {
     border: 1px solid hsla(150, 75%, 50%, 1);
   }
 
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: bold !important;
+  font-style: normal;
+  font-size: 22px !important;
+
+  //line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  height: 24px !important;
+  width: 24px;
+}
+
+.icon-button {
+  padding: 2px 4px 0px 2px;
+
+  i-bs {
+    color: white;
+    // font-size: 13px;
+    //font-weight: 600;
+  }
 }
 
 h1 {
@@ -341,24 +374,10 @@ section {
 }
 
 
-input[type="radio"] {
-  display: none;
-
-  &:not(:disabled)~label {
-    cursor: pointer;
-  }
-
-  &:disabled~label {
-    color: hsla(150, 5%, 75%, 1);
-    border-color: hsla(150, 5%, 75%, 1);
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-}
 
 label {
   display: block;
-  background: $accelya-blue;
+  background: $brand-primary-background;
   border: 1px solid hsla(150, 75%, 50%, 0.5);
   border-radius: 4px;
   width: 120px;
@@ -372,10 +391,32 @@ label {
   }
 }
 
+input[type="radio"] {
+  display: none;
+
+
+  &:not(:disabled)~label {
+    cursor: pointer;
+  }
+
+  &:disabled~label {
+    color: hsla(150, 5%, 75%, 1);
+    border-color: hsla(150, 5%, 75%, 1);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+input[type=radio]:not(:checked)~label {
+  color: white;
+}
+
 input[type="radio"]:checked+label {
   background: #0d6efd;
   color: hsla(215, 0%, 100%, 1);
 }
+
+
 
 
 @media only screen and (max-width: 700px) {

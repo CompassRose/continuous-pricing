@@ -19,7 +19,7 @@ export enum ImagePath {
 
 
 
-export const PathToAssets = ImagePath.prodPathToAssets;
+export const PathToAssets = ImagePath.devPathToAssets;
 
 export const ContinousColors: ColorObject[] = [
     { key: 'Blue Green Red', value: ['rgb(255, 255, 241)', 'rgb(255, 255, 201)', 'rgb(255, 255, 170)', 'rgb(255, 255, 147)', 'rgb(255, 255, 132)', 'rgb(255, 221, 124)', 'rgb(255, 185, 122)', 'rgb(255, 149, 124)', 'rgb(255, 114, 127)', 'rgb(255, 80, 131)', 'rgb(240, 47, 135)', 'rgb(199, 0, 132)', 'rgb(154, 0, 127)', 'rgb(106, 0, 118)', 'rgb(51, 0, 107)', 'rgb(0, 0, 92)', 'rgb(0, 0, 75)', 'rgb(0, 0, 55)', 'rgb(0, 0, 35)', 'rgb(0, 0, 5)', 'rgb(0, 0, 0)'] },
@@ -37,7 +37,10 @@ export const ContinousColors: ColorObject[] = [
 export const testColors = ['rgb(255, 255, 241)', 'rgb(255, 255, 201)', 'rgb(255, 255, 170)', 'rgb(255, 255, 147)', 'rgb(255, 255, 132)', 'rgb(255, 221, 124)', 'rgb(255, 185, 122)', 'rgb(255, 149, 124)', 'rgb(255, 114, 127)', 'rgb(255, 80, 131)', 'rgb(240, 47, 135)', 'rgb(199, 0, 132)', 'rgb(154, 0, 127)', 'rgb(106, 0, 118)', 'rgb(51, 0, 107)', 'rgb(0, 0, 92)', 'rgb(0, 0, 75)', 'rgb(0, 0, 55)', 'rgb(0, 0, 35)', 'rgb(0, 0, 5)', 'rgb(0, 0, 0)']
 
 
-export const blueRamp16 = ['#2058A7', '#2A5FAB', '#3467AF', '#3E6EB3', '#4876B8', '#527EBC', '#5C85C0', '#668DC4', '#7094C9', '#7A9CCD', '#84A4D1', '#8EABD5', '#98B3DA', '#A2BADE', '#ACC2E2', '#B6CAE7'];
+//export const blueRamp16 = ['#2058A7', '#2A5FAB', '#3467AF', '#3E6EB3', '#4876B8', '#527EBC', '#5C85C0', '#668DC4', '#7094C9', '#7A9CCD', '#84A4D1', '#8EABD5', '#98B3DA', '#A2BADE', '#ACC2E2', '#B6CAE7'];
+
+export const blueRamp16 = ['rgba(32, 88, 167, 1)', 'rgba(42, 95, 171,1)', 'rgba(52, 103, 175, 1)', 'rgba(62, 110, 179,1)', 'rgba(72, 118, 184,1)', 'rgba(82, 126, 188,1)', 'rgba(92, 133, 192,1)', 'rgba(102, 141, 196,1)', 'rgba(112, 148, 201,1)', 'rgba(122, 156, 205,1)', 'rgba(132, 164, 209,1)', 'rgba(142, 171, 213,1)', 'rgba(152, 179, 218,1)', 'rgba(162, 186, 222,1)', 'rgba(172, 194, 226,1)', 'rgba(182, 202, 231,1)'];
+
 export const redRamp10 = ['#cb1c1e', '#d2382a', '#d84c36', '#de5e43', '#e46e51', '#e97e5f', '#ef8d6e', '#f39c7e', '#f8aa8e', '#fcb99f'];
 
 export const ThemeCollection = [

@@ -11,14 +11,14 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { NgxResizeObserverModule } from 'ngx-resize-observer';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { AuAvailabilityComponent } from './auAvailability.component/AuAvailability.component';
+import { AuAvailabilityComponent } from './au-vailability.component/au-availability.component';
 import { FlightHeaderComponent } from './pricing-grid/Fight-header/flight-header.component';
-import { MatSliderModule } from '@angular/material/slider';
 import { BipPriceConfigureComponent } from './bid-price-configure/bid-price-configure.component';
-import { ContinousBidPricingComponent } from './continuous-bidpricing-chart/continuous-bidpricing-chart.component';
+import { ContinousBidPricingComponent } from './au-visualization-chart/au-visualization-chart.component';
 /// import { ConfigurationModule } from "./configuration/configuration.module";
 import { NgxBootstrapIconsModule } from 'ngx-bootstrap-icons';
-
+import { MaterialExampleModule } from '../material.module';
+import { MatIconModule } from '@angular/material/icon';
 import { arrowRepeat } from 'ngx-bootstrap-icons';
 import { caretDownSquare } from 'ngx-bootstrap-icons';
 import { caretUpSquare } from 'ngx-bootstrap-icons';
@@ -53,7 +53,8 @@ const icons = {
     ReactiveFormsModule,
     NgSelectModule,
     NgxResizeObserverModule,
-    MatSliderModule,
+    MaterialExampleModule,
+    MatIconModule,
     CommonModule,
     AppRoutingModule,
     BrowserAnimationsModule,

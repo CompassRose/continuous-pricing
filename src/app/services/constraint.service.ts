@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BezierPoints, BidPriceConstraint } from './models/dashboard.model';
+import { BezierPoints, BidPriceConstraint } from '../models/dashboard.model';
 
 
 @Injectable({

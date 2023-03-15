@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ColorManagerService } from './color-manager-service';
-import { BarSeries, BucketDetails } from './models/dashboard.model';
+import { BarSeries, BucketDetails } from '../models/dashboard.model';
 import { SharedDatasetService } from './shared-datasets.service';
-import { ConstraintType } from './dashboard-constants';
+import { ConstraintType } from '../dashboard-constants';
 
 
 @Injectable({
@@ -13,11 +13,71 @@ import { ConstraintType } from './dashboard-constants';
 export class BidPriceCalcsService {
     colorRange: string[] = [];
 
+    public hexColorCollection = [
+        '#ffff2b',
+        '#2bffff',
+        '#8040ff',
+        '#ffff80',
+        '#ff00ff',
+        '#80ff80',
+        '#ffffff',
+        '#00a4f2',
+        '#ffff28',
+        '#28ffff',
+        '#8040ff',
+        '#ffff80',
+        '#ff00ff',
+        '#80ffff',
+        '#2b2bff',
+        '#ff6c6c',
+        '#ffff80',
+        '#40ffff',
+        '#9d6fff',
+        '#ffff80',
+        '#ffeafe',
+        '#98ff00',
+        '#9b4eff',
+        '#00ca65',
+        '#ff11ff',
+        '#acff80',
+        '#ffffff',
+        '#00a9fb',
+        '#ff007e',
+        '#bbffb7',
+        '#00b7ff',
+        '#7a7a7a',
+        '#000000',
+        '#000000'
+    ];
+
+    // Hard coded airRm Box Colors
+    public airRmColors = [
+        'rgb(255,0,0)',
+        'rgb(255,108,108)',
+        'rgb(255,128,64)',
+        'rgb(255,157,111)',
+        'rgb(255,255,128)',
+        'rgb(234,254,152)',
+        'rgb(0,155,78)',
+        'rgb(0.202,101)',
+        'rgb(17,255,172)',
+        'rgb(128,255,255)',
+        'rgb(0,169,201)',
+        'rgb(0,126,187)',
+        'rgb(183,0,183)',
+        'rgb(122,122,122)',
+        'rgb(0,0,0)',
+        'rgb(0,0,0)',
+        'rgb(0,0,0)'
+    ];
+
     constructor(private sharedDatasetService: SharedDatasetService,
         private colorManagerService: ColorManagerService) { }
 
     public getColorValues(): string[] {
-        this.colorRange = this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length)
+
+        // this.colorRange = this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length)
+        this.colorRange = this.airRmColors;
         return this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length);
     }
 
@@ -30,7 +90,7 @@ export class BidPriceCalcsService {
 
         // @ts-ignore
         function ranger(from, to, step, prec) {
-            // console.log('      from: ', from, ' to ', to, ' step ', step, ' prec ', prec)
+            //  console.log('      from: ', from, ' to ', to, ' step ', step, ' prec ', prec)
             if (typeof from == 'number') {
 
                 const A = [from];
@@ -53,7 +113,7 @@ export class BidPriceCalcsService {
         let result = []
         let rangeArray = [];
         let replacementEls = [];
-
+        let tester = 0;
         this.sharedDatasetService.bucketDetails.map((p, i) => {
             if (p.fare) {
                 if (i === 0) {
@@ -66,6 +126,9 @@ export class BidPriceCalcsService {
                 } else {
                     stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
                     rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2);
+
+                    tester = tester += rangeArray.length
+                    // console.log('rangeArray ', rangeArray)
                     if (rangeArray) {
                         rangeArray.shift();
                     }
@@ -74,13 +137,15 @@ export class BidPriceCalcsService {
 
             if (rangeArray.length === 0) {
                 testIncr++;
+                //  console.log('testIncr ', testIncr)
                 for (let m = 0; m < this.sharedDatasetService.bucketDetails[testIncr].protections; m++) {
                     replacementEls.push(this.sharedDatasetService.dynamicBidPrices[0]);
                 }
             }
+
             result.push(...rangeArray);
         })
-
+        // console.log('tester ', tester)
         if (replacementEls.length > 0) {
 
             for (let f = 0; f < replacementEls.length; f++) {
@@ -98,14 +163,17 @@ export class BidPriceCalcsService {
 
 
     // Set up bar colors 
-    public adjustPieceColorForBookingUpdates(): BarSeries[] {
+    public adjustPieceColorForBookingUpdates(selectedElements: number[]): BarSeries[] {
+        // console.log('adjustPieceColorForBookingUpdates ', selectedElements)
 
         let barSeries: BarSeries[] = [];
         this.sharedDatasetService.dynamicBidPrices = [];
         let counter = 0;
         let colorIncr = 0;
         this.sharedDatasetService.bucketDetails.map((pc, i) => {
+
             if (pc.protections > 0) {
+                // console.log('pc ', ' i ', i, ' Aus ', pc.protections)
                 colorIncr++;
                 for (let e = 0; e < pc.protections; e++) {
                     barSeries.push({ value: pc.fare, barColor: this.setBookingElementsColor(colorIncr, counter) })
@@ -116,9 +184,6 @@ export class BidPriceCalcsService {
         })
         return barSeries;
     }
-
-
-
 
 
     // Generates and returns each bar color
@@ -224,13 +289,58 @@ export class BidPriceCalcsService {
         }
     }
 
+    public updateBucketDetails(selectedElements, args) {
+        args.forEach((arg, i) => {
 
-    public applyAllInfluences(bpVector: number[], args: any[]): number[] {
-        //  console.log('applyAllInfluences ', bpVector)
+
+            if (arg.key === ConstraintType.Multiply) {
+
+                selectedElements.forEach((se, i) => {
+                    console.log('Before this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+                    this.sharedDatasetService.bucketDetails[se].fare = this.sharedDatasetService.bucketDetails[se].fare * arg.value;
+                    console.log('After this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+                })
+            }
+            if (arg.key === ConstraintType.AddSubtract) {
+                selectedElements.forEach((se, i) => {
+                    console.log('Before this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+                    this.sharedDatasetService.bucketDetails[se].fare = this.sharedDatasetService.bucketDetails[se].fare + arg.value;
+                    console.log('After this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+                })
+            }
+
+            if (arg.key === ConstraintType.Minimum) {
+                selectedElements.forEach((se, i) => {
+                    if (this.sharedDatasetService.bucketDetails[se].fare < arg.value) {
+                        this.sharedDatasetService.bucketDetails[se].fare = arg.value;
+                    }
+
+                    console.log('After this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+                })
+            }
+
+            if (arg.key === ConstraintType.Maximum) {
+                selectedElements.forEach((se, i) => {
+                    console.log('Before this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+                    this.sharedDatasetService.bucketDetails[se].fare = this.sharedDatasetService.bucketDetails[se].fare * arg.value;
+                    console.log('After this.sharedDatasetService.bucketDetails[se].fare  ', this.sharedDatasetService.bucketDetails[se].fare)
+
+                })
+            }
+        })
+    }
+
+    public applyAllInfluences(selectedElements: number[], curveState: boolean, bpVector: number[], args: any[]) {
+
+        console.log('applyAllInfluences curveState ', curveState, ' selectedElements ', selectedElements, ' args ', args)
+
+        if (!curveState) {
+            this.updateBucketDetails(selectedElements, args)
+        }
 
         const applyMultiplication = (bpVector, multiplier: any): number[] => {
-            return bpVector.map((bp, i) => {
 
+            return bpVector.map((bp, i) => {
                 const num = Number(multiplier)
                 return bp * num > 0 ? Math.round(bp * num) : bp;
             })
@@ -257,10 +367,10 @@ export class BidPriceCalcsService {
             })
         }
 
-
         let aggregate = [];
 
         aggregate = args.map((arg, i) => {
+            console.log('arg ', arg)
 
             if (arg.key === ConstraintType.Multiply) {
                 bpVector = applyMultiplication(bpVector, arg.value);
@@ -278,10 +388,13 @@ export class BidPriceCalcsService {
                 bpVector = applyMaximum(bpVector, arg.value)
             }
 
+            // }
+
             return bpVector;
         })
 
         return aggregate[aggregate.length - 1];
+
 
     }
 }

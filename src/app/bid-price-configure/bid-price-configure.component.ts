@@ -1,8 +1,8 @@
 
 import { Component, Input } from '@angular/core';
-import { IFlightInfluencesByCabin } from '../models/dashboard.model';
-import { ConstraintService } from '../constraint.service';
-import { SharedDatasetService } from '../shared-datasets.service';
+import { IFlightInfluencesByCabin, BidPriceConstraint } from '../models/dashboard.model';
+import { ConstraintService } from '../services/constraint.service';
+import { SharedDatasetService } from '../services/shared-datasets.service';
 
 
 @Component({
@@ -31,14 +31,14 @@ export class BipPriceConfigureComponent {
     @Input()
     set collapseIndfluences(state: boolean) {
         this.showInfluenceBody = !this.showInfluenceBody;
-        //console.log('state ', state)
+        // console.log('state ', state)
 
     }
 
     @Input()
     set themeSwitch(state: string) {
         this.themeSwitchMode = state;
-        console.log('themeSwitch ', state)
+        //  console.log('themeSwitch ', state)
 
     }
 
@@ -48,74 +48,13 @@ export class BipPriceConfigureComponent {
     ) {
 
 
-        // this.dataService.dashboardFacade.getActiveCabin()
-        //     .subscribe((cabin) => {
-        //         if (cabin !== null) {
-        //             if (this.dataService.currentCabin !== null && this.dataService.currentCabin !== cabin) {
-        //                 this.getMyActiveCabin();
-        //             }
-        //             this.dataService.currentCabin = cabin;
-        //         }
-        //     })
-
-
-
-        // Gets Values from dashboard facade combineLatest
-        // this.dataService.dashboardFacade.combineAndSendLatestValues()
-        //     .subscribe((response) => {
-        //         console.log('\nCombineAndSend subscribe from facade --- \n', '[[[', ...response, ' ]]]');
-        //         let updatedFlight = response[0];
-        //         let updatedInfluences = response[1];
-        //         this.dataService.updatedClientFlight = this.dataService.processFlight(updatedFlight);
-        //         this.processInfluencesForUi(updatedInfluences);
-
-        //         if (this.dataService.currentCabin === null) {
-        //             this.dataService.cabinSelected = this.dataService.updatedClientFlight.cabinDetails.length - 1;
-        //             this.dataService.onCabinSelect(this.dataService.cabinSelected);
-        //         } else {
-        //             this.dataService.cabinSelected = this.dataService.currentCabin;
-        //             this.dataService.onCabinSelect(this.dataService.currentCabin);
-        //         }
-
-        //         this.dataService.dashboardFacade.ndoNumberDateSubject$.next(this.dateFormatterPipe.findNetDaysOut(this.currentCaptureDate, updatedFlight.departureDateTime))
-        //         this.dataService.dashboardFacade.toggleModifiedCurveBehaviorSubject$.next(false);
-        //         this.dataService.updatedClientFlight$.next(this.dataService.updatedClientFlight);
-        //         this.getMyActiveCabin();
-        //     })
-
-
-        // this.dataService.dashboardFacade.getAirlineValues()
-        //     .subscribe((aConfig: AirlineConfig) => {
-        //         if (aConfig !== null) {
-        //             this.currentCaptureDate = aConfig.captureDate;
-        //         }
-        //     });
-
-
-        // this.dataService.dashboardFacade.toggleModifiedCurveBehaviorSubject$
-        //     .subscribe(state => {
-        //         this.ableToSave = state;
-        //     });
-
-
-        // this.dataService.dashboardFacade.getActivePos()
-        //     .subscribe((activePos: any) => {
-        //         if (activePos) {
-
-        //             this.activePosString = activePos.value;
-        //             this.adjustedFareHolder = `${activePos.value}AdjustedFare`;
-        //         }
-        //     });
-
-
-        // Updates to dataService.currentBidPriceInfo
-        // this.dataService.dashboardFacade.getCurrentBidPriceInfo()
-        //     .subscribe((message: any) => {
-        //         if (message.originalBidPrices.length > 0) {
-        //             this.buckets = message.bucketDetails;
-        //             this.dataService.currentBidPriceInfo.bucketDetails = this.buckets;
-        //         }
-        //     });
+        this.sharedDatasetService.resetDefaultSubject$
+            .subscribe(response => {
+                if (response) {
+                    console.log('resetDefaultSubject ', response)
+                    const staticModifierObj = { mult: 1.00, addSub: 0, partialMax: '' };
+                }
+            })
     }
 
     public resetNums() {
@@ -131,6 +70,17 @@ export class BipPriceConfigureComponent {
         });
     }
 
+    // Only Numbers with Decimals
+    public keyPressNumbersDecimal(event): boolean {
+
+        var charCode = (event.which) ? event.which : event.keyCode;
+        if (charCode != 46 && charCode > 31
+            && (charCode < 48 || charCode > 57)) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
 
     // public getMyActiveCabin() {
 
@@ -253,11 +203,11 @@ export class BipPriceConfigureComponent {
 
 
     // Generates UI formatted objects
-    // private generateCabinInfluenceLists(list: any): BidPriceConstraint {
-    //     return list.constraints.map((ts: any, id: number) => {
-    //         return this.constraintService.generateBidPriceInfluenceModifiers(ts, id);
-    //     });
-    // }
+    private generateCabinInfluenceLists(list: any): BidPriceConstraint {
+        return list.constraints.map((ts: any, id: number) => {
+            return this.constraintService.generateBidPriceInfluenceModifiers(ts, id);
+        });
+    }
 
 
 
@@ -307,17 +257,6 @@ export class BipPriceConfigureComponent {
 
 
 
-    // Only Numbers with Decimals
-    public keyPressNumbersDecimal(event): boolean {
-
-        var charCode = (event.which) ? event.which : event.keyCode;
-        if (charCode != 46 && charCode > 31
-            && (charCode < 48 || charCode > 57)) {
-            event.preventDefault();
-            return false;
-        }
-        return true;
-    }
 
     // // Only Integer Numbers
     // public keyPressNumbers(event, numDigits): boolean {

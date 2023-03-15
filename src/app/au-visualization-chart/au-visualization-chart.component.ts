@@ -1,27 +1,29 @@
-import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { Component, Input, AfterViewInit, HostListener } from '@angular/core';
 import { BidPriceInfluencers, BarSeries } from '../models/dashboard.model';
-import { SharedDatasetService } from '../shared-datasets.service';
-import { BidPriceCalcsService } from '../bid-price-calcs';
+import { SharedDatasetService } from '../services/shared-datasets.service';
+import { BidPriceCalcsService } from '../services/au-visualization-calcs-service';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import * as echarts from 'echarts';
-import { ThemeControlService } from '../theme-control.service';
+import { ThemeControlService } from '../services/theme-control.service';
 
 
 @Component({
     selector: 'continuous-bid-pricing',
-    templateUrl: './continuous-bidpricing-chart.component.html',
-    styleUrls: ['./continuous-bidpricing-chart.component.scss'],
+    templateUrl: './au-visualization-chart.component.html',
+    styleUrls: ['./au-visualization-chart.component.scss'],
     providers: [CurrencyPipe, DecimalPipe]
 })
+
+
 
 export class ContinousBidPricingComponent implements AfterViewInit {
 
     public barSeriesValuesColors: BarSeries[] = [];
     public modifierCollection = [];
-    public selectedElement = [];
+    public selectedElement: any[] = [];
     public options: any = {};
     public myChart: echarts.ECharts = null;
-    public modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
+    public modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
     public colorRange: string[] = [];
     public resetChartElementView = true;
     public markPointContainer: any = {};
@@ -31,6 +33,17 @@ export class ContinousBidPricingComponent implements AfterViewInit {
     public storedDynamicBpValues = 0;
 
     public themeSelect = '';
+    public showAllCurves = false;
+
+    @Input()
+    set showBidPriceCurve(state: boolean) {
+        if (this.myChart) {
+            this.showAllCurves = state;
+            console.log('showAllCurves ', this.showAllCurves)
+
+            this.createChartElement(true);
+        }
+    }
 
 
     constructor(
@@ -42,13 +55,12 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
         this.themeSelect = JSON.parse(window.localStorage.getItem('colorTheme'));
 
-        console.log('AuAvailabilityComponent tempSavedCollection ', this.themeSelect)
+        // console.log('AuAvailabilityComponent tempSavedCollection ', this.themeSelect)
 
         this.themeControlService.resetThemeSubject$
             .subscribe((theme: string) => {
-                console.log('theme ', theme)
+                // console.log('theme ', theme)
                 this.themeSelect = theme;
-                // console.log('||||||||||| resetThemeSubject createSvg   |||||||||| ', this.themeSelect)
                 this.createSvg();
                 this.createChartElement(true);
             })
@@ -56,37 +68,45 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
         this.colorRange = this.bidPriceCalcsService.getColorValues();
 
-        this.sharedDatasetService.apiFlightActiveSubject$
-            .subscribe((response) => {
-                if (response) {
+        // this.sharedDatasetService.apiFlightActiveSubject$
+        //     .subscribe((response) => {
+        //         console.log('apiFlightActiveSubject$ ||||||   response ', response)
+        //         if (response) {
 
-                    this.sharedDatasetService.totalBookingsCollector = 0;
-                    this.storedInterpolateBpValues = 0;
-                    this.storedDynamicBpValues = 0;
-                    this.differenceCalculation = [0, 0];
-                    this.sharedDatasetService.modifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 } as BidPriceInfluencers;
-                    this.sharedDatasetService.influenceInput$.next([1.00, 'mult', 0]);
-                    this.sharedDatasetService.influenceInput$.next([0, 'addSub', 1]);
-                    this.sharedDatasetService.resetDefaultSubject$.next(true)
-                    this.loadInterpolatedBidPriceValues('activeCurve');
-                    this.loadDynamicBidPriceValues('dynamicBidPrices');
-                    this.createChartElement(true);
-                }
-            })
+        //             this.sharedDatasetService.totalBookingsCollector = 0;
+        //             this.storedInterpolateBpValues = 0;
+        //             this.storedDynamicBpValues = 0;
+        //             this.differenceCalculation = [0, 0];
+        //             this.sharedDatasetService.modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
+
+        //             // this.sharedDatasetService.influenceInput.next([1.00, 'mult', 0]);
+        //             // this.sharedDatasetService.influenceInput.next([0, 'addSub', 1]);
+
+        //             this.sharedDatasetService.resetDefaultSubject$.next(true);
+        //             this.loadInterpolatedBidPriceValues('activeCurve');
+        //             this.loadDynamicBidPriceValues('dynamicBidPrices');
+        //             this.createChartElement(true);
+        //         }
+        //     })
 
 
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
-                this.sharedDatasetService.totalBookingsCollector = 0;
-                this.sharedDatasetService.maxAuValue = this.sharedDatasetService.getMaxAu();
-                this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
-                this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
-                this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
-                this.sharedDatasetService.adjustedCurvePoints = [];
-                this.modifierCollection = [];
-                this.loadInterpolatedBidPriceValues('activeCurve');
-                this.loadDynamicBidPriceValues('dynamicBidPrices');
-                this.createChartElement(true);
+                if (response) {
+                    console.log('resetDefaultSubject {{{{{{{{{{{{{}}}}}}}}}}}}}  adjustPieceColorForBookingUpdates ', response)
+                    this.sharedDatasetService.totalBookingsCollector = 0;
+                    this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.selectedElement);
+                    this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
+                    this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                    this.sharedDatasetService.adjustedCurvePoints = [];
+                    this.sharedDatasetService.influenceInput.next([1.00, 'mult', 0]);
+                    this.sharedDatasetService.influenceInput.next([0, 'addSub', 1]);
+                    this.modifierCollection = [];
+                    this.loadInterpolatedBidPriceValues('activeCurve');
+                    this.loadDynamicBidPriceValues('dynamicBidPrices');
+                    this.createChartElement(true);
+                }
+
             })
 
 
@@ -94,87 +114,44 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             .subscribe((state: boolean) => {
 
                 if (this.myChart) {
+                    // console.log('\n****************  \n ||||||    bucketDetailsBehaviorSubject$ this.modifierCollection ', this.sharedDatasetService.modifierCollection, '\nthis.selectedElement. ', this.selectedElement, '\nbucketDetails ', this.sharedDatasetService.bucketDetails)
 
-                    this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
+                    if (this.sharedDatasetService.modifierCollection.length > 0) {
 
-                    if (state) {
+                        this.sharedDatasetService.adjustedCurvePoints = [];
+
                         this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
 
-                    } else {
-                        this.createChartElement(true);
-                    }
+                        const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints];
 
-                    this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                        this.sharedDatasetService.adjustedCurvePoints = this.bidPriceCalcsService.applyAllInfluences(this.selectedElement, this.showAllCurves, staticArray, this.sharedDatasetService.modifierCollection);
 
-                    if (this.modifierCollection.length > 0) {
-                        this.sharedDatasetService.adjustedCurvePoints = [];
-                        this.sharedDatasetService.interpolateBidPriceCurvePoints.forEach((ip, i) => {
-                            const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints]
-                            this.sharedDatasetService.adjustedCurvePoints = this.bidPriceCalcsService.applyAllInfluences(staticArray, this.modifierCollection);
+                        if (this.selectedElement.length > 0) {
+                            //   console.log('resetDefaultSubject {{{{{{{{{{{{{}}}}}}}}}}}}}  adjustPieceColorForBookingUpdates ')
+                            this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.selectedElement);
                             this.sharedDatasetService.activeCurve = this.sharedDatasetService.adjustedCurvePoints;
-                        })
-                    }
-                    this.loadInterpolatedBidPriceValues('activeCurve');
-                    this.loadDynamicBidPriceValues('dynamicBidPrices');
-                }
-            })
-
-
-
-
-
-        this.sharedDatasetService.influenceInput$
-            .subscribe(([response, mod, id]) => {
-                if (response !== null) {
-
-                    this.modifierObj[mod] = response;
-
-                    const staticModifierObj = { mult: 1.00, addSub: 0, min: 0, max: 99999 };
-
-                    this.sharedDatasetService.adjustedCurvePoints = [];
-
-                    Object.entries(staticModifierObj).forEach((d: any, i) => {
-
-                        if (staticModifierObj[mod] !== this.modifierObj[mod]) {
-                            if (!this.modifierCollection.some(influence => influence.key === mod)) {
-
-                                this.modifierCollection.push({ key: mod, value: this.modifierObj[mod] });
-                            } else {
-                                const index = this.modifierCollection.findIndex(r => r.key === mod);
-                                if (this.modifierCollection[index].value !== response) {
-                                    this.modifierCollection[index].value = response;
-                                }
-                            }
-                        } else {
-                            this.modifierCollection.splice(this.modifierCollection.findIndex(idx => idx === idx), 1);
+                            this.selectedElement = [];
+                            this.createChartElement(true);
+                            this.sharedDatasetService.modifierCollection = [];
                         }
-                    });
-
-                    console.log('modifierCollection. ', this.modifierCollection)
-
-                    if (this.modifierCollection.length > 0) {
-
-                        const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints]
-                        this.sharedDatasetService.adjustedCurvePoints = this.bidPriceCalcsService.applyAllInfluences(staticArray, this.modifierCollection);
-                        this.sharedDatasetService.activeCurve = this.sharedDatasetService.adjustedCurvePoints;
-
-                        //console.log('activeCurve. ', this.sharedDatasetService.activeCurve)
-                        this.createChartElement(true);
+                        /// No Modifiers 
                     } else {
-                        this.sharedDatasetService.adjustedCurvePoints = [];
+                        this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.selectedElement);
+
+                        if (state) {
+                            this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
+
+                        } else {
+                            this.createChartElement(true);
+                        }
+
                         this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
-                        this.createChartElement(true);
+
+                        this.loadInterpolatedBidPriceValues('activeCurve');
+                        this.loadDynamicBidPriceValues('dynamicBidPrices');
                     }
-
-                    this.loadInterpolatedBidPriceValues('activeCurve');
-                    this.loadDynamicBidPriceValues('dynamicBidPrices');
-
                 }
             })
-
-
-
-
     }
 
     public ngAfterViewInit(): void {
@@ -183,7 +160,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
         this.sharedDatasetService.applyDataChanges();
         setTimeout(() => {
-            this.createChartElement(true);
+            // this.createChartElement(true);
         }, 300);
     }
 
@@ -264,7 +241,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
     // Re-generates chart elements
     public createChartElement(redrawChartPoints: boolean): void {
-        // console.log('createChartElement  target ', redrawChartPoints)
+        console.log('createChartElement  target ', redrawChartPoints)
         const self = this;
 
         const updatePosition = () => {
@@ -276,28 +253,29 @@ export class ContinousBidPricingComponent implements AfterViewInit {
         };
 
 
-
         const onPointDragging = function (dataIndex) {
-            let yValue = 0;
+            let xValue = 0;
             let dragPosition: any = [0, 0];
-            const target = dataIndex + 1;
+            const target = dataIndex;
 
             dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
 
-            yValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
+            xValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
 
-            // console.log('dragPosition  target ', target,
+            // console.log('target ', target, ' dragPosition ', dragPosition[0])
+            // console.log('dragPosition  dataIndex ', target, ' xValue ', xValue,
             //     '\n Letter ', self.sharedDatasetService.bucketDetails[target].letter,
-            //     '\n-1 ', self.sharedDatasetService.bucketDetails[target - 1].letter,
+            //     '\n-1 ', self.sharedDatasetService.bucketDetails[target + 1].letter,
             //     '\nBD ', self.sharedDatasetService.currAus[target],
-            //     '\ncurrAu -1 ', self.sharedDatasetService.currAus[target - 1]);
+            //     '\ncurrAu -1 ', self.sharedDatasetService.currAus[target + 1]);
 
-            if (yValue < 1) { yValue = 0; };
+            if (xValue < 1) { xValue = 0; };
 
-            if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue };
+            if (xValue > self.sharedDatasetService.maxAuValue) { xValue = self.sharedDatasetService.maxAuValue };
 
-            // console.log('  yValue ', yValue, ' maxAuValue ')
-            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[target], target, yValue);
+            // console.log('  yValue ', xValue, ' maxAuValue ')
+
+            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[target], target, xValue);
 
             self.sharedDatasetService.applyDataChanges();
 
@@ -325,36 +303,55 @@ export class ContinousBidPricingComponent implements AfterViewInit {
         }
 
 
+        const onPointSelect = function (dataIndex) {
+            if (self.selectedElement.includes(dataIndex)) {
+                self.selectedElement.splice(self.selectedElement.findIndex(idx => idx === dataIndex), 1);
+            } else {
+                self.selectedElement.push(dataIndex);
+            }
+
+            console.log('onPointSelect ', dataIndex, ' selectedElement ', self.selectedElement)
+            setChartDragPoints()
+        }
+
+
         const setChartDragPoints = function () {
             let placeTemp = 0;
             let xPlace = 0;
             let scaleHandles = [];
+            /// stackValues sets z depth for group
             let stackValues = [];
-
+            let activeItems: any = {};
 
             self.myChart.setOption({
-                graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, function (item: any, dataIndex) {
+
+                //graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, function (item: any, dataIndex) {
+                graphic: echarts.util.map(self.sharedDatasetService.currAus, function (item: any, dataIndex) {
+                    //  if (!item.discrete) {
+                    // console.log('dataIndex ', dataIndex, '  ------- item ', item, ' ', self.sharedDatasetService.bucketDetails[dataIndex].letter, ' Au ', self.sharedDatasetService.bucketDetails[dataIndex].Aus, ' currAus ', self.sharedDatasetService.currAus[dataIndex])
 
                     let stacker = 120 - dataIndex;
+
                     stackValues.push(stacker)
-                    xPlace = (placeTemp += item.protections);
+
+                    //console.log(' ------- item ', self.sharedDatasetService.bucketDetails[dataIndex].letter, ' Au ', item, ' xPlace ', xPlace)
 
                     let dragPoint = 0;
 
-                    if (dataIndex !== self.sharedDatasetService.bucketDetails.length - 1) {
+                    if (dataIndex !== 0) {
                         scaleHandles = [xPlace, dragPoint];
                     }
 
-                    if (self.sharedDatasetService.bucketDetails[dataIndex - 1] && item.Aus === self.sharedDatasetService.maxAuValue && self.sharedDatasetService.bucketDetails[dataIndex - 1].Aus === self.sharedDatasetService.maxAuValue) {
+                    if (self.sharedDatasetService.bucketDetails[dataIndex - 1] && self.sharedDatasetService.bucketDetails[dataIndex].Aus === self.sharedDatasetService.maxAuValue && self.sharedDatasetService.bucketDetails[dataIndex - 1].Aus === self.sharedDatasetService.maxAuValue) {
                         stackValues[dataIndex] = stackValues[dataIndex - 1] + 2;
-                        //console.log(' stackValues[dataIndex] ', stackValues[dataIndex])
                     }
-
-                    return {
+                    // console.log(' stackValues[dataIndex] ', stackValues[dataIndex])
+                    activeItems = {
                         type: 'group',
                         position: self.myChart.convertToPixel({ gridIndex: 0 }, scaleHandles),
                         draggable: true,
                         ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                        onclick: echarts.util.curry(onPointSelect, dataIndex),
                         children: [
                             {
                                 type: 'circle',
@@ -363,7 +360,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                                     r: 12
                                 },
                                 style: {
-                                    fill: 'rgba(255,255,255,1)',//'#001871',
+                                    fill: !self.selectedElement.includes(dataIndex) ? 'rgba(255,255,255,1)' : 'red',
                                     stroke: 'black',
                                     lineWidth: 0.5,
                                     shadowBlur: 10,
@@ -378,16 +375,20 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                                 x: -12,
                                 y: -12,
                                 style: {
-                                    text: item.letter,
+                                    text: `${self.sharedDatasetService.bucketDetails[dataIndex].letter}`,
                                     textPosition: 'inside',
                                     padding: 6,
-                                    color: 'black',
+                                    fill: !self.selectedElement.includes(dataIndex) ? 'black' : 'white',
                                     fontSize: '15px',
                                     fontWeight: 'bold'
                                 },
                             }
                         ]
                     }
+                    xPlace = (placeTemp += self.sharedDatasetService.bucketDetails[dataIndex].protections);
+                    //console.log('activeItems ', activeItems.children[1].style.text, ' dataIndex ', dataIndex, ' xPlace ', xPlace, ' maxAuValue ', self.sharedDatasetService.maxAuValue)
+                    return activeItems;
+                    //}
                 })
 
             })
@@ -396,6 +397,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
         const setChartInstance = () => {
 
+            let itemDiscreteFalse = [];
             self.myChart.setOption({
 
                 grid: {
@@ -454,7 +456,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                     //position: [10, 10],
                     position: (pos, params, dom, rect, size) => {
                         if ((size.viewSize[0] - pos[0]) > 140) {
-                            pos[0] = pos[0] + 0
+                            pos[0] = pos[0] + 30
                         } else {
                             pos[0] = pos[0] - 150
                         }
@@ -510,7 +512,8 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                         showMaxLabel: true
                     },
                     data: self.sharedDatasetService.dynamicBidPrices.map((bp, i) => {
-                        return self.sharedDatasetService.dynamicBidPrices.length - i;
+
+                        return self.sharedDatasetService.maxAuValue - i;
                     }),
                 },
                 yAxis: [
@@ -567,33 +570,36 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                 series: [
                     {
                         type: 'bar',
-                        //name: 'b',
                         animation: false,
                         animationDuration: 1,
                         showBackground: false,
                         colorBy: 'series',
                         silent: true,
                         z: 2,
-                        data: self.barSeriesValuesColors.map(serie => {
+                        data: self.barSeriesValuesColors.map((serie, i) => {
+
+                            // console.log('serie ', serie)
                             return {
                                 value: serie.value,
                                 itemStyle: {
-                                    normal: {
-                                        color: serie.barColor
-                                    }
+                                    color: serie.barColor
                                 }
                             }
                         }),
                         markLine: (this.sharedDatasetService.totalBookingsCollector > 0 && this.sharedDatasetService.totalBookingsCollector < this.sharedDatasetService.maxAuValue) ? self.bidPriceCalcsService.markVerticalLineSellingValues() : null,
-                        markPoint: self.markAreaPoint(),
+                        //markPoint: self.markAreaPoint(),
                         markArea: {
                             silent: false,
-                            data: self.sharedDatasetService.bucketDetails.map((item: any, i) => {
-                                return [{
-                                    name: item.protections > 0 ? self.sharedDatasetService.bucketDetails[i].letter : '',
-                                    xAxis: self.sharedDatasetService.maxAuValue - item.Aus,
+                            data: self.sharedDatasetService.currAus.map((item: any, i) => {
+
+                                //  console.log('i ', i, ' item ', item, ' letter', self.sharedDatasetService.bucketDetails[i].letter, ' ------  ', self.sharedDatasetService.maxAuValue - item)
+
+                                //  if (!item.discrete) {
+                                itemDiscreteFalse = [{
+                                    name: item > 0 ? self.sharedDatasetService.bucketDetails[i].letter : '',
+                                    xAxis: self.sharedDatasetService.maxAuValue - item,
                                     label: {
-                                        show: item.protections > 0 ? true : false,
+                                        show: item > 0 ? true : false,
                                         backgroundColor: 'rgba(245,245,255,1)',
                                         padding: [5, 8, 2, 8],
 
@@ -610,8 +616,11 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                                         borderWidth: 1,
                                         color: 'rgba(100,100,100,0)'
                                     },
-                                    xAxis: self.sharedDatasetService.bucketDetails[i + 1] ? self.sharedDatasetService.maxAuValue - self.sharedDatasetService.bucketDetails[i + 1].Aus : self.sharedDatasetService.maxAuValue
-                                }];
+                                    xAxis: item && self.sharedDatasetService.currAus[i + 1] ? self.sharedDatasetService.maxAuValue - self.sharedDatasetService.currAus[i] : self.sharedDatasetService.maxAuValue
+                                }]
+                                // }
+                                // console.log('itemDiscreteFalse ', itemDiscreteFalse)
+                                return itemDiscreteFalse;
                             })
                         }
                     },
@@ -645,7 +654,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                         silent: true,
                         showSymbol: false,
                         selectedMode: false,
-                        symbolSize: 10,
+                        symbolSize: self.showAllCurves ? 10 : 0,
 
                         itemStyle: {
                             borderColor: 'blue',
@@ -655,7 +664,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                         lineStyle: {
                             type: 'solid',
                             color: 'blue',
-                            width: 3
+                            width: self.showAllCurves ? 3 : 0
                         },
                         data: self.sharedDatasetService.interpolateBidPriceCurvePoints,
                         markPoint: self.markPoint()
@@ -675,7 +684,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                         lineStyle: {
                             type: 'solid',
                             color: 'green',
-                            width: 3
+                            width: this.showAllCurves ? 3 : 0
                         },
                         data: self.sharedDatasetService.adjustedCurvePoints,
                     },
@@ -804,7 +813,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             coordinatesForMarkPoint = [sellingPoint, this.sharedDatasetService.activeCurve[sellingPoint]];
             sellingValues = this.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.activeCurve[sellingPoint]);
             activeColor = this.sharedDatasetService.adjustedCurvePoints.length ? 'green' : this.sharedDatasetService.totalBookingsCollector > 0 ? 'blue' : 'transparent';
-            console.log('sellingValues ', sellingValues)
+            //console.log('sellingValues ', sellingValues)
             this.markPointContainer = {
                 clickable: false,
                 animation: false,
@@ -851,5 +860,4 @@ export class ContinousBidPricingComponent implements AfterViewInit {
         }
         return this.markPointContainer;
     }
-
 }
