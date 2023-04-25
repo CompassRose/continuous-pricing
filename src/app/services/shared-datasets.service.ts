@@ -259,38 +259,17 @@ export class SharedDatasetService {
         this.buckets = [];
 
         this.bucketDetails.forEach((d, i) => {
-            // console.log('d ', d)
 
             if (!d.discrete) {
                 this.buckets.push(d.letter)
                 this.nonDiscreteBuckets.push(d)
             }
         })
-        // this.calculateAusPriorToUse(this.nonDiscreteBuckets);
-        // console.log('Buckets  ', this.buckets)
+
         this.colorRange = this.getColorValues();
         this.bucketDetailsConcatBehaviorSubject$.next(this.nonDiscreteBuckets)
     }
 
-
-
-
-    public startSharedService() {
-
-        let storedBucketCollection: BucketDetails[][] = [...this.apiBucketDetails]
-
-        //  console.log('storedBucketCollection ', storedBucketCollection);
-
-        //  window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(storedBucketCollection))));
-
-        window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(storedBucketCollection))));
-
-        storedBucketCollection.map((bc, i) => {
-            return bc = this.setProtectionsPriorToUse(bc, i);
-        })
-
-        this.resetInverseDetailsFromBookings();
-    }
 
 
 
@@ -371,7 +350,6 @@ export class SharedDatasetService {
     // Returns Derived AU breakpoints
     public calculateAus() {
         //console.log('calculateAus ', this.nonDiscreteBuckets.length)
-        // this.currAus = [];
         if (this.nonDiscreteBuckets.length) {
             this.generateBucketValues();
         }
@@ -381,7 +359,6 @@ export class SharedDatasetService {
     public generateBucketValues() {
 
         this.nonDiscreteBuckets.map((a, i) => {
-            // this.currAus.push(a.Aus)
             return a.protections = this.protectionMyLevel(i);
         })
         // console.log('\n\n\n\n nonDiscreteBuckets. ', this.nonDiscreteBuckets)
@@ -430,19 +407,6 @@ export class SharedDatasetService {
     // }
 
 
-    // Returns Derived AU breakpoints
-    private calculateAusPriorToUse(set: BucketDetails[]): void {
-
-        this.currAus = [];
-        set.map((a, i) => {
-            if (a.Aus >= 0) {
-                this.currAus.push(a.Aus)
-                //tempAus.push(Math.round(Math.floor(a.Aus)));
-            }
-
-        })
-        // console.log('   this.currAus  ', this.currAus)
-    }
 
 
     private setProtectionsPriorToUse(set: BucketDetails[], idx: number): BucketDetails[] {

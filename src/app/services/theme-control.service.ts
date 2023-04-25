@@ -19,7 +19,7 @@ export class ThemeControlService {
       this.isThemeChange = false;
       this.chartThemeSelect = 'light';
       window.localStorage.setItem('colorTheme', JSON.stringify(JSON.parse(JSON.stringify(this.chartThemeSelect))));
-      this.resetThemeSubject$.next('light')
+      this.resetThemeSubject$.next('light');
 
     } else {
       this.isThemeChange = savedTheme === 'dark' ? true : false;

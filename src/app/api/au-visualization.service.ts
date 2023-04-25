@@ -4,7 +4,7 @@ import { BidPriceInfluencers, BucketDetails } from '../models/dashboard.model';
 import { map, mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
 import { Observable, throwError as _observableThrow, from, catchError, of as _observableOf, BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angular/common/http';
-
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { isRunningWebView } from "../shared/webview-checker";
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
@@ -200,9 +200,9 @@ function blobToText(blob: any): Observable<string> {
 }
 
 
-export function getClientForEnvironment(http: HttpClient): IBidPriceService {
-  //console.log('Called getClientForEnvironment')
-  return new BidPriceAspNetService(http);
+export function getClientForEnvironment(http: HttpClient, sanitizer: DomSanitizer): IBidPriceService {
+  console.log('Called getClientForEnvironment')
+  return new BidPriceAspNetService(http, sanitizer);
 }
 
 export interface IBidPriceService {
@@ -242,46 +242,21 @@ export class BidPriceAspNetService {
 
   // public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
 
-  public apiTarget = this.mockFlightClient;
+  public apiUrl = this.mockFlightClient;
 
-  constructor(@Inject(HttpClient) protected http: HttpClient) {
+  public apiTarget;
 
-    this.airlineConfigClient = new AirlineConfigClient(this.http, this.apiTarget)
+  constructor(@Inject(HttpClient) protected http: HttpClient, private sanitizer: DomSanitizer) {
 
-    // console.log('this.airlineConfigClient ', this.airlineConfigClient)
+    this.apiTarget = sanitizer.bypassSecurityTrustResourceUrl(this.apiUrl);
 
-    //this.bidPriceInfluences = new BidPriceInfluencesClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
-    //this.flightClient = new FlightClient(this.http, this.configurationLoader.getConfiguration().apiUrl);
-    //console.log('configurationLoader ', this.configurationLoader)
-    //this.receivedUserId = window.localStorage.getItem('UserID');
-    //console.log('From Dashboard API   receivedUserId ', this.receivedUserId)
+    //console.log('this.apiTarget  ', this.apiTarget.changingThisBreaksApplicationSecurity)
+
+    this.airlineConfigClient = new AirlineConfigClient(this.http, this.apiTarget.changingThisBreaksApplicationSecurity)
 
     this.mockFlightClientValues();
     // this.setAirlineValues()
   }
-
-  // public getAirlineValues() {
-  //   return this.airlineConfigClient.get()
-  //     .pipe(
-  //       // take(1),
-  //       map((response: AirlineConfig) => {
-  //         console.log('|||||||   response ', response)
-  //         return response;
-  //       }),
-  //       catchError(error => {
-  //         console.log('airlineConfigClient ', error)
-  //         throw error;
-  //       }),
-  //     );
-  // }
-
-  // public setAirlineValues() {
-  //   this.getAirlineValues()
-  //     .subscribe((response: AirlineConfig) => {
-
-  //       console.log('airlineConfigClient ', response)
-  //     })
-  // }
 
 
   public flight_Get(): Observable<BucketDetails[]> {
@@ -309,7 +284,7 @@ export class BidPriceAspNetService {
 
     // console.log('mockFlightClientValues ', options_)
 
-    return this.http.get(this.apiTarget, options_)
+    return this.http.get(this.apiTarget.changingThisBreaksApplicationSecurity, options_)
       .pipe(
         map((response: any) => {
           return response;
@@ -319,32 +294,6 @@ export class BidPriceAspNetService {
         }),
       );
 
-  }
-
-  // public getAirlineValues() {
-  //   return this.airlineConfigClient.get()
-  //     .pipe(
-  //       map((response: AirlineConfig) => {
-  //         return response;
-  //       }),
-  //       catchError(error => {
-  //         throw error;
-  //       }),
-  //     );
-  // }
-
-
-  // Returns mult, min, max, add/sub from API // BidPriceInfluences
-  public getBidPriceInfluences(masterKey: number): Observable<BidPriceInfluencers[]> {
-    return this.bidPriceInfluences.get(masterKey)
-      .pipe(
-        map((response: any) => {
-          return response;
-        }),
-        catchError(error => {
-          throw error;
-        }),
-      );
   }
 
 
@@ -360,18 +309,6 @@ export class BidPriceAspNetService {
           throw error;
         })
       );
-  }
-
-
-  public postToFlightClient(masterKey, influences, userId): Observable<any> {
-    return this.flightClient.post(masterKey, influences, userId)
-      .pipe(
-        map((response => response)
-        ),
-        catchError(error => {
-          throw error;
-        })
-      )
   }
 
 
@@ -433,17 +370,19 @@ export class BidPriceAspNetService {
 
 
 export class BidPriceWebViewService implements IBidPriceService {
+
   private bidPriceBridge;
   readonly mockFlightClient = './assets/config/bucketConfigs.json';
 
-  constructor(@Inject(HttpClient) protected http: HttpClient) {
+  constructor(@Inject(HttpClient) protected http: HttpClient, sanitizer: DomSanitizer) {
 
     // if (!this.hasBidPriceBridge()) {
     //   this.bidPriceBridge = window.chrome.webview.hostObjects.bidPrice;
     // } else {
     //   throw Error("Could not find bidPrice bridge object 'window.chrome.webview.hostObjects.bidPrice'");
     // }
-    getClientForEnvironment(http)
+
+    getClientForEnvironment(http, sanitizer)
 
 
   }

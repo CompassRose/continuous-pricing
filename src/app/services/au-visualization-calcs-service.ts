@@ -168,54 +168,18 @@ export class BidPriceCalcsService {
     }
 
 
-    public generateColorValues() {
-
-        let colorSeries = [];
-
-        let counter = 0;
-        let colorIncr = 0;
-
-        this.sharedDatasetService.nonDiscreteBuckets.map((pc, i) => {
-
-            if (pc.protections > 0) {
-                for (let e = 0; e < pc.protections; e++) {
-                    if (!colorSeries.includes(this.setBookingElementsColor(colorIncr, counter))) {
-                        // console.log('i ', i, ' colorIncr ', colorIncr, ' counter ', counter)
-                        colorSeries.push(this.setBookingElementsColor(colorIncr, counter))
-                    }
-                    counter++
-                }
-                colorIncr++;
-            }
-        })
-        return colorSeries;
-    }
-
     // Set up bar colors 
     public adjustPieceColorForBookingUpdates(selectedElements: number[]) {
 
-        // console.log('selectedElements ', selectedElements)
         this.sharedDatasetService.dynamicBidPrices = [];
-        this.sharedDatasetService.nonDiscreteBuckets.map((pc, i) => {
-            if (pc.protections > 0) {
-                for (let e = 0; e < pc.protections; e++) {
-                    this.sharedDatasetService.dynamicBidPrices.push(pc.fare)
+        for (let i = 0; i < this.sharedDatasetService.nonDiscreteBuckets.length; i++) {
+            if (this.sharedDatasetService.nonDiscreteBuckets[i].protections > 0) {
+                for (let e = 0; e < this.sharedDatasetService.nonDiscreteBuckets[i].protections; e++) {
+                    this.sharedDatasetService.dynamicBidPrices.push(this.sharedDatasetService.nonDiscreteBuckets[i].fare)
                 }
             }
-        })
-        // console.log('\n  ----  Length', this.sharedDatasetService.dynamicBidPrices.length)
+        }
     }
-
-
-
-    // Generates and returns each bar color
-    public setBookingElementsColor(value, j): string {
-        //  console.log('\n  ----   this.colorRange[value] ', value, ' j ', j)
-        //  const len = this.sharedDatasetService.dynamicBidPrices[0] - this.sharedDatasetService.totalBookingsCollector;
-
-        return this.sharedDatasetService.colorRange[value]; //'rgb(55, 165, 55)'
-    }
-
 
 
 
@@ -258,7 +222,7 @@ export class BidPriceCalcsService {
             const fareClass = `Selling: ${rounded}`;
             // Vertical Active Class/Value Selling Line
             const letterTarget = this.findMatchingBucketForBidPrice(this.sharedDatasetService.activeCurve[sellingPoint]).letter
-            console.log('markVerticalLineSellingValues ', fareClass, ' XXXX ', letterTarget)
+            // console.log('markVerticalLineSellingValues ', fareClass, ' XXXX ', letterTarget)
 
             return {
                 name: 'current',

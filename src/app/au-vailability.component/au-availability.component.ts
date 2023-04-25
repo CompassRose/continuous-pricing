@@ -244,11 +244,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                 //self.sharedDatasetService.bucketDetails
                 graphic: echarts.util.map(self.sharedDatasetService.buckets, (item, dataIndex) => {
 
-
-
-                    //if (item.discrete) {
-                    // console.log('util ', item, ' dataIndex ', dataIndex)
-
                     let activeItems = {};
 
                     const handles = [item, self.sharedDatasetService.bucketDetails[dataIndex].Aus];
@@ -449,7 +444,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                     show: showLabels ? true : true,// temp > 0 ? true : false,
                                     width: 25,
                                     height: 14,
-                                    backgroundColor: 'rgba(240,240,240,0.15',
+                                    backgroundColor: item.protections > 0 ? 'rgba(240,240,240,0.15' : 'rgba(240,240,240,0',
                                     formatter: (params) => {
                                         let active;
                                         const auDiff = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].protections - self.sharedDatasetService.bucketDetails[params.dataIndex].bookings);
@@ -468,14 +463,14 @@ export class AuAvailabilityComponent implements AfterViewInit {
 
                                 itemStyle: {
                                     color: 'rgba(128,128,25,0.4)',
-                                    opacity: 1,
+                                    //opacity: 1,
                                     // borderColor: 'black',
                                     // borderWidth: 0,
                                     shadowColor: 'black',
-                                    shadowOffsetY: -2,
+                                    shadowOffsetY: -1,
                                     decal: {
                                         symbol: 'rect',
-                                        color: 'rgba(20, 13, 250, 0.43)',
+                                        color: 'rgba(20, 13, 250, 0.23)',
                                         dashArrayX: [1, 0],
                                         dashArrayY: [4, 2],
                                         symbolSize: 1,
