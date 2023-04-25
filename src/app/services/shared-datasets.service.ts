@@ -385,7 +385,7 @@ export class SharedDatasetService {
             return a.protections = this.protectionMyLevel(i);
         })
         // console.log('\n\n\n\n nonDiscreteBuckets. ', this.nonDiscreteBuckets)
-        this.bucketDetailsBehaviorSubject$.next(false);
+        this.bucketDetailsBehaviorSubject$.next(true);
     }
 
 

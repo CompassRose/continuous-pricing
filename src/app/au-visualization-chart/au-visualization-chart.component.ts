@@ -51,10 +51,12 @@ export class ContinousBidPricingComponent implements AfterViewInit {
     set showBidPriceCurve(state: boolean) {
         if (this.myChart) {
             this.showAllCurves = state;
-            //console.log('showAllCurves ', this.showAllCurves)
+            console.log('showAllCurves ', this.showAllCurves)
+
             if (state) {
                 this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
             }
+            this.setChartInstance();
             this.createChartElement(false);
         }
     }
@@ -74,6 +76,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                 // console.log('theme ', theme)
                 this.themeSelect = theme;
                 this.createSvg();
+                this.setChartInstance();
                 this.createChartElement(true);
             })
 
@@ -152,7 +155,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             .subscribe((state: boolean) => {
 
                 if (this.myChart) {
-                    // console.log(' AU VISUAIZATION ((((((((  bucketDetailsBehaviorSubject$ createChartElement )))))))))))  state ', state)
+                    //console.log(' AU VISUAIZATION ((((((((  bucketDetailsBehaviorSubject$ createChartElement )))))))))))  state ', state)
                     if (this.sharedDatasetService.modifierCollection.length > 0) {
 
                         this.sharedDatasetService.adjustedCurvePoints = [];
@@ -166,24 +169,28 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                         if (this.sharedDatasetService.selectedElement.length > 0) {
                             //  console.log('1   createChartElement <<<<<<<<>>>>>>>>>>>>selectedElement.length > 0')
                             this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.sharedDatasetService.selectedElement);
-                            this.sharedDatasetService.activeCurve = this.sharedDatasetService.adjustedCurvePoints;
+                            /// this.sharedDatasetService.activeCurve = this.sharedDatasetService.adjustedCurvePoints;
                             this.sharedDatasetService.selectedElement = [];
                             this.createChartElement(true);
                             this.sharedDatasetService.modifierCollection = [];
                         }
                         /// No Modifiers 
                     } else {
+
                         this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.sharedDatasetService.selectedElement);
-                        if (state) {
-                            if (this.showAllCurves) {
-                                this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
-                            }
+                        if (this.showAllCurves) {
+                            this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
                         }
 
                         this.sharedDatasetService.activeCurve = this.sharedDatasetService.dynamicBidPrices;
 
                         setTimeout(() => {
+
                             this.createChartElement(true);
+
+                            this.myChart.setOption({
+                                series: this.setChartSeries()
+                            })
                         }, 0);
 
                         /// this.loadInterpolatedBidPriceValues('activeCurve');
@@ -201,6 +208,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             this.setChartInstance();
         }, 0);
     }
+
 
     @HostListener('window:resize', ['$event'])
     onResize(event) {
@@ -487,10 +495,6 @@ export class ContinousBidPricingComponent implements AfterViewInit {
         const self = this;
 
         const updatePosition = () => {
-
-            if (redrawChartPoints) {
-                self.setChartSeries();
-            }
             setChartDragPoints();
         };
 
