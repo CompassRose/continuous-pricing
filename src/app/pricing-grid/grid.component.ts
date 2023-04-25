@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from "@angular/common";
-import { Subscription, map, merge, Observable, pairwise, scan } from 'rxjs';
+import { Subscription, map, merge, Observable, pairwise, scan, Subject } from 'rxjs';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { BookingControlService } from '../services/booking-control-service';
 import { KeyCode } from './lib/keycodes';
@@ -8,7 +8,7 @@ import { shortcut, sequence } from './lib/shortcuts';
 import { PathToAssets } from '../dashboard-constants';
 import { environment } from 'src/environments/environment.prod';
 import { ThemeControlService } from '../services/theme-control.service';
-
+import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visualization.service';
 
 export function animationFrame({
   requestAnimationFrame,
@@ -38,31 +38,34 @@ export function animationFrame({
 })
 
 
-
 export class ContinousPricingComponent implements OnInit {
 
   public slider: any = document.getElementById("myRange");
   public output: any = document.getElementById("demo");
+
   public currentApplicationVersion = environment.appVersion;
 
-  readonly fps$ = animationFrame(this.documentRef.defaultView).pipe(
-    pairwise(),
-    scan((acc, [prev, cur]) => {
-      if (acc.push(1000 / (cur - prev)) > 60) {
-        acc.shift();
-      }
-      return acc;
-    }, []),
-    map(arr => Math.round(arr.reduce((acc, cur) => acc + cur, 0) / arr.length))
-  );
+  readonly fps$ = animationFrame(this.documentRef.defaultView)
+    .pipe(
+      pairwise(),
+      scan((acc, [prev, cur]) => {
+
+        if (acc.push(1000 / (cur - prev)) > 60) {
+          acc.shift();
+          //  console.log('pairwise ', acc)
+        } return acc;
+      }, []),
+      map(
+        arr => Math.round(arr.reduce((acc, cur) => acc + cur, 0) / arr.length))
+    );
 
 
   // Holder for toggle single shortcut
   public lastSelectedMetric = 0;
 
   public pathToAssets = PathToAssets;
-  sub: Subscription;
-  shortcuts$: Observable<string>;
+  public sub: Subscription;
+  public shortcuts$: Observable<string>;
 
   public frameRateCounterState = false;
   public influencesExpanded = true;
@@ -73,57 +76,96 @@ export class ContinousPricingComponent implements OnInit {
   public selectedFlightIndex = 0;
   public selectedCabinIndex = 2;
 
+
+  public pointsDeSelected = false;
+  // public pointSelected = false;
+
+
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
-    //private dashboardApi: DashboardApi,
+    //private bidPriceWebViewService: BidPriceWebViewService,
+    public dashboardApi: BidPriceAspNetService,
     public bookingControlService: BookingControlService,
     public themeControlService: ThemeControlService,
     public sharedDatasetService: SharedDatasetService) {
+    // console.log('bidPriceWebViewService ', bidPriceWebViewService)
+    //this.bidPriceWebViewService.flight_Get();
 
     //this.selectedFlightValues = {} //sharedDatasetService.mockFlightValues[0];
     //this.selectedFlightKey = this.sharedDatasetService.mockFlightValues[0].masterKey;
-    this.flightSelectControl(this.sharedDatasetService.mockFlightValues[0]);
+
   }
 
+
+  // Activates Continuous price curve
   public toggleFrameRate() {
     this.frameRateCounterState = !this.frameRateCounterState;
   }
 
+
+
   public cabinSelection(ev) {
-    this.selectedCabinIndex = ev.id
-    console.log('cabinSelection ', ev, ' this.selectedCabinIndex ', this.selectedCabinIndex)
+    this.selectedCabinIndex = ev.id;
+    //console.log('cabinSelection ', ev, ' this.selectedCabinIndex ', this.selectedCabinIndex)
   }
 
 
   // Called onStart and from flight dropdown
   public flightSelectControl(ev) {
 
-    console.log('flightSelectControl ', ev)
     this.sharedDatasetService.totalBookingsCollector = 0;
-    this.selectedFlightKey = ev;
     const index = this.sharedDatasetService.mockFlightValues.findIndex(mk => mk.masterKey === ev.masterKey);
+
     this.selectedFlightIndex = index;
+
+    // console.log('flightSelectControl ', ev, ' selectedFlightIndex ', this.selectedFlightIndex)
     this.selectedFlightValues = this.sharedDatasetService.mockFlightValues[index];
+
     this.selectedFlightKey = ev.masterKey;
     this.sharedDatasetService.setFlightClient(index);
 
-    this.bookingControlService.tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails];
-
-    this.bookingControlService.change(this.sharedDatasetService.totalBookingsCollector)
-
-    this.bookingControlService.bookingSlider$.next(this.sharedDatasetService.totalBookingsCollector);
-
+    // this.bookingControlService.tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails];
+    // this.bookingControlService.bookingSlider$.next(this.sharedDatasetService.totalBookingsCollector);
   }
+
+
+  public deselectAllPoints() {
+    console.log('           ..............  deselectAllPoints deselectAllPoints ', this.pointsDeSelected);
+    this.pointsDeSelected = !this.pointsDeSelected;
+    this.sharedDatasetService.multiSelectedNodeSubject$.next([]);
+  }
+
 
   public ngOnInit() {
 
+    this.dashboardApi.mockFlightClientValues()
+      .subscribe((flight: any) => {
+
+        console.log('flight ', flight)
+
+        this.sharedDatasetService.apiBucketDetails = flight;
+
+        window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
+
+        window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
+
+
+        this.sharedDatasetService.bucketDetails = this.sharedDatasetService.apiBucketDetails[0];
+
+        this.flightSelectControl(this.sharedDatasetService.mockFlightValues[0]);
+
+        //   // this.bookingControlService.change(this.sharedDatasetService.totalBookingsCollector);
+
+      })
 
 
     this.sharedDatasetService.updatedClientFlight$.next(this.sharedDatasetService.mockFlightValues);
 
+
+
     this.bookingControlService.bookingSlider$
       .subscribe(response => {
-        //console.log('BOOK response ', response)
+        // console.log('BOOK response ', response)
         this.sharedDatasetService.generateInverseDetails();
       })
 
@@ -131,6 +173,7 @@ export class ContinousPricingComponent implements OnInit {
       shortcut([KeyCode.MetaRight, KeyCode.KeyJ]),
       shortcut([KeyCode.MetaLeft, KeyCode.KeyJ])
     );
+
 
     const ctrlL = merge(
       shortcut([KeyCode.ControlLeft, KeyCode.KeyL]),
@@ -151,7 +194,7 @@ export class ContinousPricingComponent implements OnInit {
       //   KeyCode.KeyQ,
       //   KeyCode.KeyW,
       //   KeyCode.KeyE,
-      //   KeyCode.KeyR,
+      KeyCode.KeyR,
       KeyCode.Digit1,
       //KeyCode.Digit2,
       //KeyCode.ControlLeft,
@@ -200,7 +243,7 @@ export class ContinousPricingComponent implements OnInit {
       //  altK,
       //  altSpace
     ).pipe(map((arr) => {
-
+      // console.log('arr ', arr)
       return arr.map((a) => {
         if (this.sharedDatasetService.selectedMetric !== 0) {
           this.lastSelectedMetric = this.sharedDatasetService.selectedMetric;
@@ -228,6 +271,8 @@ export class ContinousPricingComponent implements OnInit {
       }).join("+")
     }))
   }
+
+
 
   public collapseInfluences() {
     //console.log('collapseInfluences ', this.influencesExpanded)

@@ -15,6 +15,11 @@ import { AuAvailabilityComponent } from './au-vailability.component/au-availabil
 import { FlightHeaderComponent } from './pricing-grid/Fight-header/flight-header.component';
 import { BipPriceConfigureComponent } from './bid-price-configure/bid-price-configure.component';
 import { ContinousBidPricingComponent } from './au-visualization-chart/au-visualization-chart.component';
+import { DragPointDistributionService } from './services/drag-point-distribution';
+import { BidPriceWebViewService } from '../app/api/au-visualization.service';
+
+import { BidPriceAspNetService } from "./api/au-visualization.service";
+
 /// import { ConfigurationModule } from "./configuration/configuration.module";
 import { NgxBootstrapIconsModule } from 'ngx-bootstrap-icons';
 import { MaterialExampleModule } from '../material.module';
@@ -48,6 +53,7 @@ const icons = {
   ],
   imports: [
     BrowserModule,
+
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
@@ -66,7 +72,12 @@ const icons = {
       echarts: () => import('echarts')
     })
   ],
-  providers: [{ provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }],
+  providers: [{
+    provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR'
+  },
+    BidPriceAspNetService,
+    BidPriceWebViewService,
+    DragPointDistributionService],
   schemas: [NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]
 })

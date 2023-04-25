@@ -386,6 +386,23 @@ label {
   font-size: 13px;
   position: relative;
 
+  &.red {
+    background: red;
+  }
+
+  &.blue {
+    background: #0d6efd;
+  }
+
+  &.gray {
+    background: gray;
+  }
+
+  &.dark-blue {
+    background: $brand-primary-background;
+
+  }
+
   &:hover {
     border: 1px solid hsla(150, 75%, 50%, 1);
   }
@@ -397,23 +414,41 @@ input[type="radio"] {
 
   &:not(:disabled)~label {
     cursor: pointer;
+    //background: red;
   }
 
   &:disabled~label {
     color: hsla(150, 5%, 75%, 1);
     border-color: hsla(150, 5%, 75%, 1);
+    background: gray;
     box-shadow: none;
     cursor: not-allowed;
   }
 }
 
 input[type=radio]:not(:checked)~label {
+  // background: $brand-primary-background;
   color: white;
 }
 
 input[type="radio"]:checked+label {
   background: #0d6efd;
+
+  // &:disabled~label {
+  //   background: #0d6efd;
+  // }
+
   color: hsla(215, 0%, 100%, 1);
+
+  // &:not(:active)~label {
+  //   cursor: pointer;
+  //   background: #0d6efd;
+  // }
+
+  // &:active~label {
+  //   background: red;
+  // }
+
 }
 
 

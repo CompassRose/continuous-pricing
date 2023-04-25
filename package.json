@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --aot --watch  --configuration production",
+    "build": "ng build --aot --watch  --configuration development",
     "test": "ng test"
   },
   "private": true,

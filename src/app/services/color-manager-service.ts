@@ -10,11 +10,10 @@ const culori = require('culori')
 
 export class ColorManagerService {
 
-
-
-    public genColors(numClasses): any[] {
-
+    public genColors(numClasses: number): any[] {
+        // console.log('genColors ', numClasses)
         numClasses = numClasses + 1;
+
         function adjustHue(val) {
             if (val < 0) val += Math.ceil(-val / 360) * 360;
             return val % 360;
@@ -26,9 +25,9 @@ export class ColorManagerService {
         }
 
         function createHueShiftPalette(opts) {
-            // console.log('createHueShiftPalette ', opts)
-            const { base, minLightness, maxLightness, hueStep } = opts;
 
+            const { base, minLightness, maxLightness, hueStep } = opts;
+            // console.log('createHueShiftPalette ', base, ' minLightness ', minLightness, ' maxLightness ', maxLightness, ' hueStep ', hueStep)
             const palette = [base];
             const test = (numClasses / 2);
 
@@ -36,8 +35,8 @@ export class ColorManagerService {
                 const incr = i + 2;
                 const hueDark = adjustHue(base.h - hueStep * i);
                 const hueLight = adjustHue(base.h + hueStep * incr);
-                const lightnessDark = map(i, 0, 4, base.l, minLightness);
-                const lightnessLight = map(i, 0, 4, base.l, maxLightness);
+                const lightnessDark = map(i, 0, 14, base.l, minLightness);
+                const lightnessLight = map(i, 0, 2, base.l, maxLightness);
                 const chroma = base.c;
 
                 palette.push({
@@ -63,12 +62,12 @@ export class ColorManagerService {
             base: {
                 l: 25,
                 c: 135,
-                h: 10,
+                h: 2,
                 mode: "lch"
             },
             minLightness: 35,
             maxLightness: 65,
-            hueStep: 9
+            hueStep: 12
         });
 
         const hueShiftPaletteHex = hueShiftPalette.map((color) => formatHex(color));

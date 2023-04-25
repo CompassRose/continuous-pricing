@@ -1,5 +1,5 @@
 import { Component, Input, AfterViewInit, HostListener } from '@angular/core';
-import { BidPriceInfluencers, BarSeries } from '../models/dashboard.model';
+import { BidPriceInfluencers, BarSeries, BucketDetails } from '../models/dashboard.model';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { BidPriceCalcsService } from '../services/au-visualization-calcs-service';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
@@ -18,13 +18,11 @@ import { ThemeControlService } from '../services/theme-control.service';
 
 export class ContinousBidPricingComponent implements AfterViewInit {
 
-    public barSeriesValuesColors: BarSeries[] = [];
-    public modifierCollection = [];
-    public selectedElement: any[] = [];
+    public barSeriesValuesColors: any[] = [];
     public options: any = {};
     public myChart: echarts.ECharts = null;
     public modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
-    public colorRange: string[] = [];
+    //public colorRange: string[] = [];
     public resetChartElementView = true;
     public markPointContainer: any = {};
 
@@ -34,14 +32,30 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
     public themeSelect = '';
     public showAllCurves = false;
+    public nonDiscreteBuckets: BucketDetails[] = [];
+    public chartSeriesCollection: any[] = [];
+
+
+    @Input()
+    set gridPointsDeSelected(state: boolean) {
+        if (this.sharedDatasetService.selectedElement.length > 0) {
+            this.sharedDatasetService.selectedElement = [];
+            this.sharedDatasetService.setGroupingMethod(0);
+            this.sharedDatasetService.multiSelectedNodeSubject$.next([])
+            this.createChartElement(false);
+        }
+    }
+
 
     @Input()
     set showBidPriceCurve(state: boolean) {
         if (this.myChart) {
             this.showAllCurves = state;
-            console.log('showAllCurves ', this.showAllCurves)
-
-            this.createChartElement(true);
+            //console.log('showAllCurves ', this.showAllCurves)
+            if (state) {
+                this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
+            }
+            this.createChartElement(false);
         }
     }
 
@@ -55,8 +69,6 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
         this.themeSelect = JSON.parse(window.localStorage.getItem('colorTheme'));
 
-        // console.log('AuAvailabilityComponent tempSavedCollection ', this.themeSelect)
-
         this.themeControlService.resetThemeSubject$
             .subscribe((theme: string) => {
                 // console.log('theme ', theme)
@@ -66,47 +78,73 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             })
 
 
-        this.colorRange = this.bidPriceCalcsService.getColorValues();
+        this.sharedDatasetService.apiFlightActiveSubject$
+            .subscribe((response) => {
 
-        // this.sharedDatasetService.apiFlightActiveSubject$
-        //     .subscribe((response) => {
-        //         console.log('apiFlightActiveSubject$ ||||||   response ', response)
-        //         if (response) {
+                if (response) {
+                    // console.log('apiFlightActiveSubject$ ||||||   response ', response)
+                    //             this.sharedDatasetService.totalBookingsCollector = 0;
+                    //             this.storedInterpolateBpValues = 0;
+                    //             this.storedDynamicBpValues = 0;
+                    //             this.differenceCalculation = [0, 0];
+                    this.sharedDatasetService.modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
 
-        //             this.sharedDatasetService.totalBookingsCollector = 0;
-        //             this.storedInterpolateBpValues = 0;
-        //             this.storedDynamicBpValues = 0;
-        //             this.differenceCalculation = [0, 0];
-        //             this.sharedDatasetService.modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
+                    this.sharedDatasetService.influenceInput.next([1.00, 'mult', 0]);
+                    this.sharedDatasetService.influenceInput.next([0, 'addSub', 1]);
 
-        //             // this.sharedDatasetService.influenceInput.next([1.00, 'mult', 0]);
-        //             // this.sharedDatasetService.influenceInput.next([0, 'addSub', 1]);
+                    //this.sharedDatasetService.resetDefaultSubject$.next(true);
+                    //this.loadInterpolatedBidPriceValues('activeCurve');
+                    //this.loadDynamicBidPriceValues('dynamicBidPrices');
 
-        //             this.sharedDatasetService.resetDefaultSubject$.next(true);
-        //             this.loadInterpolatedBidPriceValues('activeCurve');
-        //             this.loadDynamicBidPriceValues('dynamicBidPrices');
-        //             this.createChartElement(true);
-        //         }
-        //     })
+                    // this.createChartElement(true);
+                }
+            })
+
+
 
 
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
+
                 if (response) {
-                    console.log('resetDefaultSubject {{{{{{{{{{{{{}}}}}}}}}}}}}  adjustPieceColorForBookingUpdates ', response)
                     this.sharedDatasetService.totalBookingsCollector = 0;
-                    this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.selectedElement);
-                    this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
-                    this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                    this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.sharedDatasetService.selectedElement);
                     this.sharedDatasetService.adjustedCurvePoints = [];
                     this.sharedDatasetService.influenceInput.next([1.00, 'mult', 0]);
                     this.sharedDatasetService.influenceInput.next([0, 'addSub', 1]);
-                    this.modifierCollection = [];
-                    this.loadInterpolatedBidPriceValues('activeCurve');
-                    this.loadDynamicBidPriceValues('dynamicBidPrices');
-                    this.createChartElement(true);
+                    this.sharedDatasetService.modifierCollection = [];
+                    this.sharedDatasetService.selectedElement = [];
+                    this.sharedDatasetService.applyDataChanges();
+                    this.sharedDatasetService.setGroupingMethod(0);
+
+                    // console.log('this.showAllCurves ', this.showAllCurves)
+                    if (this.showAllCurves) {
+                        this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
+                        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                    }
+
+
+                    // this.loadInterpolatedBidPriceValues('activeCurve');
+                    // this.loadDynamicBidPriceValues('dynamicBidPrices');
+
+                    if (this.sharedDatasetService.selectedElement.length > 0) {
+                        this.sharedDatasetService.selectedElement = [];
+                        this.sharedDatasetService.setGroupingMethod(0);
+                    }
+
+                    this.createChartElement(false);
+
                 }
 
+            })
+
+        // Truncated Bucket list
+        this.sharedDatasetService.bucketDetailsConcatBehaviorSubject$
+            .subscribe(buckets => {
+                if (buckets.length) {
+                    this.nonDiscreteBuckets = buckets;
+                    this.barSeriesValuesColors = this.bidPriceCalcsService.generateColorValues();
+                }
             })
 
 
@@ -114,8 +152,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             .subscribe((state: boolean) => {
 
                 if (this.myChart) {
-                    // console.log('\n****************  \n ||||||    bucketDetailsBehaviorSubject$ this.modifierCollection ', this.sharedDatasetService.modifierCollection, '\nthis.selectedElement. ', this.selectedElement, '\nbucketDetails ', this.sharedDatasetService.bucketDetails)
-
+                    // console.log(' AU VISUAIZATION ((((((((  bucketDetailsBehaviorSubject$ createChartElement )))))))))))  state ', state)
                     if (this.sharedDatasetService.modifierCollection.length > 0) {
 
                         this.sharedDatasetService.adjustedCurvePoints = [];
@@ -124,54 +161,55 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
                         const staticArray = [...this.sharedDatasetService.interpolateBidPriceCurvePoints];
 
-                        this.sharedDatasetService.adjustedCurvePoints = this.bidPriceCalcsService.applyAllInfluences(this.selectedElement, this.showAllCurves, staticArray, this.sharedDatasetService.modifierCollection);
+                        this.sharedDatasetService.adjustedCurvePoints = this.bidPriceCalcsService.applyAllInfluences(this.sharedDatasetService.selectedElement, this.showAllCurves, staticArray, this.sharedDatasetService.modifierCollection);
 
-                        if (this.selectedElement.length > 0) {
-                            //   console.log('resetDefaultSubject {{{{{{{{{{{{{}}}}}}}}}}}}}  adjustPieceColorForBookingUpdates ')
-                            this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.selectedElement);
+                        if (this.sharedDatasetService.selectedElement.length > 0) {
+                            //  console.log('1   createChartElement <<<<<<<<>>>>>>>>>>>>selectedElement.length > 0')
+                            this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.sharedDatasetService.selectedElement);
                             this.sharedDatasetService.activeCurve = this.sharedDatasetService.adjustedCurvePoints;
-                            this.selectedElement = [];
+                            this.sharedDatasetService.selectedElement = [];
                             this.createChartElement(true);
                             this.sharedDatasetService.modifierCollection = [];
                         }
                         /// No Modifiers 
                     } else {
-                        this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.selectedElement);
-
+                        this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.sharedDatasetService.selectedElement);
                         if (state) {
-                            this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
-
-                        } else {
-                            this.createChartElement(true);
+                            if (this.showAllCurves) {
+                                this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
+                            }
                         }
 
-                        this.sharedDatasetService.activeCurve = this.sharedDatasetService.interpolateBidPriceCurvePoints;
+                        this.sharedDatasetService.activeCurve = this.sharedDatasetService.dynamicBidPrices;
 
-                        this.loadInterpolatedBidPriceValues('activeCurve');
-                        this.loadDynamicBidPriceValues('dynamicBidPrices');
+                        setTimeout(() => {
+                            this.createChartElement(true);
+                        }, 0);
+
+                        /// this.loadInterpolatedBidPriceValues('activeCurve');
+                        // this.loadDynamicBidPriceValues('dynamicBidPrices');
                     }
                 }
             })
     }
 
+
+
     public ngAfterViewInit(): void {
-
         this.createSvg();
-
-        this.sharedDatasetService.applyDataChanges();
         setTimeout(() => {
-            // this.createChartElement(true);
-        }, 300);
+            this.setChartInstance();
+        }, 0);
     }
 
-
-    @HostListener('window:resize') onResize() {
+    @HostListener('window:resize', ['$event'])
+    onResize(event) {
+        // console.log('event ', event)
         if (this.myChart) {
             this.myChart.resize();
             this.refreshChartVisual();
         }
     }
-
 
 
     // Sets up Dom node and attaches myChart element
@@ -187,31 +225,14 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
     // on window resize
     public refreshChartVisual = () => {
-        //  console.log('refreshChartVisual refreshChartVisual, refreshChartVisual')
-        //  console.log('\n\n ||||||||||||| refreshChartVisual TRUE createChartElement ||||||||||| ')
         this.createChartElement(true);
     }
 
 
 
-    public generateCompetitorBidPriceComparison(top, bottom) {
-        // console.log('|||||  generateCompetitorBidPriceComparison  ||||| ', top, ' bottom ', bottom)
 
-        this.sharedDatasetService.competitorsCurvePoints[0] = this.sharedDatasetService.interpolateBidPriceCurvePoints.map((dbp, i) => {
-            return dbp + top;
-        })
-
-        this.sharedDatasetService.competitorsCurvePoints[1] = this.sharedDatasetService.interpolateBidPriceCurvePoints.map((dbp, i) => {
-            return dbp + bottom;
-        })
-
-    }
-
-
-
+    // Out for now
     public loadDynamicBidPriceValues(metric: string) {
-
-        //console.log('this.sharedDatasetService  ', this.sharedDatasetService[metric])
         this.differenceCalculation[0] = this.sharedDatasetService[metric].reduce((accumulator, value) => {
             return accumulator + value;
         }, 0)
@@ -223,7 +244,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
     }
 
 
-
+    // Out for now
     public loadInterpolatedBidPriceValues(metric: string) {
 
         this.differenceCalculation[1] = this.sharedDatasetService[metric].reduce((accumulator, value) => {
@@ -234,464 +255,384 @@ export class ContinousBidPricingComponent implements AfterViewInit {
             window.localStorage.setItem('interpolate', JSON.stringify(this.differenceCalculation[1]));
             this.storedInterpolateBpValues = JSON.parse(window.localStorage.getItem('interpolate'));
         } else { }
-        // console.log('this.differenceCalculation[1]  ', this.differenceCalculation[1])
     }
 
 
 
+    // Sets Fare class regions on top of chart
+    public setMarkArea(index: number) {
+
+        let itemDiscreteFalse;
+
+        const markArea = {
+            silent: false,
+            data: this.sharedDatasetService.nonDiscreteBuckets.map((item: any, i) => {
+                itemDiscreteFalse = [{
+                    name: i > 0 ? item.letter : '',
+                    xAxis: this.sharedDatasetService.maxAuValue - item.Aus,
+                    label: {
+                        show: item.Aus > 0 ? true : false,
+                        backgroundColor: 'rgba(245,245,255,1)',
+                        padding: [5, 8, 2, 8],
+                        fontSize: 13,
+                        fontWeight: 'bold',
+                        color: '#001871',
+                        borderColor: 'rgba(105,105,115,0.8)',
+                        borderWidth: 0.5,
+                        offset: [0, 3],
+                    },
+                }, {
+                    itemStyle: {
+                        borderColor: '#001871',
+                        borderWidth: this.sharedDatasetService.nonDiscreteBuckets[i + 1] ? 1 : 0,
+                        color: 'rgba(100,100,100,0)'
+                    },
+                    xAxis: item.Aus && this.sharedDatasetService.nonDiscreteBuckets[i + 1] ? this.sharedDatasetService.maxAuValue - item.Aus : this.sharedDatasetService.maxAuValue
+                }]
+                // console.log('itemDiscreteFalse ', itemDiscreteFalse)
+                return itemDiscreteFalse;
+            })
+        }
+        return markArea;
+    }
+
+
+    // No need to reset axis's 
+    // Called once at start
+    public setChartSeries(): any[] {
+        let colorSeries = [];
+        this.sharedDatasetService.maxAuValue = this.nonDiscreteBuckets[0].Aus;
+        let colorIncrementor = 0 ///self.sharedDatasetService.dynamicBidPrices[0];
+
+        function example() {
+            return;
+        }
+
+        let chartObj = {
+            value: 0,
+            itemStyle: {
+                color: ''
+            }
+        };
+
+        let mySeries = [
+
+            // {
+            //     id: 'e',
+            //     type: 'line',
+            //     z: 5,
+            //     animation: false,
+            //     silent: false,
+            //     showSymbol: false,
+            //     selectedMode: false,
+            //     symbolSize: 10,
+            //     itemStyle: {
+            //         borderColor: 'yellow',
+            //         borderWidth: 5,
+            //         color: 'red'
+            //     },
+            //     lineStyle: {
+            //         type: 'solid',
+            //         color: this.themeSelect === 'dark' ? 'rgba(220, 220, 0, 1)' : 'rgba(220, 220, 0, 1)',
+            //         width: this.themeSelect === 'dark' ? 4 : 4
+            //     },
+            //     data: this.sharedDatasetService.dynamicBidPrices
+            // },
+
+            {
+                id: 'f',
+                type: 'bar',
+                animation: false,
+                animationDuration: 1,
+                showBackground: false,
+                scolorBy: 'series',
+                silent: true,
+                z: 2,
+                data: this.sharedDatasetService.dynamicBidPrices.map((point: any, i: number) => {
+                    if (!colorSeries.includes(point)) {
+                        colorSeries.push(point)
+                        colorIncrementor += 1;
+                    }
+                    chartObj = {
+                        value: point,
+                        itemStyle: {
+                            color: this.barSeriesValuesColors[colorIncrementor]
+                        }
+                    }
+                    return chartObj;
+                }),
+                markArea: this.setMarkArea(0)
+
+            },
+
+            {
+                id: 'd',
+                type: 'line',
+                z: 1,
+                animation: false,
+                silent: true,
+                showSymbol: false,
+                selectedMode: false,
+                symbolSize: this.showAllCurves ? 10 : 0,
+
+                itemStyle: {
+                    borderColor: 'transparent',
+                    borderWidth: this.showAllCurves ? 1 : 0,
+                    color: this.showAllCurves ? 'blue' : 'transparent' // 
+                },
+                lineStyle: {
+                    type: 'solid',
+                    color: 'blue',
+                    width: this.showAllCurves ? 3 : 0
+                },
+                data: this.sharedDatasetService.interpolateBidPriceCurvePoints,
+                markPoint: this.markPoint()
+            },
+        ]
+        // console.log('mySeries ', mySeries)
+        return mySeries;
+    }
+
+
+    public setChartInstance = () => {
+
+        console.log('\n\n\n Calling INIT Chart setChartInstance ')
+        this.sharedDatasetService.maxAuValue = this.nonDiscreteBuckets[0].Aus;
+
+        // if (!self.myChart) {
+
+        this.myChart.setOption({
+
+            grid: {
+                show: false,
+                left: 60,
+                right: 20,
+                top: 40,
+                bottom: 40
+            },
+            // backgroundColor: 'rgba(205,225,245,1)',
+            xAxis: {
+                inverse: false,
+                // boundaryGap: [0, 0],
+                scale: true,
+                type: 'category',
+                silent: false,
+                position: 'bottom',
+                //boundaryGap: true,
+                nameGap: 43,
+                axisLine: {
+                    onZero: true,
+                    linestyle: {
+                        color: 'black',
+                    }
+                },
+                axisTick: {
+                    alignWithLabel: true,
+                    length: 20,
+                    minorTick: {
+                        //         show: true
+                    }
+                },
+                showGrid: true,
+                axisLabel: {
+                    interval: 1,
+                    margin: 15,
+                    hideOverlap: true,
+                    fontSize: 10,
+                    showMinLabel: true,
+                    showMaxLabel: true
+                },
+                data: this.sharedDatasetService.dynamicBidPrices.map((bp, i) => {
+                    return this.sharedDatasetService.maxAuValue - i;
+                }),
+            },
+            yAxis: [
+                {
+                    //silent: true,
+                    show: true,
+                    animation: false,
+                    type: 'value',
+                    name: 'Fares',
+                    position: 'left',
+                    nameLocation: 'middle',
+                    nameRotate: 90,
+                    nameGap: 35,
+                    nameTextStyle: {
+                        fontSize: 14,
+                        fontWeight: 'normal'
+                    },
+                    // position: 'left',
+                    showGrid: false,
+                    max: this.sharedDatasetService.modifierCollection.length === 0 ? this.nonDiscreteBuckets[0].fare + 5 : this.sharedDatasetService.adjustedCurvePoints[0] + 5,
+                    interval: this.nonDiscreteBuckets[0].fare < 400 ? 20 : this.nonDiscreteBuckets[0].fare > 1000 ? 350 : 35,
+                    scale: false,
+                    splitLine: {
+                        show: true
+                    },
+                    axisLine: {
+                        show: true,
+                        onZero: false
+                    }
+                },
+            ],
+
+            series: this.setChartSeries()
+
+        })
+    }
+
     // Re-generates chart elements
     public createChartElement(redrawChartPoints: boolean): void {
-        console.log('createChartElement  target ', redrawChartPoints)
+
         const self = this;
 
         const updatePosition = () => {
 
             if (redrawChartPoints) {
-                setChartInstance();
+                self.setChartSeries();
             }
             setChartDragPoints();
         };
 
 
+
         const onPointDragging = function (dataIndex) {
+
             let xValue = 0;
             let dragPosition: any = [0, 0];
+
             const target = dataIndex;
 
             dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
 
-            xValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
+            xValue = self.sharedDatasetService.maxAuValue - Math.round((dragPosition[0]))
 
-            // console.log('target ', target, ' dragPosition ', dragPosition[0])
-            // console.log('dragPosition  dataIndex ', target, ' xValue ', xValue,
-            //     '\n Letter ', self.sharedDatasetService.bucketDetails[target].letter,
-            //     '\n-1 ', self.sharedDatasetService.bucketDetails[target + 1].letter,
-            //     '\nBD ', self.sharedDatasetService.currAus[target],
-            //     '\ncurrAu -1 ', self.sharedDatasetService.currAus[target + 1]);
+            // console.log(
+            //     '\n\n--------------------  letter ', self.nonDiscreteBuckets[target].letter,
+            //     '\nAus ', self.nonDiscreteBuckets[target].Aus,
+            //     '\ntarget letter ', self.nonDiscreteBuckets[target].letter,
+            //     '\n[targetPlus].Aus, ', self.nonDiscreteBuckets[target].Aus,
+            //     ' \nxValue ', xValue)
 
             if (xValue < 1) { xValue = 0; };
 
             if (xValue > self.sharedDatasetService.maxAuValue) { xValue = self.sharedDatasetService.maxAuValue };
 
-            // console.log('  yValue ', xValue, ' maxAuValue ')
-
-            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[target], target, xValue);
-
+            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.nonDiscreteBuckets[dataIndex].Aus, dataIndex, xValue);
             self.sharedDatasetService.applyDataChanges();
 
             updatePosition();
+
+            self.myChart.setOption({
+                series: self.setChartSeries()
+            })
         }
 
 
-        const showTooltip = (dataIndex, params) => {
-            self.myChart.dispatchAction({
-                type: 'showTip',
-                //position: [params.offsetX - 10, params.offsetY - 50],
-                seriesIndex: 0,
-                dataIndex: dataIndex
-            });
-        }
-
-
-        const hideTooltip = (dataIndex, params) => {
-            self.myChart.dispatchAction({
-                type: 'hideTip',
-                //position: [params.offsetX - 10, params.offsetY - 50],
-                seriesIndex: 0,
-                dataIndex: dataIndex
-            });
-        }
+        // Drag Point Selection System
+        // Must select/deselect adjacent points 
+        // With any points selected only single/multiple dragging permitted
 
 
         const onPointSelect = function (dataIndex) {
-            if (self.selectedElement.includes(dataIndex)) {
-                self.selectedElement.splice(self.selectedElement.findIndex(idx => idx === dataIndex), 1);
-            } else {
-                self.selectedElement.push(dataIndex);
+            // Sorts low to high
+            function compareNumbers(a, b) {
+                return a - b;
             }
 
-            console.log('onPointSelect ', dataIndex, ' selectedElement ', self.selectedElement)
-            setChartDragPoints()
+            //console.log('onPointSelect ', dataIndex, ' selectedElement ', self.sharedDatasetService.selectedElement)
+
+            if (self.sharedDatasetService.selectedElement.includes(dataIndex)) {
+                if (self.sharedDatasetService.selectedElement.length === 1) {
+                    self.sharedDatasetService.selectedElement = [];
+                }
+                if (dataIndex <= self.sharedDatasetService.selectedElement[0] ||
+                    dataIndex >= self.sharedDatasetService.selectedElement[self.sharedDatasetService.selectedElement.length - 1]) {
+                    self.sharedDatasetService.selectedElement.splice(self.sharedDatasetService.selectedElement.findIndex(idx => idx === dataIndex), 1);
+                }
+            } else {
+                if (self.sharedDatasetService.selectedElement.length === 0 || self.sharedDatasetService.selectedElement.includes(dataIndex + 1) || self.sharedDatasetService.selectedElement.includes(dataIndex - 1)) {
+                    self.sharedDatasetService.selectedElement.push(dataIndex);
+                }
+            }
+
+            self.sharedDatasetService.selectedElement.sort(compareNumbers);
+            self.sharedDatasetService.multiSelectedNodeSubject$.next(self.sharedDatasetService.selectedElement)
+            setChartDragPoints();
         }
 
 
+
         const setChartDragPoints = function () {
+
             let placeTemp = 0;
             let xPlace = 0;
             let scaleHandles = [];
-            /// stackValues sets z depth for group
             let stackValues = [];
             let activeItems: any = {};
 
             self.myChart.setOption({
-
-                //graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, function (item: any, dataIndex) {
-                graphic: echarts.util.map(self.sharedDatasetService.currAus, function (item: any, dataIndex) {
-                    //  if (!item.discrete) {
-                    // console.log('dataIndex ', dataIndex, '  ------- item ', item, ' ', self.sharedDatasetService.bucketDetails[dataIndex].letter, ' Au ', self.sharedDatasetService.bucketDetails[dataIndex].Aus, ' currAus ', self.sharedDatasetService.currAus[dataIndex])
+                graphic: echarts.util.map(self.sharedDatasetService.buckets, function (item: any, dataIndex) {
 
                     let stacker = 120 - dataIndex;
 
-                    stackValues.push(stacker)
-
-                    //console.log(' ------- item ', self.sharedDatasetService.bucketDetails[dataIndex].letter, ' Au ', item, ' xPlace ', xPlace)
+                    stackValues.push(stacker);
 
                     let dragPoint = 0;
-
                     if (dataIndex !== 0) {
                         scaleHandles = [xPlace, dragPoint];
                     }
 
-                    if (self.sharedDatasetService.bucketDetails[dataIndex - 1] && self.sharedDatasetService.bucketDetails[dataIndex].Aus === self.sharedDatasetService.maxAuValue && self.sharedDatasetService.bucketDetails[dataIndex - 1].Aus === self.sharedDatasetService.maxAuValue) {
+                    if (self.nonDiscreteBuckets[dataIndex - 1] && self.nonDiscreteBuckets[dataIndex].Aus === self.sharedDatasetService.maxAuValue && self.nonDiscreteBuckets[dataIndex - 1].Aus === self.sharedDatasetService.maxAuValue) {
                         stackValues[dataIndex] = stackValues[dataIndex - 1] + 2;
                     }
-                    // console.log(' stackValues[dataIndex] ', stackValues[dataIndex])
-                    activeItems = {
-                        type: 'group',
-                        position: self.myChart.convertToPixel({ gridIndex: 0 }, scaleHandles),
-                        draggable: true,
-                        ondrag: echarts.util.curry(onPointDragging, dataIndex),
-                        onclick: echarts.util.curry(onPointSelect, dataIndex),
-                        children: [
-                            {
-                                type: 'circle',
-                                z: stackValues[dataIndex],
-                                shape: {
-                                    r: 12
+
+                    if (!self.nonDiscreteBuckets[dataIndex].discrete) {
+                        activeItems = {
+                            type: 'group',
+                            position: self.myChart.convertToPixel({ gridIndex: 0 }, scaleHandles),
+                            draggable: true,
+                            ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                            onclick: echarts.util.curry(onPointSelect, dataIndex),
+                            children: [
+                                {
+                                    type: 'circle',
+                                    z: stackValues[dataIndex],
+                                    shape: {
+                                        r: dataIndex > 0 ? 12 : 0
+                                    },
+                                    style: {
+                                        fill: !self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'rgba(255,255,255,1)' : 'red',
+                                        stroke: dataIndex > 0 ? 'black' : 'trnsparent',
+                                        shadowBlur: 10,
+                                        shadowOffsetX: -1,
+                                        shadowOffsetY: -1,
+                                        shadowColor: dataIndex > 0 ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
+                                    },
                                 },
-                                style: {
-                                    fill: !self.selectedElement.includes(dataIndex) ? 'rgba(255,255,255,1)' : 'red',
-                                    stroke: 'black',
-                                    lineWidth: 0.5,
-                                    shadowBlur: 10,
-                                    shadowOffsetX: -1,
-                                    shadowOffsetY: -1,
-                                    shadowColor: 'rgba(0,0,0,0.4)',
-                                },
-                            },
-                            {
-                                type: 'text',
-                                z: stackValues[dataIndex],
-                                x: -12,
-                                y: -12,
-                                style: {
-                                    text: `${self.sharedDatasetService.bucketDetails[dataIndex].letter}`,
-                                    textPosition: 'inside',
-                                    padding: 6,
-                                    fill: !self.selectedElement.includes(dataIndex) ? 'black' : 'white',
-                                    fontSize: '15px',
-                                    fontWeight: 'bold'
-                                },
-                            }
-                        ]
+                                {
+                                    type: 'text',
+                                    z: stackValues[dataIndex],
+                                    x: -12,
+                                    y: -12,
+                                    style: {
+                                        text: dataIndex > 0 ? `${item}` : ``,
+                                        textPosition: 'inside',
+                                        padding: 6,
+                                        fill: !self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'black' : 'white',
+                                        fontSize: '15px',
+                                        fontWeight: 'bold'
+                                    },
+                                }
+                            ]
+                        }
                     }
-                    xPlace = (placeTemp += self.sharedDatasetService.bucketDetails[dataIndex].protections);
-                    //console.log('activeItems ', activeItems.children[1].style.text, ' dataIndex ', dataIndex, ' xPlace ', xPlace, ' maxAuValue ', self.sharedDatasetService.maxAuValue)
+                    xPlace = (placeTemp += self.nonDiscreteBuckets[dataIndex].protections);
                     return activeItems;
-                    //}
                 })
-
             })
         }
 
-
-        const setChartInstance = () => {
-
-            let itemDiscreteFalse = [];
-            self.myChart.setOption({
-
-                grid: {
-                    show: false,
-                    left: 60,
-                    right: 20,
-                    top: 40,
-                    bottom: 40
-                },
-                // backgroundColor: 'rgba(205,225,245,1)',
-                toolbox: {
-                    show: false,
-                    right: 60,
-                    top: -7,
-                    itemSize: 13,
-                    emphasis: {
-                        iconStyle: {
-                            textPosition: 'left',
-                            textBackgroundColor: 'white'
-                        }
-                    },
-                    feature: {
-                        dataZoom: {
-                            show: false,
-                            yAxisIndex: 'none',
-                            iconStyle: {
-                                textBackgroundColor: 'white'
-                            },
-                            emphasis: {
-                                iconStyle: {
-                                    borderColor: 'blue'
-                                }
-                            },
-                            brushStyle: {
-                                borderColor: 'lightBlue',
-                                borderWidth: 1
-                            }
-                        }
-                    }
-                },
-                tooltip: {
-                    show: true,
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    borderWidth: 2,
-                    borderColor: 'Blue',
-                    extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
-                    // axisPointer: {
-                    //     trigger: 'axis'
-                    // },
-                    padding: 5,
-                    textStyle: {
-                        fontSize: 12,
-                        color: '#000'
-                    },
-                    //position: [10, 10],
-                    position: (pos, params, dom, rect, size) => {
-                        if ((size.viewSize[0] - pos[0]) > 140) {
-                            pos[0] = pos[0] + 30
-                        } else {
-                            pos[0] = pos[0] - 150
-                        }
-                        pos[1] = pos[1] - 80;
-                        return pos;
-                    },
-                    formatter: (params) => {
-
-                        let tooltipString = '';
-                        tooltipString = `<div style="width: 130px;">
-                        <div>Seat: ${params[0].axisValue}</div>
-                        <div>${params[2].marker}Continuous: <span style="float: right;">${this.sharedDatasetService.interpolateBidPriceCurvePoints[params[1].dataIndex].toFixed(0)}</span></div>
-                        <div>${params[1].marker}Fixed: <span style="float: right;">${this.sharedDatasetService.dynamicBidPrices[params[2].dataIndex]}</span></div></div>`;
-                        return tooltipString;
-                    },
-                    rich: {
-                        a: {
-                            align: 'right',
-                            fontSize: 23,
-                            width: 70,
-                            fontWeight: 'normal',
-                            color: 'black'
-                        },
-                    }
-                },
-                xAxis: {
-                    silent: false,
-                    position: 'bottom',
-                    inverse: false,
-                    type: 'category',
-                    boundaryGap: true,
-                    nameGap: 43,
-                    axisLine: {
-                        onZero: true,
-                        linestyle: {
-                            color: 'black',
-                        }
-                    },
-                    axisTick: {
-                        alignWithLabel: true,
-                        length: 20,
-                        minorTick: {
-                            show: true
-                        }
-                    },
-                    showGrid: true,
-                    axisLabel: {
-                        interval: 1,
-                        margin: 15,
-                        hideOverlap: true,
-                        fontSize: 10,
-                        showMinLabel: true,
-                        showMaxLabel: true
-                    },
-                    data: self.sharedDatasetService.dynamicBidPrices.map((bp, i) => {
-
-                        return self.sharedDatasetService.maxAuValue - i;
-                    }),
-                },
-                yAxis: [
-                    // {
-                    //     //silent: true,
-                    //     show: true,
-                    //     animation: false,
-                    //     min: 'dataMin',
-                    //     max: 'dataMax',
-                    //     type: 'log',
-                    //     // position: 'right',
-                    //     //type: 'value',
-                    //     showGrid: false,
-                    //     //max: this.modifierCollection.length === 0 ? self.sharedDatasetService.maxFareValue + self.sharedDatasetService.maxFareValue / 10 : self.sharedDatasetService.adjustedCurvePoints[0] + 10,
-                    //     interval: 10,
-                    //     scale: false,
-                    //     splitLine: {
-                    //         show: true
-                    //     },
-                    //     axisLine: {
-                    //         show: true,
-                    //         onZero: false
-                    //     }
-                    // },
-                    {
-                        //silent: true,
-                        show: true,
-                        animation: false,
-                        type: 'value',
-                        name: 'Fares',
-                        position: 'left',
-                        nameLocation: 'middle',
-                        nameRotate: 90,
-                        nameGap: 35,
-                        nameTextStyle: {
-                            fontSize: 14,
-                            fontWeight: 'normal'
-                        },
-                        // position: 'left',
-                        showGrid: false,
-                        max: this.modifierCollection.length === 0 ? self.sharedDatasetService.maxFareValue + 5 : self.sharedDatasetService.adjustedCurvePoints[0] + 5,
-                        interval: self.sharedDatasetService.maxFareValue < 400 ? 20 : self.sharedDatasetService.maxFareValue > 1000 ? 350 : 35,
-                        scale: false,
-                        splitLine: {
-                            show: true
-                        },
-                        axisLine: {
-                            show: true,
-                            onZero: false
-                        }
-                    },
-                ],
-
-                series: [
-                    {
-                        type: 'bar',
-                        animation: false,
-                        animationDuration: 1,
-                        showBackground: false,
-                        colorBy: 'series',
-                        silent: true,
-                        z: 2,
-                        data: self.barSeriesValuesColors.map((serie, i) => {
-
-                            // console.log('serie ', serie)
-                            return {
-                                value: serie.value,
-                                itemStyle: {
-                                    color: serie.barColor
-                                }
-                            }
-                        }),
-                        markLine: (this.sharedDatasetService.totalBookingsCollector > 0 && this.sharedDatasetService.totalBookingsCollector < this.sharedDatasetService.maxAuValue) ? self.bidPriceCalcsService.markVerticalLineSellingValues() : null,
-                        //markPoint: self.markAreaPoint(),
-                        markArea: {
-                            silent: false,
-                            data: self.sharedDatasetService.currAus.map((item: any, i) => {
-
-                                //  console.log('i ', i, ' item ', item, ' letter', self.sharedDatasetService.bucketDetails[i].letter, ' ------  ', self.sharedDatasetService.maxAuValue - item)
-
-                                //  if (!item.discrete) {
-                                itemDiscreteFalse = [{
-                                    name: item > 0 ? self.sharedDatasetService.bucketDetails[i].letter : '',
-                                    xAxis: self.sharedDatasetService.maxAuValue - item,
-                                    label: {
-                                        show: item > 0 ? true : false,
-                                        backgroundColor: 'rgba(245,245,255,1)',
-                                        padding: [5, 8, 2, 8],
-
-                                        fontSize: 13,
-                                        fontWeight: 'bold',
-                                        color: '#001871',
-                                        borderColor: 'rgba(105,105,115,0.8)',
-                                        borderWidth: 0.5,
-                                        offset: [0, 3],
-                                    },
-                                }, {
-                                    itemStyle: {
-                                        borderColor: '#001871',
-                                        borderWidth: 1,
-                                        color: 'rgba(100,100,100,0)'
-                                    },
-                                    xAxis: item && self.sharedDatasetService.currAus[i + 1] ? self.sharedDatasetService.maxAuValue - self.sharedDatasetService.currAus[i] : self.sharedDatasetService.maxAuValue
-                                }]
-                                // }
-                                // console.log('itemDiscreteFalse ', itemDiscreteFalse)
-                                return itemDiscreteFalse;
-                            })
-                        }
-                    },
-                    {
-                        id: 'e',
-                        type: 'line',
-                        z: 5,
-                        animation: false,
-                        silent: false,
-                        showSymbol: false,
-                        selectedMode: false,
-                        symbolSize: 10,
-                        itemStyle: {
-                            borderColor: 'yellow',
-                            borderWidth: 0,
-                            color: 'red'
-                        },
-                        lineStyle: {
-                            type: 'solid',
-                            color: this.themeSelect === 'dark' ? 'rgba(220, 220, 0, 1)' : 'rgba(220, 220, 0, 1)',
-                            width: this.themeSelect === 'dark' ? 0 : 0
-                        },
-                        data: self.sharedDatasetService.dynamicBidPrices
-                    },
-
-                    {
-                        id: 'd',
-                        type: 'line',
-                        z: 1,
-                        animation: false,
-                        silent: true,
-                        showSymbol: false,
-                        selectedMode: false,
-                        symbolSize: self.showAllCurves ? 10 : 0,
-
-                        itemStyle: {
-                            borderColor: 'blue',
-                            borderWidth: 1,
-                            color: 'blue'
-                        },
-                        lineStyle: {
-                            type: 'solid',
-                            color: 'blue',
-                            width: self.showAllCurves ? 3 : 0
-                        },
-                        data: self.sharedDatasetService.interpolateBidPriceCurvePoints,
-                        markPoint: self.markPoint()
-                    },
-                    {
-                        id: 'c',
-                        type: 'line',
-                        silent: true,
-                        showSymbol: false,
-                        selectedMode: false,
-                        symbolSize: 10,
-                        itemStyle: {
-                            borderColor: 'green',
-                            borderWidth: 1,
-                            color: 'green'
-                        },
-                        lineStyle: {
-                            type: 'solid',
-                            color: 'green',
-                            width: this.showAllCurves ? 3 : 0
-                        },
-                        data: self.sharedDatasetService.adjustedCurvePoints,
-                    },
-
-                ]
-            })
-        }
         updatePosition();
     }
 
@@ -706,14 +647,14 @@ export class ContinousBidPricingComponent implements AfterViewInit {
         if (this.differenceCalculation[0] !== this.storedDynamicBpValues) {
             const sign = this.differenceCalculation[0] > this.storedDynamicBpValues ? '+' : '';
             const pipedDynamicCurrency = this.currencyPipe.transform((this.differenceCalculation[0] - this.storedDynamicBpValues), 'EUR', 'symbol', '1.0-0').replace("€", "");
-            dynamicDiff = `${sign}${pipedDynamicCurrency}`;
+            dynamicDiff = `${sign}${pipedDynamicCurrency} `;
         }
 
         if (this.differenceCalculation[1] !== this.storedInterpolateBpValues) {
 
             const sign = this.differenceCalculation[1] > this.storedInterpolateBpValues ? '+' : '';
             const pipedCurrency = this.currencyPipe.transform((this.differenceCalculation[1] - this.storedInterpolateBpValues), 'EUR', 'symbol', '1.0-0').replace("€", "");
-            interpDiff = `${sign}${pipedCurrency}`;
+            interpDiff = `${sign}${pipedCurrency} `;
 
         }
         dynCurrency = this.currencyPipe.transform(this.differenceCalculation[0], 'EUR', 'symbol', '1.0-0').replace("€", "");
@@ -744,7 +685,7 @@ export class ContinousBidPricingComponent implements AfterViewInit {
                         backgroundColor: 'white',
                         color: 'black',
                         formatter: () => {
-                            return `{c|Continuous:}{dc|${activeCurrency}}{iDiff|${interpDiff}}\n{f|Fixed:}{fc|${dynCurrency}}{dDiff|${dynamicDiff}}`;
+                            return `{ c | Continuous: } { dc | ${activeCurrency} } { iDiff | ${interpDiff} } \n{ f | Fixed: } { fc | ${dynCurrency} } { dDiff | ${dynamicDiff} } `;
                         },
                         lineHeight: 20,
                         rich: {

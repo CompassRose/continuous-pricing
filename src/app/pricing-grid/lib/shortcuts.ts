@@ -12,7 +12,7 @@ export const singleShortcut = (shortcut: KeyCode) => {
 
     const singleKeyEvents = merge(keyDown$, keyUp$).pipe(
         distinctUntilChanged((a, b) => {
-            console.log('KeyboardEvent \na ', a, '\n\nb ', b)
+            // console.log('KeyboardEvent \na ', a, '\n\nb ', b)
             return a.code === b.code && a.type === b.type
         }),
         share()
@@ -31,7 +31,7 @@ export const shortcut = (shortcut: KeyCode[]) => {
 
     const keyEvents = merge(keyDown$, keyUp$).pipe(
         distinctUntilChanged((a, b) => {
-            //console.log('KeyboardEvent \na ', a.code, '\n\nb ', b.code, ' type a ', a.type, ' b.type ', b.type)
+            // console.log('KeyboardEvent \na ', a.code, '\n\nb ', b.code, ' type a ', a.type, ' b.type ', b.type)
             return a.code === b.code && a.type === b.type
         }),
         share()
@@ -42,9 +42,9 @@ export const shortcut = (shortcut: KeyCode[]) => {
         keyEvents
             .pipe(
                 filter((event) => {
-                    //console.log('createKeyPressStream  ', event, '  charCode ', charCode.valueOf())
+                    // console.log('createKeyPressStream  ', event, '  charCode ', charCode.valueOf())
                     if (event.code === charCode.valueOf()) {
-                        //console.log('       createKeyPressStream  ', event.code, ' charCode ', charCode)
+                        //   console.log('   |||||||    createKeyPressStream  ', event.code, ' charCode ', charCode)
                     }
                     return event.code === charCode.valueOf()
                 }));
@@ -53,7 +53,7 @@ export const shortcut = (shortcut: KeyCode[]) => {
     return combineLatest(shortcut.map((s) => createKeyPressStream(s)))
         .pipe(
             filter<KeyboardEvent[]>((arr) => {
-                // console.log('combineLatest  ', arr)
+                //  console.log('combineLatest  ', arr)
                 let type;
                 return arr.every((a) => {
 
@@ -72,7 +72,7 @@ export const shortcut = (shortcut: KeyCode[]) => {
 export function sequence() {
 
     return (source: Observable<KeyboardEvent[]>) => {
-        //  console.log('KeyboardEvent ', source)
+        // console.log('KeyboardEvent ', source)
         return source.pipe(
             filter((arr) => {
                 //console.log('arr ', arr)

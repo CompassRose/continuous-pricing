@@ -1,10 +1,10 @@
-import { Component, ElementRef, AfterViewInit, HostListener } from '@angular/core';
+import { Component, Input, AfterViewInit, HostListener } from '@angular/core';
 import * as echarts from 'echarts';
 import { BidPriceCalcsService } from '../services/au-visualization-calcs-service';
-import { ColorManagerService } from '../services/color-manager-service';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { ThemeControlService } from '../services/theme-control.service';
-import { blueRamp16 } from '../dashboard-constants'
+import { blueRamp16 } from '../dashboard-constants';
+import { BucketDetails } from '../models/dashboard.model';
 
 @Component({
     selector: 'draggable-available',
@@ -15,73 +15,116 @@ import { blueRamp16 } from '../dashboard-constants'
 export class AuAvailabilityComponent implements AfterViewInit {
 
     public options: any = {};
+    public chart: HTMLCanvasElement;
     public myChart: echarts.ECharts = null;
     public selectedElement = [];
     public allSeriesData: number[][] = [];
     public themeSelect = '';
-    public colorRange: string[] = [];
+
+    public bucketDetails: BucketDetails[] = [];
+
+    // @Input()
+    // gridPointsDeSelected(state: boolean) {
+    //     console.log('XXXXXXXXXXXXXXXX  gridPointsDeSelected createChartElement ', state)
+    //     if (this.sharedDatasetService.selectedElement.length > 0) {
+    //         // this.sharedDatasetService.selectedElement = [];
+    //         // this.sharedDatasetService.setGroupingMethod(0);
+    //         this.createChartElement(true);
+    //     }
+    // }
+
+
+    @Input()
+    set collapseInfluences(state: boolean) {
+
+        if (this.myChart) {
+            this.myChart.resize();
+            this.refreshChartVisual();
+        }
+    }
+
 
     constructor(public sharedDatasetService: SharedDatasetService,
         public themeControlService: ThemeControlService,
-        public bidPriceCalcsService: BidPriceCalcsService,
-        private colorManagerService: ColorManagerService) {
+        public bidPriceCalcsService: BidPriceCalcsService) {
 
         this.themeSelect = JSON.parse(window.localStorage.getItem('colorTheme'));
-        this.colorRange = this.bidPriceCalcsService.getColorValues();
+
 
         //  console.log('AuAvailabilityComponent tempSavedCollection ', this.themeSelect)
 
+        // If chart drag nodes are selected
+        this.sharedDatasetService.multiSelectedNodeSubject$
+            .subscribe((node) => {
+                if (node.length > 0) {
+                    this.createChartElement(false);
+                } else {
+                    // Don't call on start, only on deselect all
+                    if (this.myChart) {
+                        this.createChartElement(false);
+                    }
+                }
+
+            })
+
+
         this.themeControlService.resetThemeSubject$
             .subscribe((theme: string) => {
-                // console.log('theme ', theme)
                 this.themeSelect = theme;
                 this.createSvg();
+                this.createChartElement(true);
             })
+
 
 
         this.sharedDatasetService.bucketDetailsBehaviorSubject$
             .subscribe((state) => {
-
                 if (this.myChart) {
-                    //  console.log('Au Chart ', this.sharedDatasetService.bucketDetails)
-                    // this.createSvg('draggable-available')
-                    this.createChartElement();
+                    // if (state) {
+                    this.createChartElement(true);
+                    //}
                 }
             })
 
+
+
+        /// Deselect all nodes reset chart to default values
         this.sharedDatasetService.resetDefaultSubject$
             .subscribe(response => {
                 if (response) {
-                    this.createSvg();
+                    this.createChartElement(true);
                 }
-
             })
-
-        // const tempSavedCollection = JSON.parse(window.localStorage.getItem('savedBucketCollection'));
     }
 
-    @HostListener('window:resize') onResize() {
 
+
+    @HostListener('window:resize', ['$event'])
+    onResize(event) {
         if (this.myChart) {
             this.myChart.resize();
+            this.refreshChartVisual();
         }
     }
 
-    updatePosition: () => void;
+    public refreshChartVisual = () => {
+        this.myChart.resize();
+        this.createChartElement(true);
+    }
+
+
 
     // Called from template auto resize chart
-    public onChartInit(e): void { }
+    // public onChartInit(e): void { }
+
 
 
     public ngAfterViewInit(): void {
-        this.createSvg()
+        // console.log('ngAfterViewInit createSvg ')
+        this.createSvg();
     }
 
-    // public getColorValues(): string[] {
-    //     this.colorRange = this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length);
-    //     console.log('getColorValues ', this.colorRange)
-    //     return this.colorManagerService.genColors(this.sharedDatasetService.bucketDetails.length);
-    // }
+
 
     // Initialize Chart Node
     public createSvg() {
@@ -90,19 +133,16 @@ export class AuAvailabilityComponent implements AfterViewInit {
             echarts.init(document.getElementById('draggable-available')).dispose();
         }
 
-        const chart: HTMLCanvasElement = document.getElementById('draggable-available') as HTMLCanvasElement;
-        this.myChart = echarts.init(chart, this.themeSelect);
+        this.chart = document.getElementById('draggable-available') as HTMLCanvasElement;
+        this.myChart = echarts.init(this.chart, this.themeSelect);
 
         setTimeout(() => {
-            this.createChartElement();
-        }, 0);
-
+            this.createChartElement(true);
+        }, 100);
     }
 
 
-    public refreshChartVisual = () => {
-        this.myChart.resize();
-    }
+
 
 
     public selectBars(index) {
@@ -126,95 +166,141 @@ export class AuAvailabilityComponent implements AfterViewInit {
         //console.log(' selectedElement ', this.selectedElement)
     }
 
-    public applyDataChanges() {
-        this.sharedDatasetService.calculateAus();
-    }
 
-    public createChartElement = () => {
 
+    // Re-generates chart elements
+
+    public createChartElement(redrawChartPoints: boolean): void {
+
+        //console.log('||||||  createChartElement ', redrawChartPoints)
         const self = this;
 
         const updatePosition = () => {
-            // console.log('updatePosition updatePosition updatePosition updatePosition')
-            setChartOptions();
-            setTimeout(() => {
-                setChartDragPoints();
-
-            }, 300);
+            // console.log('           updatePosition', redrawChartPoints)
+            if (redrawChartPoints) {
+                setChartOptions();
+            }
+            setChartDragPoints();
         };
 
 
+
+        const onPointSelect = function (dataIndex) {
+
+            // Sorts low to high
+            function compareNumbers(a, b) {
+                return a - b;
+            }
+
+            //console.log('onPointSelect ', dataIndex, ' selectedElement ', self.sharedDatasetService.selectedElement)
+
+            if (self.sharedDatasetService.selectedElement.includes(dataIndex)) {
+                if (self.sharedDatasetService.selectedElement.length === 1) {
+                    self.sharedDatasetService.selectedElement = [];
+                }
+                if (dataIndex <= self.sharedDatasetService.selectedElement[0] ||
+                    dataIndex >= self.sharedDatasetService.selectedElement[self.sharedDatasetService.selectedElement.length - 1]) {
+                    self.sharedDatasetService.selectedElement.splice(self.sharedDatasetService.selectedElement.findIndex(idx => idx === dataIndex), 1);
+                }
+            } else {
+                if (self.sharedDatasetService.selectedElement.length === 0 || self.sharedDatasetService.selectedElement.includes(dataIndex + 1) || self.sharedDatasetService.selectedElement.includes(dataIndex - 1)) {
+                    self.sharedDatasetService.selectedElement.push(dataIndex);
+                }
+            }
+
+            self.sharedDatasetService.selectedElement.sort(compareNumbers);
+            console.log('onPointSelect ', dataIndex, ' selectedElement ', self.sharedDatasetService.selectedElement)
+            self.sharedDatasetService.multiSelectedNodeSubject$.next(self.sharedDatasetService.selectedElement)
+            setChartDragPoints();
+        }
+
+
         const onPointDragging = function (dataIndex) {
-            // const test = self.sharedDatasetService.generateBookingCounts()
 
             let yValue = 0;
             let dragPosition: any = [0, 0];
             dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
 
-            yValue = Math.round(Math.floor(dragPosition[0]));
-            console.log('yValue ', yValue)
+            // console.log('dragPositionY ', dragPositionY)
+
+            yValue = Math.round(Math.floor(dragPosition[1]));
+            // console.log('yValue ', dragPosition)
             if (yValue < 0) { yValue = 0; }
-            //if (yValue > self.maxAuValue) { yValue = self.maxAuValue }
+            if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
 
-            if (self.sharedDatasetService.bucketDetails[dataIndex].discrete) {
-
-                self.sharedDatasetService.bucketDetails[dataIndex].Aus = yValue;
-                console.log('dataIndex ', dataIndex, ' Aus ', self.sharedDatasetService.bucketDetails[dataIndex].Aus)
-                // self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.currAus[dataIndex], dataIndex, yValue);
-
-                //self.applyDataChanges();
-                // self.sharedDatasetService.generateBucketValues();
-                //updatePosition();
-                setChartDragPoints()
-            }
+            // console.log('dataIndex ', dataIndex, ' Aus ', self.sharedDatasetService.bucketDetails[dataIndex]);
+            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.bucketDetails[dataIndex].Aus, dataIndex, yValue);
+            self.sharedDatasetService.applyDataChanges();
+            updatePosition();
 
         }
+
 
 
         const setChartDragPoints = function () {
 
-            const symbolSize = 28;
-
+            // console.log(' self.sharedDatasetService.buckets ', self.sharedDatasetService.buckets)
             self.myChart.setOption({
+                //self.sharedDatasetService.bucketDetails
+                graphic: echarts.util.map(self.sharedDatasetService.buckets, (item, dataIndex) => {
 
-                graphic: echarts.util.map(self.sharedDatasetService.bucketDetails, (item, dataIndex) => {
+
 
                     //if (item.discrete) {
-                    //console.log('util ', item, ' dataIndex ', dataIndex)
-                    let activeItems = {}
-                    const handles = item.discrete ? [item.letter, self.sharedDatasetService.bucketDetails[dataIndex].Aus] : [];
-                    const fillColor = 'Blue';
-                    const strokeColor = '#d1c027';
-                    const lineWidth = 2;
+                    // console.log('util ', item, ' dataIndex ', dataIndex)
+
+                    let activeItems = {};
+
+                    const handles = [item, self.sharedDatasetService.bucketDetails[dataIndex].Aus];
 
                     activeItems = {
-                        type: 'circle',
+                        type: 'group',
                         position: self.myChart.convertToPixel('grid', handles),
-                        shape: {
-                            cx: 0,
-                            cy: 0,
-                            r: symbolSize / 3
-                        },
-                        style: {
-                            fill: fillColor,
-                            stroke: strokeColor,
-                            lineWidth: lineWidth
-                        },
-                        invisible: false,
                         draggable: true,
                         ondrag: echarts.util.curry(onPointDragging, dataIndex),
-                        z: 100
+                        children: [
+                            {
+                                type: 'circle',
+                                z: 101,
+                                shape: {
+                                    r: 12
+                                },
+                                style: {
+                                    fill: !self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'rgba(255,255,255,1)' : 'red',
+                                    stroke: dataIndex > 0 ? 'black' : 'trnsparent',
+                                    shadowBlur: 10,
+                                    shadowOffsetX: -1,
+                                    shadowOffsetY: -1,
+                                    shadowColor: dataIndex > 0 ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
+                                },
+                            },
+                            {
+                                type: 'text',
+                                z: 102,
+                                x: -12,
+                                y: -12,
+                                style: {
+                                    text: dataIndex !== 0 ? self.sharedDatasetService.bucketDetails[dataIndex].letter : '',
+                                    textPosition: 'inside',
+                                    padding: 6,
+                                    fill: !self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'black' : 'white',
+                                    fontSize: '15px',
+                                    fontWeight: 'bold'
+                                },
+                            }
+                        ]
                     }
-
-                    //}
+                    if (dataIndex === 0) {
+                        activeItems = null
+                    }
+                    // console.log('activeItems ', activeItems)
                     return activeItems;
                 })
-
             })
         }
 
         const setChartOptions = function () {
-
+            // console.log('           setChartOptions setChartOptions setChartOptions')
             self.myChart.setOption({
 
                 grid: {
@@ -252,10 +338,8 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         //lineHeight: 45,
                         //height: 33,
                     },
-                    //top: 0,
                     itemWidth: 30,
                     itemHeight: 14,
-
                     right: 80,
                     data: [
                         {
@@ -266,7 +350,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                 borderColor: 'transparent',
                                 borderWidth: 0,
                                 borderType: 'solid',
-
                                 decal: {
                                     symbol: 'rect',
                                     color: 'rgba(39, 39, 255, 0.32)',
@@ -281,7 +364,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             name: 'Protections',
                             icon: 'rect',
                             itemStyle: {
-                                color: '#5F1BAF',
+                                color: '#981D97',
                                 opacity: 1,
                                 decal: {
                                     symbol: 'rect',
@@ -311,10 +394,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             fontSize: 14,
                             fontWeight: 'normal'
                         },
-                        max: function (value) {
-                            return value.max + 15;
-                        },
-                        //max: (self.sharedDatasetService.bucketDetails[0].Aus) + 20,
+                        max: self.sharedDatasetService.bucketDetails[0].Aus + 20,
                         interval: 10,
                         inverse: false,
                         axisLine: {
@@ -323,6 +403,9 @@ export class AuAvailabilityComponent implements AfterViewInit {
                         axisLabel: {
                             fontSize: 12
                         },
+                        data: self.sharedDatasetService.bucketDetails.map((bp, i) => {
+                            return bp.Aus;
+                        }),
                     },
                 ],
                 xAxis: [
@@ -342,212 +425,110 @@ export class AuAvailabilityComponent implements AfterViewInit {
                             return item.letter;
                         }),
                     },
-                    {
-                        show: true,
-                        type: 'category',
-                        name: 'Bookings',
-                        nameLocation: 'middle',
-                        nameGap: 25,
-                        nameTextStyle: {
-                            fontSize: 14,
-                            fontWeight: 'bold'
-                        },
-
-                        inverse: false,
-                        position: 'bottom',
-                        axisTick: {
-                            show: true,
-                        },
-
-                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-
-                            let booksValue = `${item.bookings}`;
-                            return {
-                                value: booksValue,
-                                textStyle: {
-                                    color: 'rgb(55, 165, 55)',
-                                    fontSize: 13,
-                                    fontWeight: 'bold',
-
-                                }
-                            }
-
-                        }),
-                    }
                 ],
+
                 series: [
-                    {
-                        type: 'bar',
-                        barGap: '-100%',
-                        showBackground: false,
-                        name: 'AUs',
-                        z: 1,
-                        animation: false,
-                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-
-                            //return self.sharedDatasetService.bucketDetails[i].Aus;
-                            let discreteItems = {};
-
-                            if (self.sharedDatasetService.bucketDetails[i].discrete) {
-
-                                const test = self.sharedDatasetService.bucketDetails[i].Aus;
-
-                                discreteItems = {
-                                    value: test,
-                                    label: {
-                                        // itemStyle: {
-                                        //     color: () => {
-                                        //         return self.themeSelect === 'dark' ? 'rgba(255, 245, 6, .65)' : 'rgba(255, 245, 6, .4)'
-                                        //     },
-                                        //     decal: {
-                                        //         //symbol: 'rect',
-                                        //         color: 'rgba(50, 50, 70, 1 )',
-                                        //         //backgroundColor: 'rgba(200, 200, 0, .5)',
-                                        //         dashArrayX: [1, 0],
-                                        //         dashArrayY: [2, 3],
-                                        //         symbolSize: 0.5,
-                                        //         rotation: Math.PI / 6
-                                        //     }
-                                        // },
-
-                                        show: true,
-                                        formatter: (params) => {
-                                            // console.log('params ', params, ' BD ', self.sharedDatasetService.bucketDetails[params.dataIndex])
-                                            let active;
-                                            // let fareString = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.bucketDetails[params.dataIndex].protections;
-                                            const fareString = self.sharedDatasetService.bucketDetails[params.dataIndex].Aus - self.sharedDatasetService.totalBookingsCollector
-                                            if (self.sharedDatasetService.bucketDetails[params.dataIndex]) {
-                                                const auDiff = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus);
-                                                active = auDiff//< self.sharedDatasetService.bucketDetails[params.dataIndex].Aus ? Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].Aus) : '';
-                                            }
-                                            return `${active}`
-                                        },
-
-                                        color: self.themeSelect === 'dark' ? 'white' : 'black',
-                                        fontSize: 12,
-                                        fontWeight: 'normal',
-                                        // padding: 5,
-                                        offset: item.bookings > 0 ? [0, -10] : [0, -10],
-                                        position: 'top',
-                                    },
-                                    itemStyle: {
-                                        color: 'rgba(255, 255, 4, 0.0)',//'#1F45FC', //'#0000A0',  //rgba(32, 96, 248, 1)
-                                        // shadowColor: 'gold',
-                                        // shadowOffsetY: -2,
-                                        decal: {
-                                            symbol: 'rect',
-                                            color: 'rgba(255, 255, 4, 0.28)',
-                                            dashArrayX: [2, 1],
-                                            dashArrayY: [2, 4],
-                                            symbolSize: 4,
-                                            rotation: Math.PI / 6
-                                        }
-                                    },
-                                }
-
-                            }
-                            return discreteItems;
-                        }),
-                    },
-
                     {
                         type: 'bar',
                         name: 'Protections',
                         silent: true,
                         barGap: '-100%',
-                        barWidth: '90%',
-                        stack: 'total',
+                        barWidth: '85%',
+                        //stack: 'total',
                         z: 6,
                         animation: false,
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
 
                             // item.discrete ? false : true
+                            const showLabels: boolean = (item.Aus - item.protections) < 20 ? false : true;
+                            // console.log('showLabels ', showLabels, ' --- ', item.Aus - item.protections)
                             const test = item.protections > 0 && !item.discrete ? item.protections : 0;
                             return {
                                 value: test,
                                 label: {
-                                    show: false,// temp > 0 ? true : false,
+                                    show: showLabels ? true : true,// temp > 0 ? true : false,
                                     width: 25,
                                     height: 14,
-                                    backgroundColor: '#5F1BAF',
-                                    //padding: 3,
+                                    backgroundColor: 'rgba(240,240,240,0.15',
                                     formatter: (params) => {
                                         let active;
                                         const auDiff = Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].protections - self.sharedDatasetService.bucketDetails[params.dataIndex].bookings);
-
                                         //console.log('params.dataIndex, letter ', self.sharedDatasetService.bucketDetails[params.dataIndex].letter, ' auDiff ', auDiff)
                                         active = auDiff > 0 ? auDiff : '' // > self.sharedDatasetService.bucketDetails[params.dataIndex].bookings ? Math.round(self.sharedDatasetService.bucketDetails[params.dataIndex].protections) : '';
-
                                         return active;
                                     },
-                                    color: 'white',
-                                    fontSize: 11,
-                                    fontWeight: 'normal',
+                                    color: 'black',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
                                     textBorderWidth: 0,
                                     textBorderColor: 'black',
-                                    offset: [0, 11],
-                                    position: 'top',
+                                    offset: [0, 4],
+                                    position: showLabels ? 'top' : 'insideTop',
                                 },
 
                                 itemStyle: {
-                                    color: '#981D97',
+                                    color: 'rgba(128,128,25,0.4)',
                                     opacity: 1,
                                     // borderColor: 'black',
                                     // borderWidth: 0,
-                                    // shadowColor: 'black',
-                                    // shadowOffsetY: -2,
-                                    // decal: {
-                                    //     symbol: 'rect',
-                                    //     color: 'rgba(0, 0, 0, 0.1)',
-                                    //     dashArrayX: [1, 0],
-                                    //     dashArrayY: [4, 2],
-                                    //     symbolSize: 1,
-                                    //     rotation: Math.PI / 6
-                                    // },
+                                    shadowColor: 'black',
+                                    shadowOffsetY: -2,
+                                    decal: {
+                                        symbol: 'rect',
+                                        color: 'rgba(20, 13, 250, 0.43)',
+                                        dashArrayX: [1, 0],
+                                        dashArrayY: [4, 2],
+                                        symbolSize: 1,
+                                        rotation: Math.PI / 6
+                                    },
                                 }
                             }
                         })
                     },
-                    {
-                        type: 'bar',
-                        name: 'Bookings',
-                        barGap: '-100%',
-                        //stack: 'total',
-                        barWidth: '90%',
-                        z: 8,
-                        animation: false,
-                        data: self.sharedDatasetService.bucketDetails.map((item, i) => {
-                            return item.bookings;
-                        }),
-                        itemStyle: {
-                            color: 'rgb(55, 165, 55)',
-                            decal: {
-                                symbol: 'rect',
-                                color: 'rgba(0, 0, 0, 0.12)',
-                                dashArrayX: [1, 0],
-                                dashArrayY: [4, 2],
-                                symbolSize: 1,
-                                rotation: Math.PI / 6
-                            }
-                        },
-                    },
+
+                    // {
+                    //     type: 'bar',
+                    //     name: 'Bookings',
+                    //     barGap: '-100%',
+                    //     //stack: 'total',
+                    //     barWidth: '90%',
+                    //     z: 8,
+                    //     animation: false,
+                    //     data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+                    //         return item.bookings;
+                    //     }),
+                    //     itemStyle: {
+                    //         color: 'rgb(55, 165, 55)',
+                    //         decal: {
+                    //             symbol: 'rect',
+                    //             color: 'rgba(0, 0, 0, 0.12)',
+                    //             dashArrayX: [1, 0],
+                    //             dashArrayY: [4, 2],
+                    //             symbolSize: 1,
+                    //             rotation: Math.PI / 6
+                    //         }
+                    //     },
+                    // },
                     {
                         type: 'bar',
                         stack: 'total',
-                        barWidth: '90%',
+                        barWidth: '85%',
                         name: 'SA',
                         showBackground: true,
                         backgroundStyle: {
-                            color: 'rgba(180, 130, 10, 0.05)'
+                            color: 'rgba(180, 130, 10, 0.15)'
                         },
                         z: 2,
                         animation: false,
+                        //  data: self.sharedDatasetService.bucketDetails.map((item, i) => { 
                         data: self.sharedDatasetService.bucketDetails.map((item, i) => {
+
                             // console.log('item ', item)
                             const diff = item.Aus - self.sharedDatasetService.totalBookingsCollector;
                             const auValue = item.Aus;
                             const auDiff = Math.round(item.protections - item.bookings);
                             const test = diff > 0 ? Math.round(diff) : '';
+                            // console.log('test ', test)
                             return {
                                 value: test,
                                 label: {
@@ -561,26 +542,26 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                     color: self.themeSelect === 'dark' ? 'white' : 'black',
                                     fontSize: 12,
                                     fontWeight: 'normal',
-                                    // padding: 5,
-                                    offset: [0, 4],
-                                    position: 'top' ///item.bookings > 0 ? 'top' : 'insideTop',
+                                    offset: [0, -10],
+                                    position: 'top'
                                 },
                                 itemStyle: {
-                                    color: blueRamp16[i],
-                                    ////'rgb(65, 65, 255)', //'#0000A0',  //rgba(32, 96, 248, 1)
-                                    borderColor: 'transparent',
-                                    borderWidth: 0,
-                                    borderType: 'solid',
-                                    // shadowColor: 'black',
-                                    // shadowOffsetY: -2,
-                                    // decal: {
-                                    //     symbol: 'rect',
-                                    //     color: 'rgba(39, 39, 255, 0.22)',
-                                    //     dashArrayX: [3, 0],
-                                    //     dashArrayY: [4, 2],
-                                    //     symbolSize: 1,
-                                    //     rotation: Math.PI / 6
-                                    // }
+                                    color: !item.discrete ? self.sharedDatasetService.colorRange[i] : 'rgba(80,80,80,1)',
+                                    //borderColor: 'transparent',
+                                    //borderWidth: 0,
+                                    // borderType: 'solid',
+                                    shadowColor: 'rgba(0,0,0,0.2)',
+                                    shadowBlur: 3,
+                                    shadowOffsetX: -2,
+                                    //shadowOffsetY: -2,
+                                    decal: {
+                                        symbol: 'rect',
+                                        color: !item.discrete ? 'rgba(39, 39, 255, 0.1)' : 'rgba(70,70,70, 0)',
+                                        dashArrayX: [3, 0],
+                                        dashArrayY: [4, 2],
+                                        symbolSize: 1,
+                                        rotation: Math.PI / 6
+                                    }
                                 },
                                 emphasis: {
                                     itemStyle: {
@@ -603,9 +584,6 @@ export class AuAvailabilityComponent implements AfterViewInit {
         return this.sharedDatasetService.bucketDetails[idx].fare;
     }
 
-    private currYAvailValue(idx: number) {
-        return this.sharedDatasetService.currAus[idx];
-    }
 
 }
 

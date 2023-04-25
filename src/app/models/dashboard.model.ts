@@ -113,6 +113,7 @@ export interface ChartDisplayType {
 
 export interface BarSeries {
   value: number;
+  //width: number;
   barColor: string;
 }
 

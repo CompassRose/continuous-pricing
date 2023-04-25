@@ -8,6 +8,7 @@
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
 
+
 import { map, mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
 import { Observable, throwError as _observableThrow, of as _observableOf, BehaviorSubject } from 'rxjs';
 import { Injectable, Inject, Optional, InjectionToken } from '@angular/core';
@@ -15,6 +16,7 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
+
 
 // Fallback in case of null url
 export const BASE_LOCALHOST_5000 = "http://localhost:5000";
@@ -30,6 +32,7 @@ export class AccountClient {
         this.http = http;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : BASE_LOCALHOST_5000;
     }
+
 
     login(login: Login): Observable<LoginResponse> {
         let url_ = this.baseUrl + "/Account/login";
