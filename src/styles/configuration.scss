@@ -111,28 +111,29 @@ sans-serif;
   align-items: center;
 }
 
-.ng-select.primary-background ::ng-deep .ng-select-container {
-  color: $brand-off-white-lt !important;
-  background-color: $brand-primary-background;
-  border-radius: 2px;
-  border: 1px solid $brand-off-white-lt !important;
-  min-height: .85rem !important;
-  max-height: 1.1rem !important;
-  padding: 0 3px;
-  align-items: center;
-  font-size: $font-size-base-xs;
-}
+// .ng-select.primary-background ::ng-deep .ng-select-container {
+//   color: $brand-off-white-lt !important;
+//   background-color: $brand-primary-background;
+//   border-radius: 2px;
+//   border: 1px solid $brand-off-white-lt !important;
+//   min-height: .85rem !important;
+//   max-height: 1.1rem !important;
+//   padding: 0 3px;
+//   align-items: center;
+//   font-size: $font-size-base-xs;
+// }
 
 
 
 .ng-select.white-button-match ::ng-deep .ng-select-container {
   color: $brand-dark-gray-text !important;
-  background-color: $Brand-off-white-background;
+  background-color: white !important;
   border-radius: 2px;
   border: 1px solid $brand-off-white-md !important;
-  min-height: .65rem !important;
+  min-height: 1.4rem !important;
   max-height: 1.1rem !important;
-  min-width: 60px;
+  min-width: 30px;
+  max-width: 60px;
   align-items: left;
   font-size: $font-size-base-xs;
 }
@@ -159,9 +160,9 @@ sans-serif;
   width: 100% !important;
 }
 
-.ng-dropdown-panel.ng-select-bottom {
-  min-width: 3.8rem !important;
-}
+// .ng-dropdown-panel.ng-select-bottom {
+//   min-width: 3rem !important;
+// }
 
 //
 //$brand-link-blue-text 
@@ -178,7 +179,7 @@ sans-serif;
 
 :host ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
   width: 100% !important;
-  padding: 2px 5px !important;
+  padding: 1px 3px !important;
   font-size: $font-size-base-xs !important;
 }
 
@@ -188,7 +189,7 @@ sans-serif;
 
 .ng-select .ng-select-container .ng-value-container .ng-placeholder {
   margin-top: 0px !important;
-  color: rgb(70, 70, 70) !important;
+  ///color: rgb(70, 70, 70) !important;
   //font-size: 12px !important;
   font-size: $font-size-base-xs !important;
 }

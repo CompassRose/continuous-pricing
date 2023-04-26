@@ -62,11 +62,75 @@
       </div>
     </div>
   </div>
+
   <div class="bp-inf-row">
+
+    <div class="title-block py-3">
+      <div class="bpi-header font-11 fw-600">{{constraintService.bpHeaderAbbrev[5].name}}</div>
+    </div>
+    <!-- <div>{{item.originalValue}} {{getPMinSelectedOriginalValue(5)}}</div> -->
+    <div class="bp-inf-value-group w-100">
+
+      <div class="centered-group seperator font-11"
+        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
+        <div class=" me-2">{{constraintService.bpCategory[0].name}}</div>
+      </div>
+
+      <div class="centered-group seperator font-11"
+        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
+        <div class="font-11 me-1">{{constraintService.bpCategory[1].name}}:</div>
+        <div class="font-11">{{sharedDatasetService.staticModifiers.partialMax}}</div>
+
+
+        <ng-select title="Select Max Fare Class"
+          class="white-button-match"
+          [clearable]="false"
+          [searchable]="false"
+          [disabled]="false"
+          placeholder="None"
+          [items]="sharedDatasetService.buckets"
+          [bindLabel]="'bucketLetter'">
+          <ng-template ng-label-tmp
+            let-itemMaxSelected="openClassSelected">
+            <div class="d-flex">
+              <span class="">{{openClassSelected}}
+              </span>
+            </div>
+          </ng-template>
+          <ng-template ng-option-tmp
+            let-item="item"
+            let-i="index">
+            <div class="option-template-text d-flex"
+              (click)="selectPartialMinFareClassFromDropdown(item,i, 5)">
+              <span class="w-50">{{item}}
+              </span>
+              <!-- <span class="me-auto">{{initialMinBuckets[i][adjustedFareHolder]}}</span> -->
+            </div>
+          </ng-template>
+        </ng-select>
+
+      </div>
+
+      <div class="centered-group font-11"
+        [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
+        <div class="font-10 fw-500">Seats:</div>
+        <div class="center-input">
+          <input #myInput
+            type="number"
+            class="center-input font-11"
+            [(ngModel)]="maxSeats"
+            (keyup)="partialMaxSeatValues(5)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="bp-inf-row">
     <div class="title-block py-3">
       <div class="bpi-header font-11 fw-600">
         {{constraintService.bpHeaderAbbrev[5].name}}</div>
     </div>
+
     <div class="bp-inf-value-group w-100">
       <div class="centered-group seperator"
         [ngClass]="themeSwitchMode === 'light' ? 'light-mode' : 'dark-mode'">
@@ -93,9 +157,9 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
-  <!-- <div class="d-flex align-items-center"
+  <!-- <div class="d-flex align-items-end"
     *ngIf="showInfluenceControls">
     <button type="button"
       class="btn btn-primary btn-xs me-2">

@@ -73,11 +73,14 @@ export class ContinousBidPricingComponent implements AfterViewInit {
 
         this.themeControlService.resetThemeSubject$
             .subscribe((theme: string) => {
-                // console.log('theme ', theme)
+                console.log('theme ', theme)
                 this.themeSelect = theme;
                 this.createSvg();
                 this.setChartInstance();
                 this.createChartDraggingElement(true);
+                this.myChart.setOption({
+                    series: this.setChartSeries()
+                })
             })
 
 

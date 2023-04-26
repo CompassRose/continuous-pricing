@@ -27,6 +27,8 @@ export class BipPriceConfigureComponent {
     public activeCabinInfluences: IFlightInfluencesByCabin = {};
     public showInfluenceBody = true;
     public themeSwitchMode = 'light';
+    public maxSeats = 0;
+    public openClassSelected: string = 'P';
 
     @Input()
     set collapseInfluences(state: boolean) {
@@ -82,6 +84,44 @@ export class BipPriceConfigureComponent {
         return true;
     }
 
+
+    // From seat Input enter number
+    public partialMaxSeatValues(value: any): void {
+
+        console.log('partialMaxSeatValues ', value)
+        // if (value.maxSeats < 0) {
+        //     this.activeCabinInfluences.constraints[5].maxSeats = 0;
+        // } else if (value.maxSeats > 99) {
+        //     value.maxSeats = 99;
+        // } else {
+        //     if (this.activeCabinInfluences.constraints[5].maxSeats !== value.maxSeats) {
+        //         this.activeCabinInfluences.constraints[5].maxSeats = value.maxSeats;
+        //     }
+        // }
+
+        // this.dataService.dashboardFacade.toggleModifiedCurveBehaviorSubject$.next(true);
+        // this.myInputOnChange(this.activeCabinInfluences.constraints[5], 5);
+    }
+
+    // ng-select in template
+    public selectPartialMinFareClassFromDropdown(bucket, idx: number, metric: number): void {
+        console.log('selectPartialMinFareClassFromDropdown ', bucket, ' idx ', idx, ' metric ', metric);
+
+        this.openClassSelected = bucket;
+
+        // this.dataService.dashboardFacade.toggleModifiedCurveBehaviorSubject$.next(true);
+
+        // if (bucket.bucketLetter === 'None') {
+        //     delete this.activeCabinInfluences.constraints[metric].updValue;
+        //     this.activeCabinInfluences.constraints[metric].value = '';
+        //     this.activeCabinInfluences.constraints[metric].originalValue = '';
+        // } else {
+        //     this.activeCabinInfluences.constraints[metric].updValue = bucket.bucketLetter;
+        //     this.activeCabinInfluences.constraints[metric].value = this.initialMinBuckets[idx][this.adjustedFareHolder];
+        // }
+
+        // this.myInputOnChange(this.activeCabinInfluences.constraints[metric], metric);
+    }
 
     // Generates UI formatted objects
     private generateCabinInfluenceLists(list: any): BidPriceConstraint {

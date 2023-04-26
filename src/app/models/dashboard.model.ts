@@ -74,25 +74,12 @@ export interface BidPriceConstraint {
   categories?: any[];
   name?: string;
   constraint: string;
-  originalBezierPoints?: BezierPoints[];
-  showDecimals?: boolean;
   value: any;
   updValue?: any;
   originalValue?: any;
   maxSeats?: number;
 }
 
-export interface BidPriceConstraint {
-  categories?: any[];
-  name?: string;
-  constraint: string;
-  originalBezierPoints?: BezierPoints[];
-  showDecimals?: boolean;
-  value: any;
-  updValue?: any;
-  originalValue?: any;
-  maxSeats?: number;
-}
 
 export interface BezierPoints {
   x: number;

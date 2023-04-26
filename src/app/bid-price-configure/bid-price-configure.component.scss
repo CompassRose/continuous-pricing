@@ -1,7 +1,11 @@
 @import 'src/styles/configuration';
 @import 'src/styles/fonts';
 
-
+.center-input-text {
+  text-align: center;
+  max-width: 2.3rem;
+  max-height: 16px !important;
+}
 
 .bp-inf-column {
   display: flex;
@@ -58,7 +62,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
+
         flex-direction: row;
+
+        &.column-format {
+          flex-direction: column !important;
+        }
 
         &.seperator {
           border-right: 1px solid lightblue;

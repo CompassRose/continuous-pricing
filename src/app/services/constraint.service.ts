@@ -81,7 +81,6 @@ export class ConstraintService {
             constraint.originalValue = constraint.value;
         }
 
-        constraint.originalBezierPoints = this.setBezierPoints(constraint.value);
 
         if (idx < 6) {
             const foundIdx = this.bpHeaderAbbrev.findIndex(x => {

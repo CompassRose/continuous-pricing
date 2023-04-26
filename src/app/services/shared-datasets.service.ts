@@ -136,6 +136,8 @@ export class SharedDatasetService {
     // Simple string array for less overhead
     public buckets: string[] = [];
 
+    public allBuckets: string[] = [];
+
     // Activates deselect button
     readonly pointsOnn$ = new BehaviorSubject<boolean>(false);
 
@@ -164,7 +166,7 @@ export class SharedDatasetService {
         this.bucketDetailsConcatBehaviorSubject$
             .subscribe(buckets => {
                 if (buckets.length) {
-                    //  console.log('|||||||||||||||||||||||||||||||||||||  bucketDetailsConcatBehaviorSubject$ buckets ', buckets)
+                    //console.log('|||||||||||||||||||||||||||||||||||||  bucketDetailsConcatBehaviorSubject$ buckets ', buckets)
                     this.nonDiscreteBuckets = buckets;
                     this.applyDataChanges();
                 }
@@ -259,7 +261,7 @@ export class SharedDatasetService {
         this.buckets = [];
 
         this.bucketDetails.forEach((d, i) => {
-
+            this.allBuckets.push(d.letter)
             if (!d.discrete) {
                 this.buckets.push(d.letter)
                 this.nonDiscreteBuckets.push(d)
@@ -377,52 +379,6 @@ export class SharedDatasetService {
     }
 
 
-    // public calculateBucketBands(): number[] {
-
-    //     const arr = new Array<number>();
-    //     this.nonDiscreteBuckets.forEach((d, i) => {
-    //         arr.push(0);
-    //     });
-
-    //     arr[0] = this.dynamicBidPrices.length;
-    //     this.dynamicBidPrices.forEach((d, i) => {
-
-    //         const bidPrice = this.dynamicBidPrices[i];
-
-    //         for (let bucketIdx = 1; bucketIdx < this.nonDiscreteBuckets.length; bucketIdx++) {
-    //             const bucketInfo = this.nonDiscreteBuckets[bucketIdx];
-
-    //             //     const fareValue = (bucketInfo.modifiedFare !== undefined) ? bucketInfo.modifiedFare : bucketInfo.fare;
-    //             const fareValue = bucketInfo.Aus;
-    //             if (fareValue >= bidPrice) {
-
-    //                 arr[bucketIdx]++;
-    //             }
-    //         }
-    //     });
-
-    //     //  console.log('arr ', arr)
-
-    //     return arr;
-    // }
-
-
-
-
-    private setProtectionsPriorToUse(set: BucketDetails[], idx: number): BucketDetails[] {
-
-        let tempBuckets = [];
-
-        tempBuckets = set.map((a: any, i) => {
-            if (a.Aus > this.maxAuValue) {
-                a.Aus = this.maxAuValue;
-            }
-            a.protections = this.protectionMyLevelPriorToUse(i, idx) - a.bookings;
-            return a
-        })
-
-        return tempBuckets;
-    }
 
 
     // Returns Bucket Seat count for protection
@@ -437,19 +393,10 @@ export class SharedDatasetService {
 
     public showCompetitors() {
         this.showCompetitorsFlag = !this.showCompetitorsFlag;
-        this.bucketDetails = JSON.parse(window.localStorage.getItem('archivedBuckets'));
+        this.nonDiscreteBuckets = JSON.parse(window.localStorage.getItem('archivedBuckets'));
         this.resetDefaultSubject$.next(true)
     }
 
-
-    // Returns Flight Observable Not Used
-    // public getFlightClient(): Observable<FlightClientDetails> {
-    //     return this.getApiFlightClient();
-    // }
-
-    // public getApiFlightClient(): Observable<FlightClientDetails> {
-    //     return this.apiFlightClientSubject$.asObservable();
-    // }
 
 
     public resetInverseDetailsFromBookings() {
@@ -461,14 +408,14 @@ export class SharedDatasetService {
     public generateInverseDetails(): any[] {
 
         const inverseFareValues = [];
-        let remainingSeats = this.bucketDetails[0].Aus - this.totalBookingsCollector;
-        //console.log('generateInverseDetails Length ', this.bucketDetails.length, ' remainingSeats ', remainingSeats)
+        let remainingSeats = this.nonDiscreteBuckets[0].Aus - this.totalBookingsCollector;
+        console.log('generateInverseDetails Length ', this.nonDiscreteBuckets.length, ' remainingSeats ', remainingSeats)
         let percentOfTop = [];
         let inverseDistribution = 0;
-        let theTop = this.bucketDetails[0].Aus;
+        let theTop = this.nonDiscreteBuckets[0].Aus;
         let totalIFV = 0;
 
-        this.bucketDetails.map((d: any, i) => {
+        this.nonDiscreteBuckets.map((d: any, i) => {
             // console.log('Letter ', d)
             percentOfTop.push(+((d.fare / theTop) * 100).toFixed(0));
             inverseDistribution = 1 / (percentOfTop[i] * 100);
@@ -506,7 +453,7 @@ export class SharedDatasetService {
 
         // console.log('\n\n ^^^^ currAu ', currAu, ' targetAu ', targetAu, ' targetBp ', targetBp, '\n\n')
 
-        //  console.log('calculateBidPriceForAu bucketIdx ', bucketIdx, ' Letter ', this.bucketDetails[bucketIdx].letter, ' bucketIdx ', ' targetAu ', targetAu, ' targetBp ', targetBp)
+        //  console.log('calculateBidPriceForAu bucketIdx ', bucketIdx, ' Letter ', this.nonDiscreteBuckets[bucketIdx].letter, ' bucketIdx ', ' targetAu ', targetAu, ' targetBp ', targetBp)
 
         // How many handles to bring along on the way up -->
 
@@ -522,7 +469,9 @@ export class SharedDatasetService {
 
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         //console.log('UP: bucketInfo bucketIdx ', bucketIdx)
+                        //bucketInfo.Aus = targetAu;
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'up')
+
 
                     } else if (this.selectedElement.length > 0) {
                         // console.log('\n\n Up: dragSelectedNodes ',)
@@ -544,12 +493,13 @@ export class SharedDatasetService {
                 // console.log('**************************\n\n\n Down: dragSelectedNodes ', bucketInfo.fare, ' targetBp ', targetBp)
                 if (bucketInfo.fare >= targetBp) {
                     //  console.log('D: bucketInfo ', bucketInfo, '  selectedElement ', this.selectedElement, ' dragGrouping ', this.dragGrouping[this.selectedMetric])
-                    //console.log('Down currAu ', currAu, '\ntargetAu ', targetAu, '\nletter ', this.bucketDetails[bucketIdx].letter, '\nAus ', this.bucketDetails[bucketIdx].Aus)
+                    //console.log('Down currAu ', currAu, '\ntargetAu ', targetAu, '\nletter ', this.nonDiscreteBuckets[bucketIdx].letter, '\nAus ', this.nonDiscreteBuckets[bucketIdx].Aus)
 
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'down')
                         //  console.log('Down ,etric 2,3,4')
                     } else if (this.selectedElement.length > 0) {
+                        //bucketInfo.Aus = targetAu;
                         this.dragPointCalculations.dragSelectedNodes(this.selectedElement, this.nonDiscreteBuckets, 'down', targetAu)
                     }
                     else {
@@ -570,7 +520,7 @@ export class SharedDatasetService {
         if (this.selectedMetric === 1) {
             this.distributeFromExistingAus(bucketIdx, targetAu, direction)
         } else if (this.selectedMetric === 2) {
-            console.log('direction ', direction, ' idx ', bucketIdx, ' letter ', this.bucketDetails[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.bucketDetails[bucketIdx].Aus, ' selectedMetric ', this.selectedMetric)
+            //console.log('direction ', direction, ' idx ', bucketIdx, ' letter ', this.nonDiscreteBuckets[bucketIdx].letter, '  targetAu ', targetAu, ' Au ', this.nonDiscreteBuckets[bucketIdx].Aus, ' selectedMetric ', this.selectedMetric)
             this.distributeFromLinearScale(bucketIdx, targetAu, direction);
         } else if (this.selectedMetric === 3) {
             this.distributeFromInverseFareValues(bucketIdx, targetAu, direction)
@@ -586,30 +536,30 @@ export class SharedDatasetService {
 
                 let groupValueAuPercentage = 0;
 
-                if (this.bucketDetails[i].Aus < this.maxAuValue) {
-                    groupValueAuPercentage = this.bucketDetails[bucketIdx].Aus / (targetAu / bucketIdx) / bucketIdx;
+                if (this.nonDiscreteBuckets[i].Aus < this.maxAuValue) {
+                    groupValueAuPercentage = this.nonDiscreteBuckets[bucketIdx].Aus / (targetAu / bucketIdx) / bucketIdx;
 
-                    const bucketInfo = this.bucketDetails[i];
+                    const bucketInfo = this.nonDiscreteBuckets[i];
                     bucketInfo.Aus += groupValueAuPercentage;
                     console.log('Up ', bucketIdx, ' bucketInfo.Aus  ', bucketInfo.Aus, ' letter ', bucketInfo.letter, ' groupValueAuPercentage ', groupValueAuPercentage)
-                    //  console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+                    //  console.log('   Au % ', this.nonDiscreteBuckets[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.nonDiscreteBuckets[i].Aus.toFixed(2))
                 }
                 else {
-                    this.bucketDetails[i].Aus = this.maxAuValue;
+                    this.nonDiscreteBuckets[i].Aus = this.maxAuValue;
                 }
             }
         } else {
-            for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
+            for (let i = bucketIdx; i < this.nonDiscreteBuckets.length; i++) {
                 let groupValueAuPercentage = 0;
-                if (this.bucketDetails[i].Aus >= 0) {
-                    groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / bucketIdx) / bucketIdx;
+                if (this.nonDiscreteBuckets[i].Aus >= 0) {
+                    groupValueAuPercentage = this.nonDiscreteBuckets[i].Aus / (targetAu / bucketIdx) / bucketIdx;
 
-                    const bucketInfo = this.bucketDetails[i];
+                    const bucketInfo = this.nonDiscreteBuckets[i];
                     bucketInfo.Aus -= groupValueAuPercentage;
                     console.log('Down ', bucketIdx, ' bucketInfo  ', bucketInfo.Aus, ' letter ', bucketInfo.letter, ' groupValueAuPercentage ', groupValueAuPercentage)
-                    // console.log('   Au % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+                    // console.log('   Au % ', this.nonDiscreteBuckets[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.nonDiscreteBuckets[i].Aus.toFixed(2))
                 } else {
-                    this.bucketDetails[i].Aus = 0;
+                    this.nonDiscreteBuckets[i].Aus = 0;
                 }
             }
 
@@ -621,7 +571,7 @@ export class SharedDatasetService {
 
     public distributeFromLinearScale(bucketIndex, targetAu, dir) {
 
-        console.log('\n\n\n gdistributeFromLinearScale ', this.bucketDetails[bucketIndex].letter, '\nAus ', this.bucketDetails[bucketIndex].Aus, '\ndirection ', dir, '\nvalues ', bucketIndex, '\ntargetAu ', targetAu, '\n\n')
+        console.log('\n\n\n gdistributeFromLinearScale ', this.nonDiscreteBuckets[bucketIndex].letter, '\nAus ', this.nonDiscreteBuckets[bucketIndex].Aus, '\ndirection ', dir, '\nvalues ', bucketIndex, '\ntargetAu ', targetAu, '\n\n')
 
         let val;
         let mult;
@@ -629,18 +579,19 @@ export class SharedDatasetService {
 
         if (dir === 'down') {
 
-            val = this.bucketDetails.length - bucketIndex;
+            val = this.nonDiscreteBuckets.length - bucketIndex;
             console.log('Dowm val ', val)
             mult = targetAu / val;
 
-            for (let i = (this.bucketDetails.length - 1); i >= bucketIndex; i--) {
-                console.log('Dowm ', i, ' letter ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[i].Aus, ' ----  ', accum)
+            for (let i = (this.nonDiscreteBuckets.length - 1); i >= bucketIndex; i--) {
+                console.log('Dowm ', i, ' letter ', this.nonDiscreteBuckets[i].letter, ' Aus ', this.nonDiscreteBuckets[i].Aus, ' ----  ', accum)
                 accum += mult
-                this.bucketDetails[i].Aus = accum;
+                this.nonDiscreteBuckets[i].Aus = accum;
             }
 
         } else {
-            val = this.bucketDetails.length - bucketIndex;
+
+            val = this.nonDiscreteBuckets.length - bucketIndex;
 
             accum = 0;
 
@@ -652,11 +603,11 @@ export class SharedDatasetService {
 
             for (let i = 0; i <= bucketIndex; i++) {
 
-                if (this.bucketDetails[i].Aus < this.maxAuValue) {
-                    this.bucketDetails[i].Aus = (this.maxAuValue - accum);
-                    console.log('i ', i, ' letter ', this.bucketDetails[i].letter, ' Aus ', this.bucketDetails[i].Aus, ' ----  ', accum, ' targetAu ', targetAu)
+                if (this.nonDiscreteBuckets[i].Aus < this.maxAuValue) {
+                    this.nonDiscreteBuckets[i].Aus = (this.maxAuValue - accum);
+                    console.log('i ', i, ' letter ', this.nonDiscreteBuckets[i].letter, ' Aus ', this.nonDiscreteBuckets[i].Aus, ' ----  ', accum, ' targetAu ', targetAu)
                 } else {
-                    this.bucketDetails[i].Aus > this.maxAuValue ? this.bucketDetails[i].Aus = this.bucketDetails[i].Aus -= accum : this.maxAuValue;
+                    this.nonDiscreteBuckets[i].Aus > this.maxAuValue ? this.nonDiscreteBuckets[i].Aus = this.nonDiscreteBuckets[i].Aus -= accum : this.maxAuValue;
                 }
 
                 accum += mult;
@@ -666,38 +617,38 @@ export class SharedDatasetService {
 
     public distributeFromInverseFareValues(bucketIdx, targetAu, direction) {
 
-        //console.log('\n\n\n generateInverseFareValues ', this.bucketDetails[bucketIdx].letter, ' direction ', direction, ' bucketIdx ', bucketIdx, ' targetAu ', targetAu)
+        //console.log('\n\n\n generateInverseFareValues ', this.nonDiscreteBuckets[bucketIdx].letter, ' direction ', direction, ' bucketIdx ', bucketIdx, ' targetAu ', targetAu)
         let groupValueAuPercentage = 0;
 
         if (direction === 'up') {
 
-            //console.log('UP bucketDetails ', this.bucketDetails[bucketIdx].letter)
+            //console.log('UP nonDiscreteBuckets ', this.nonDiscreteBuckets[bucketIdx].letter)
             for (let i = bucketIdx; i >= 0; i--) {
 
-                if (this.bucketDetails[i].Aus < this.maxAuValue) {
-                    groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / this.inverseFareValues[i].protections) / bucketIdx;
-                    const bucketInfo = this.bucketDetails[i];
+                if (this.nonDiscreteBuckets[i].Aus < this.maxAuValue) {
+                    groupValueAuPercentage = this.nonDiscreteBuckets[i].Aus / (targetAu / this.inverseFareValues[i].protections) / bucketIdx;
+                    const bucketInfo = this.nonDiscreteBuckets[i];
                     bucketInfo.Aus = bucketInfo.Aus += groupValueAuPercentage;
-                    console.log('    Inverse Fare % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
+                    console.log('    Inverse Fare % ', this.nonDiscreteBuckets[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.nonDiscreteBuckets[i].Aus.toFixed(2))
                 }
                 else {
-                    this.bucketDetails[i].Aus = this.maxAuValue;
+                    this.nonDiscreteBuckets[i].Aus = this.maxAuValue;
                 }
             }
 
         } else {
-            //console.log('Down  letter ', this.bucketDetails[bucketIdx].letter)
+            //console.log('Down  letter ', this.nonDiscreteBuckets[bucketIdx].letter)
             let increment = bucketIdx + 1;
-            for (let i = bucketIdx; i < this.bucketDetails.length; i++) {
-                //console.log('i ', i, '   Down  letter ', this.bucketDetails[i].letter, ' ip: ', targetAu / this.inverseFareValues[i].protections)
-                if (this.bucketDetails[i].Aus > 0) {
+            for (let i = bucketIdx; i < this.nonDiscreteBuckets.length; i++) {
+                //console.log('i ', i, '   Down  letter ', this.nonDiscreteBuckets[i].letter, ' ip: ', targetAu / this.inverseFareValues[i].protections)
+                if (this.nonDiscreteBuckets[i].Aus > 0) {
                     // console.log('i ', i)
-                    console.log(' Down Inverse Fare % ', this.bucketDetails[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.bucketDetails[i].Aus.toFixed(2))
-                    groupValueAuPercentage = this.bucketDetails[i].Aus / (targetAu / this.inverseFareValues[i].protections) / increment;
-                    const bucketInfo = this.bucketDetails[i];
+                    console.log(' Down Inverse Fare % ', this.nonDiscreteBuckets[i].letter, ' idx ', i, ' Modifier ', groupValueAuPercentage.toFixed(2), ' Aus ', this.nonDiscreteBuckets[i].Aus.toFixed(2))
+                    groupValueAuPercentage = this.nonDiscreteBuckets[i].Aus / (targetAu / this.inverseFareValues[i].protections) / increment;
+                    const bucketInfo = this.nonDiscreteBuckets[i];
                     bucketInfo.Aus = bucketInfo.Aus < 0 ? 0 : bucketInfo.Aus -= groupValueAuPercentage;
                 } else {
-                    this.bucketDetails[i].Aus = 0;
+                    this.nonDiscreteBuckets[i].Aus = 0;
                 }
             }
 

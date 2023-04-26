@@ -242,7 +242,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
             // console.log(' self.sharedDatasetService.buckets ', self.sharedDatasetService.buckets)
             self.myChart.setOption({
                 //self.sharedDatasetService.bucketDetails
-                graphic: echarts.util.map(self.sharedDatasetService.buckets, (item, dataIndex) => {
+                graphic: echarts.util.map(self.sharedDatasetService.allBuckets, (item, dataIndex) => {
 
                     let activeItems = {};
 
@@ -457,12 +457,13 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                     fontWeight: 'bold',
                                     textBorderWidth: 0,
                                     textBorderColor: 'black',
+                                    //offset: [0, showLabels ? 4 : 10],
                                     offset: [0, 4],
                                     position: showLabels ? 'top' : 'insideTop',
                                 },
 
                                 itemStyle: {
-                                    color: 'rgba(128,128,25,0.4)',
+                                    color: '#981D97',
                                     //opacity: 1,
                                     // borderColor: 'black',
                                     // borderWidth: 0,
@@ -541,7 +542,7 @@ export class AuAvailabilityComponent implements AfterViewInit {
                                     position: 'top'
                                 },
                                 itemStyle: {
-                                    color: !item.discrete ? self.sharedDatasetService.colorRange[i] : 'rgba(80,80,80,1)',
+                                    color: self.themeSelect === 'dark' ? self.sharedDatasetService.colorRange[i] : item.discrete ? 'rgba(80,80,80,1)' : blueRamp16[i],
                                     //borderColor: 'transparent',
                                     //borderWidth: 0,
                                     // borderType: 'solid',
