@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional, InjectionToken } from '@angular/core';
-import { BidPriceInfluencers, BucketDetails } from '../models/dashboard.model';
+import { BidPriceInfluencers, BucketDetails, FlightClientDetails } from '../models/dashboard.model';
 
 import { map, mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
 import { Observable, throwError as _observableThrow, from, catchError, of as _observableOf, BehaviorSubject } from 'rxjs';
@@ -72,14 +72,7 @@ export class AirlineConfigClient {
   public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
 
   constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
-
-    //  console.log('AirlineConfigClient', API_BASE_URL)
-
     this.http = http;
-
-    //this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : BASE_LOCALHOST_5000;
-
-    //console.log('AirlineConfigClient this.baseUrl ', this.baseUrl)
   }
 
   letter: string;
@@ -205,6 +198,8 @@ export function getClientForEnvironment(http: HttpClient, sanitizer: DomSanitize
   return new BidPriceAspNetService(http, sanitizer);
 }
 
+
+
 export interface IBidPriceService {
   // TODO: add documentation to all methods
   // account_Login_Post(login: Login): Observable<LoginResponse>;
@@ -215,78 +210,47 @@ export interface IBidPriceService {
   // bidPriceInfluenceThresholds_Post(masterKey: number, thresholds: CabinBidPriceInfluenceThresholds[]): Observable<void>;
   // dailyFare_Get(masterKey: number): Observable<PosDailyFare[]>;
   flight_Get(): Observable<any>;
-
   flight_Post(masterKey: number, bidPriceInfluences: LegBidPriceInfluences[]): Observable<void>;
-
   // legBidPrice_Get(masterKey: number): Observable<CabinBidPriceValues[]>;
   // // that's all the API has described. I don't know what it's supposed to be doing
   // legBidPrice_Post(masterKey: number): Observable<void>;
-
   // legFlightDetails_Get(masterKey: number): Observable<LegFlightDetails>;
 }
+
 
 @Injectable({
   providedIn: 'root'
 })
 
+
+
 export class BidPriceAspNetService {
+
   readonly airportCodes_URL = './assets/csv/airports_small.csv';
-  readonly mockFlightClient = './assets/config/bucketConfigs.json';
-  private bidPriceInfluences: BidPriceInfluencesClient;
   private flightClient: FlightClient;
   private airlineConfigClient: AirlineConfigClient;
-  // public selectedMasterKey: number;
-  // public receivedUserId: string = '';
-
   private bpService: IBidPriceService;
 
   // public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
 
-  public apiUrl = this.mockFlightClient;
+  public readonly bucketUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/bucketConfigs.json';
+  public readonly flightClientUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/flightClient.json';
 
   public apiTarget;
 
+
   constructor(@Inject(HttpClient) protected http: HttpClient, private sanitizer: DomSanitizer) {
-
-    this.apiTarget = sanitizer.bypassSecurityTrustResourceUrl(this.apiUrl);
-
-    //console.log('this.apiTarget  ', this.apiTarget.changingThisBreaksApplicationSecurity)
-
-    this.airlineConfigClient = new AirlineConfigClient(this.http, this.apiTarget.changingThisBreaksApplicationSecurity)
-
-    this.mockFlightClientValues();
-    // this.setAirlineValues()
+    this.apiTarget = sanitizer.bypassSecurityTrustResourceUrl(this.bucketUrl);
+    this.airlineConfigClient = new AirlineConfigClient(this.http, this.apiTarget.changingThisBreaksApplicationSecurity);
   }
 
 
-  public flight_Get(): Observable<BucketDetails[]> {
-    //console.log('Const flight_Get ');
-    return this.bpService.flight_Get();
-  }
+  public apiFlightClientValues(): Observable<FlightClientDetails[]> {
 
-
-  public flight_Post(masterKey: number, bidPriceInfluences: LegBidPriceInfluences[]): Observable<void> {
-    return this.bpService.flight_Post(masterKey, bidPriceInfluences);
-  }
-
-
-
-  public mockFlightClientValues(): Observable<BucketDetails[][]> {
-
-    let options_: any = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        "Access-Control-Allow-Headers": "Origin, Accept, Content-Type, X-Requested-W",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
-      })
-    };
-
-    // console.log('mockFlightClientValues ', options_)
-
-    return this.http.get(this.apiTarget.changingThisBreaksApplicationSecurity, options_)
+    return this.http.get(this.flightClientUrl)
       .pipe(
         map((response: any) => {
+          // console.log('API response ', response)
           return response;
         }),
         catchError(error => {
@@ -296,6 +260,30 @@ export class BidPriceAspNetService {
 
   }
 
+
+  public apiBucketValues(): Observable<BucketDetails[][]> {
+
+    return this.http.get(this.bucketUrl)
+      .pipe(
+        map((response: any) => {
+          //console.log('API response ', response)
+          return response;
+        }),
+        catchError(error => {
+          throw error;
+        }),
+      );
+
+  }
+
+  public flight_Get(): Observable<BucketDetails[]> {
+    return this.bpService.flight_Get();
+  }
+
+
+  public flight_Post(masterKey: number, bidPriceInfluences: LegBidPriceInfluences[]): Observable<void> {
+    return this.bpService.flight_Post(masterKey, bidPriceInfluences);
+  }
 
 
   //  LegFlightDetailsClient

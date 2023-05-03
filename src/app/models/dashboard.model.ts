@@ -5,7 +5,9 @@ export interface FlightClientDetails {
   prevYearMasterKey?: number | undefined;
   airlineCode?: string | undefined;
   origin?: string | undefined;
+  fullOrigin?: string;
   destination?: string | undefined;
+  fullDestination?: string | undefined;
   equipment?: string | undefined;
   flightNumber?: number;
   departureDateTime?: Date;
@@ -123,6 +125,7 @@ export interface BucketDetails {
   Aus?: number;
   Sa?: number;
   discrete?: boolean;
+  color?: string;
 }
 
 export interface xAxisTextValue {

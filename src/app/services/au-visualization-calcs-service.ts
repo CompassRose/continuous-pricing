@@ -16,80 +16,13 @@ export class BidPriceCalcsService {
     public selectedIndex: number;
 
 
-    public hexColorCollection = [
-        '#ffff2b',
-        '#2bffff',
-        '#8040ff',
-        '#ffff80',
-        '#ff00ff',
-        '#80ff80',
-        '#ffffff',
-        '#00a4f2',
-        '#ffff28',
-        '#28ffff',
-        '#8040ff',
-        '#ffff80',
-        '#ff00ff',
-        '#80ffff',
-        '#2b2bff',
-        '#ff6c6c',
-        '#ffff80',
-        '#40ffff',
-        '#9d6fff',
-        '#ffff80',
-        '#ffeafe',
-        '#98ff00',
-        '#9b4eff',
-        '#00ca65',
-        '#ff11ff',
-        '#acff80',
-        '#ffffff',
-        '#00a9fb',
-        '#ff007e',
-        '#bbffb7',
-        '#00b7ff',
-        '#7a7a7a',
-        '#000000',
-        '#000000'
-    ];
-
-    // 29
-    //     :
-    //     { value: 99, barColor: 'rgb(0,155,78)' }
-    // 30
-    //     :
-    //     { value: 86, barColor: 'rgb(0.202,101)' }
-    // 40
-    //     :
-    //     { value: 74, barColor: 'rgb(17,255,172)' }
-    // Hard coded airRm Box Colors
-
-    public airRmColors = [
-        'rgb(255,0,0)',
-        'rgb(255,108,108)',
-        'rgb(255,128,64)',
-        'rgb(255,157,111)',
-        'rgb(255,255,128)',
-        'rgb(234,254,152)',
-        'rgb(0,155,78)',
-        'rgb(0.202,101)',
-        'rgb(17,255,172)',
-        'rgb(128,255,255)',
-        'rgb(0,169,201)',
-        'rgb(0,126,187)',
-        'rgb(183,0,183)',
-        'rgb(122,122,122)',
-        'rgb(50,50,50)',
-        'rgb(40,40,40)',
-        'rgb(30,30,30)'
-    ];
-
     constructor(private sharedDatasetService: SharedDatasetService) { }
 
 
     public getColorValues(): string[] {
-
+        console.log('COLOR ', this.sharedDatasetService.colorRange)
         return this.colorRange = this.sharedDatasetService.colorRange;
+
     }
 
 
@@ -168,17 +101,55 @@ export class BidPriceCalcsService {
     }
 
 
-    // Set up bar colors 
-    public adjustPieceColorForBookingUpdates(selectedElements: number[]) {
 
+    // // Set up bar colors 
+    // public adjustPieceColorForBookingUpdates() {
+
+    //     this.sharedDatasetService.dynamicBidPrices = [];
+    //     for (let i = 0; i < this.sharedDatasetService.nonDiscreteBuckets.length; i++) {
+    //         if (this.sharedDatasetService.nonDiscreteBuckets[i].protections > 0) {
+    //             for (let e = 0; e < this.sharedDatasetService.nonDiscreteBuckets[i].protections; e++) {
+    //                 this.sharedDatasetService.dynamicBidPrices.push(this.sharedDatasetService.nonDiscreteBuckets[i].fare)
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
+    public adjustPieceColorForBookingUpdates(): BarSeries[] {
+
+        let barSeries: BarSeries[] = [];
         this.sharedDatasetService.dynamicBidPrices = [];
-        for (let i = 0; i < this.sharedDatasetService.nonDiscreteBuckets.length; i++) {
-            if (this.sharedDatasetService.nonDiscreteBuckets[i].protections > 0) {
-                for (let e = 0; e < this.sharedDatasetService.nonDiscreteBuckets[i].protections; e++) {
-                    this.sharedDatasetService.dynamicBidPrices.push(this.sharedDatasetService.nonDiscreteBuckets[i].fare)
+        let counter = 0;
+        let colorIncr = 0;
+
+        this.sharedDatasetService.nonDiscreteBuckets.map((pc, i) => {
+
+            if (pc.protections > 0) {
+
+                for (let e = 0; e < pc.protections; e++) {
+
+                    if (counter < 190) {
+                        barSeries.push({ value: pc.fare, barColor: this.setBookingElementsColor(colorIncr, counter) })
+                        counter++
+                        this.sharedDatasetService.dynamicBidPrices.push(pc.fare)
+                    }
+
                 }
+                colorIncr++;
             }
-        }
+        })
+        //console.log('adjustPieceColorForBookingUpdates ', barSeries.length, ' counter ', counter)
+        return barSeries;
+    }
+
+
+    // Generates and returns each bar color
+    public setBookingElementsColor(value, j): string {
+
+        //  console.log('setBookingElementsColor ', value, ' j ', this.sharedDatasetService.colorRange[value])
+        return this.sharedDatasetService.colorRange[value];
     }
 
 
@@ -213,7 +184,8 @@ export class BidPriceCalcsService {
             sellingPoint = 0;
         }
 
-        const activeColor = this.sharedDatasetService.adjustedCurvePoints.length ? 'green' : 'blue';
+        const activeColor = 'blue'
+        //this.sharedDatasetService.adjustedCurvePoints.length ? 'green' : 'blue';
         const baseCurve = this.sharedDatasetService.dynamicBidPrices;
 
         if (this.sharedDatasetService.totalBookingsCollector > 0) {

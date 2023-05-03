@@ -35,10 +35,10 @@ export class DragPointDistributionService {
             if (dir === 'up') {
 
                 bucketInfo.Aus += 1;
-                // console.log('Up: bucketInfo:  ', bucketInfo.letter, ' Aus ', bucketInfo.Aus, ' targetAu ',)
+                //  console.log('Up: bucketInfo:  ', bucketInfo.letter, ' Aus ', bucketInfo.Aus, ' targetAu ',)
 
             } else {
-                // console.log('Down bucketInfo:  ', bucketInfo.letter, ' Aus ', bucketInfo.Aus, ' targetAu ',)
+                ///   console.log('Down bucketInfo:  ', bucketInfo.letter, ' Aus ', bucketInfo.Aus, ' targetAu ',)
                 bucketInfo.Aus -= 1;
             }
         })

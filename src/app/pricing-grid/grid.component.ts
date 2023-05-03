@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from "@angular/common";
-import { Subscription, map, merge, Observable, pairwise, scan, Subject } from 'rxjs';
+import { Subscription, map, merge, Observable, debounceTime, of, switchMap, BehaviorSubject, pairwise, scan, combineLatest, Subject } from 'rxjs';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { BookingControlService } from '../services/booking-control-service';
 import { KeyCode } from './lib/keycodes';
@@ -9,6 +9,7 @@ import { PathToAssets } from '../dashboard-constants';
 import { environment } from 'src/environments/environment.prod';
 import { ThemeControlService } from '../services/theme-control.service';
 import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visualization.service';
+import { BidPriceInfluencers, BucketDetails, FlightClientDetails } from '../models/dashboard.model';
 
 export function animationFrame({
   requestAnimationFrame,
@@ -80,19 +81,34 @@ export class ContinousPricingComponent implements OnInit {
   public pointsDeSelected = false;
   // public pointSelected = false;
 
+  public apiFlightCollectiontSubject$ = new BehaviorSubject<FlightClientDetails[]>([]);
+
+  public apiBucketCollectionSubject$ = new BehaviorSubject<BucketDetails[]>([]);
+
 
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
-    //private bidPriceWebViewService: BidPriceWebViewService,
     public dashboardApi: BidPriceAspNetService,
     public bookingControlService: BookingControlService,
     public themeControlService: ThemeControlService,
     public sharedDatasetService: SharedDatasetService) {
-    // console.log('bidPriceWebViewService ', bidPriceWebViewService)
-    //this.bidPriceWebViewService.flight_Get();
 
-    //this.selectedFlightValues = {} //sharedDatasetService.mockFlightValues[0];
-    //this.selectedFlightKey = this.sharedDatasetService.mockFlightValues[0].masterKey;
+
+    this.combineAndSendLatestValues()
+      .subscribe((response: any[]) => {
+
+        if (response[0].length > 0) {
+          this.sharedDatasetService.allFlightValues = response[0];
+          const flightCollection = response[0] as FlightClientDetails[];
+          this.sharedDatasetService.apiBucketDetails = response[1] as BucketDetails[][];
+          this.sharedDatasetService.bucketDetails = this.sharedDatasetService.apiBucketDetails[0] as BucketDetails[];
+          window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
+          window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
+          this.sharedDatasetService.updatedClientFlight$.next(flightCollection[0]);
+          this.flightSelectControl(response[0][0]);
+        }
+      })
+
 
   }
 
@@ -111,55 +127,87 @@ export class ContinousPricingComponent implements OnInit {
 
 
   // Called onStart and from flight dropdown
-  public flightSelectControl(ev) {
+  public flightSelectControl(flightSpecifics) {
 
     this.sharedDatasetService.totalBookingsCollector = 0;
-    const index = this.sharedDatasetService.mockFlightValues.findIndex(mk => mk.masterKey === ev.masterKey);
+
+    const index = this.sharedDatasetService.allFlightValues.findIndex(mk => {
+      // console.log('mk ', mk, '\n fsm ', flightSpecifics)
+      return mk.masterKey === flightSpecifics.masterKey
+    });
 
     this.selectedFlightIndex = index;
 
-    // console.log('flightSelectControl ', ev, ' selectedFlightIndex ', this.selectedFlightIndex)
-    this.selectedFlightValues = this.sharedDatasetService.mockFlightValues[index];
+    this.selectedFlightValues = this.sharedDatasetService.allFlightValues[index];
 
-    this.selectedFlightKey = ev.masterKey;
+    // console.log('XXXXXX  flightSelectControl ', flightSpecifics[index])
+
+    this.selectedFlightKey = flightSpecifics.masterKey;
     this.sharedDatasetService.setFlightClient(index);
+
+
 
     // this.bookingControlService.tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails];
     // this.bookingControlService.bookingSlider$.next(this.sharedDatasetService.totalBookingsCollector);
+
   }
 
 
+
   public deselectAllPoints() {
-    console.log('           ..............  deselectAllPoints deselectAllPoints ', this.pointsDeSelected);
+    //console.log('           ..............  deselectAllPoints deselectAllPoints ', this.pointsDeSelected);
     this.pointsDeSelected = !this.pointsDeSelected;
     this.sharedDatasetService.multiSelectedNodeSubject$.next([]);
   }
 
+  /**
+ * @return Two element array, elem 1 is FlightClientDetails, elem 2 is BidPriceInfluencers[]
+ */
+
+  public combineAndSendLatestValues(): Observable<(FlightClientDetails[] | BucketDetails[])[]> {
+
+    // debounce time insures enough time to get all new values,
+    // switchMap: higher order observable that unsubscribes after return...
+    //    and if there is a fast hover it cancels current operation and starts new evaluation
+
+    // noinspection UnnecessaryLocalVariableJS
+    const returnVal: Observable<(FlightClientDetails[] | BucketDetails[])[]> =
+      combineLatest(
+        [this.apiFlightCollectiontSubject$, this.apiBucketCollectionSubject$]
+      ).pipe(
+        debounceTime(20),
+        switchMap(([flight, buckets]) => {
+          // console.log('??? ', [flight, buckets])
+          return of([flight, buckets])
+        })
+      );
+    return returnVal;
+  }
 
   public ngOnInit() {
 
-    this.dashboardApi.mockFlightClientValues()
-      .subscribe((flight: any) => {
-
-        console.log('flight ', flight)
-
-        this.sharedDatasetService.apiBucketDetails = flight;
-
-        window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
-
-        window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
 
 
-        this.sharedDatasetService.bucketDetails = this.sharedDatasetService.apiBucketDetails[0];
+    this.dashboardApi.apiBucketValues()
+      .subscribe((flightBuckets: any) => {
+        console.log('/////////  flight ', flightBuckets)
 
-        this.flightSelectControl(this.sharedDatasetService.mockFlightValues[0]);
-
-        //   // this.bookingControlService.change(this.sharedDatasetService.totalBookingsCollector);
+        this.apiBucketCollectionSubject$.next(flightBuckets);
+        // this.sharedDatasetService.setFlightClient(0);
 
       })
 
 
-    this.sharedDatasetService.updatedClientFlight$.next(this.sharedDatasetService.mockFlightValues);
+    this.dashboardApi.apiFlightClientValues()
+      .subscribe((flights: FlightClientDetails[]) => {
+
+        console.log('flight ', flights)
+        this.apiFlightCollectiontSubject$.next(flights);
+        this.selectedFlightValues = flights[0];
+      })
+
+
+
 
 
 

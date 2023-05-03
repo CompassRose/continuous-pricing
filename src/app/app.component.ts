@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
 
   constructor(private secure: SecurityService) {
     this.safeValue = this.secure.getSafeHtml("<h1>Sanitization Success</h1>");
-    console.log('\n{{{  AppComponent this.safeValue }}}', this.safeValue, '\n')
+    // console.log('\n{{{  AppComponent this.safeValue }}}', this.safeValue, '\n')
   }
 
   ngOnInit() {
