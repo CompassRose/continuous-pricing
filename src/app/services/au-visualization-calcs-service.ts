@@ -19,14 +19,6 @@ export class BidPriceCalcsService {
     constructor(private sharedDatasetService: SharedDatasetService) { }
 
 
-    public getColorValues(): string[] {
-        console.log('COLOR ', this.sharedDatasetService.colorRange)
-        return this.colorRange = this.sharedDatasetService.colorRange;
-
-    }
-
-
-
     // Generates Bid Price Curve from adjustments
     public generateInterpolatedCurvePoints(): number[] {
 
@@ -59,18 +51,18 @@ export class BidPriceCalcsService {
         let rangeArray = [];
         let replacementEls = [];
         let tester = 0;
-        this.sharedDatasetService.bucketDetails.map((p, i) => {
+        this.sharedDatasetService.nonDiscreteBuckets.map((p, i) => {
             if (p.fare) {
                 if (i === 0) {
 
-                    for (let m = 0; m < this.sharedDatasetService.bucketDetails[0].protections; m++) {
-                        if (this.sharedDatasetService.bucketDetails[0].protections > 0) {
-                            rangeArray.push(this.sharedDatasetService.bucketDetails[0].fare)
+                    for (let m = 0; m < this.sharedDatasetService.nonDiscreteBuckets[0].protections; m++) {
+                        if (this.sharedDatasetService.nonDiscreteBuckets[0].protections > 0) {
+                            rangeArray.push(this.sharedDatasetService.nonDiscreteBuckets[0].fare)
                         }
                     }
                 } else {
-                    stepper = (this.sharedDatasetService.bucketDetails[i - 1].fare - p.fare) / p.protections;
-                    rangeArray = ranger(this.sharedDatasetService.bucketDetails[i - 1].fare, p.fare, stepper, 2);
+                    stepper = (this.sharedDatasetService.nonDiscreteBuckets[i - 1].fare - p.fare) / p.protections;
+                    rangeArray = ranger(this.sharedDatasetService.nonDiscreteBuckets[i - 1].fare, p.fare, stepper, 2);
 
                     tester = tester += rangeArray.length
                     if (rangeArray) {
@@ -80,9 +72,9 @@ export class BidPriceCalcsService {
             }
             if (rangeArray.length === 0) {
                 testIncr++;
-                for (let m = 0; m < this.sharedDatasetService.bucketDetails[testIncr].protections; m++) {
+                for (let m = 0; m < this.sharedDatasetService.nonDiscreteBuckets[testIncr].protections; m++) {
                     // console.log('testIncr ', testIncr, ' protections ', this.sharedDatasetService.bucketDetails[testIncr])
-                    replacementEls.push(this.sharedDatasetService.dynamicBidPrices[0]);
+                    replacementEls.push(this.sharedDatasetService.nonDiscreteBuckets[0].fare);
                 }
             }
 
@@ -103,53 +95,57 @@ export class BidPriceCalcsService {
 
 
     // // Set up bar colors 
-    // public adjustPieceColorForBookingUpdates() {
-
-    //     this.sharedDatasetService.dynamicBidPrices = [];
-    //     for (let i = 0; i < this.sharedDatasetService.nonDiscreteBuckets.length; i++) {
-    //         if (this.sharedDatasetService.nonDiscreteBuckets[i].protections > 0) {
-    //             for (let e = 0; e < this.sharedDatasetService.nonDiscreteBuckets[i].protections; e++) {
-    //                 this.sharedDatasetService.dynamicBidPrices.push(this.sharedDatasetService.nonDiscreteBuckets[i].fare)
-    //             }
-    //         }
-    //     }
-    // }
-
-
-
-    public adjustPieceColorForBookingUpdates(): BarSeries[] {
-
-        let barSeries: BarSeries[] = [];
-        this.sharedDatasetService.dynamicBidPrices = [];
-        let counter = 0;
-        let colorIncr = 0;
-
-        this.sharedDatasetService.nonDiscreteBuckets.map((pc, i) => {
-
-            if (pc.protections > 0) {
-
-                for (let e = 0; e < pc.protections; e++) {
-
-                    if (counter < 190) {
-                        barSeries.push({ value: pc.fare, barColor: this.setBookingElementsColor(colorIncr, counter) })
-                        counter++
-                        this.sharedDatasetService.dynamicBidPrices.push(pc.fare)
-                    }
-
+    public adjustPieceColorAndValue(buckets): any[] {
+        let test = [];
+        for (let e = 0; e < buckets.protections; e++) {
+            this.sharedDatasetService.dynamicBidPrices.push(buckets.fare)
+            const chartObj = {
+                value: buckets.fare,
+                itemStyle: {
+                    color: buckets.color
                 }
-                colorIncr++;
             }
-        })
-        //console.log('adjustPieceColorForBookingUpdates ', barSeries.length, ' counter ', counter)
-        return barSeries;
+            test.push(chartObj)
+        }
+        return test;
     }
 
 
-    // Generates and returns each bar color
-    public setBookingElementsColor(value, j): string {
 
-        //  console.log('setBookingElementsColor ', value, ' j ', this.sharedDatasetService.colorRange[value])
-        return this.sharedDatasetService.colorRange[value];
+    public returnProtectionValues(set): any {
+
+        let colorSeries = [];
+
+        let chartObj = {
+            value: 0,
+            itemStyle: {
+                color: ''
+            }
+        };
+
+        for (let p = 0; p < set.protections; p++) {
+
+            return chartObj = {
+                value: set.fare,
+                itemStyle: {
+                    color: set.color
+                }
+            }
+
+        }
+        //console.log('colorSeries ', chartObj)
+        return chartObj
+    }
+
+
+    public adjustPieceColorForBookingUpdates() {
+        this.sharedDatasetService.dynamicBidPrices = [];
+        this.sharedDatasetService.dynamicChartObject = [];
+        this.sharedDatasetService.nonDiscreteBuckets.map((pc, i) => {
+            pc.color = this.sharedDatasetService.colorRange[i];
+            const fareHolder = this.adjustPieceColorAndValue(pc)
+            this.sharedDatasetService.dynamicChartObject.push(...fareHolder)
+        })
     }
 
 
@@ -157,20 +153,16 @@ export class BidPriceCalcsService {
     public findMatchingBucketForBidPrice(bidPrice: number): BucketDetails {
 
         let currData: BucketDetails = null;
-
         for (const bucketInfo of this.sharedDatasetService.bucketDetails) {
-
             const fareValue = bucketInfo.fare;
-
             if (fareValue === bidPrice) {
-
-                // console.log('bucketInfo ', bucketInfo)
                 currData = bucketInfo;
                 break;
             }
         }
         return currData;
     }
+
 
 
 

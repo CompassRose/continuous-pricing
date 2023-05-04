@@ -11,6 +11,7 @@ import { ThemeControlService } from '../services/theme-control.service';
 import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visualization.service';
 import { BidPriceInfluencers, BucketDetails, FlightClientDetails } from '../models/dashboard.model';
 
+
 export function animationFrame({
   requestAnimationFrame,
   cancelAnimationFrame
@@ -190,7 +191,7 @@ export class ContinousPricingComponent implements OnInit {
 
     this.dashboardApi.apiBucketValues()
       .subscribe((flightBuckets: any) => {
-        console.log('/////////  flight ', flightBuckets)
+        // console.log('/////////  flight ', flightBuckets)
 
         this.apiBucketCollectionSubject$.next(flightBuckets);
         // this.sharedDatasetService.setFlightClient(0);
@@ -201,7 +202,7 @@ export class ContinousPricingComponent implements OnInit {
     this.dashboardApi.apiFlightClientValues()
       .subscribe((flights: FlightClientDetails[]) => {
 
-        console.log('flight ', flights)
+        // console.log('flight ', flights)
         this.apiFlightCollectiontSubject$.next(flights);
         this.selectedFlightValues = flights[0];
       })

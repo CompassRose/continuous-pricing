@@ -125,12 +125,14 @@ export class AuAvailabilityComponent {
 
         this.sharedDatasetService.apiActiveBucketsSubject$
             .subscribe(response => {
-                //console.log('response ', response)
                 if (response.length > 0) {
                     this.createSvg();
-                    this.setChartInstance();
+                    setTimeout(() => {
+                        this.setChartInstance();
+                    }, 0);
                 }
             })
+
 
         /// Deselect all nodes reset chart to default values
         this.sharedDatasetService.resetDefaultSubject$

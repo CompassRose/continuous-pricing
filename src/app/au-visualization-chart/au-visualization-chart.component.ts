@@ -1,4 +1,4 @@
-import { Component, Input, AfterViewInit, HostListener } from '@angular/core';
+import { Component, Input, HostListener } from '@angular/core';
 import { BidPriceInfluencers, BarSeries, BucketDetails } from '../models/dashboard.model';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { BidPriceCalcsService } from '../services/au-visualization-calcs-service';
@@ -30,7 +30,6 @@ export const modifiedCurveColor = (val) => {
 
 export class ContinousBidPricingComponent {
 
-    //public barSeriesValuesColors: any[] = [];
     public options: any = {};
     public myChart: echarts.ECharts = null;
     public modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
@@ -47,7 +46,6 @@ export class ContinousBidPricingComponent {
     public nonDiscreteBuckets: BucketDetails[] = [];
     public chartSeriesCollection: any[] = [];
 
-    public barSeriesValuesColors: BarSeries[] = [];
 
     @Input()
     set gridPointsDeSelected(state: boolean) {
@@ -71,6 +69,7 @@ export class ContinousBidPricingComponent {
             if (state) {
                 this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
             }
+
             this.setChartInstance();
             this.createChartDraggingElement(false);
             this.myChart.setOption({
@@ -91,10 +90,9 @@ export class ContinousBidPricingComponent {
 
         this.sharedDatasetService.colorRangeSelection$
             .subscribe(range => {
-                console.log('range ', range)
                 if (range && this.myChart) {
-
-                    this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
+                    console.log('range ', range)
+                    this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
                     this.createChartDraggingElement(true);
                     this.myChart.setOption({
                         series: this.setChartSeries()
@@ -120,18 +118,10 @@ export class ContinousBidPricingComponent {
         this.sharedDatasetService.apiActiveBucketsSubject$
             .subscribe(response => {
                 if (response.length > 0) {
-                    //  console.log('|||||||||   setChartInstance apiActiveBucketsSubject response ', response)
-
                     this.createSvg();
-
                     setTimeout(() => {
                         this.setChartInstance();
-                        this.createChartDraggingElement(true);
-                        this.myChart.setOption({
-                            series: this.setChartSeries()
-                        })
                     }, 0);
-
                 }
             })
 
@@ -141,11 +131,9 @@ export class ContinousBidPricingComponent {
 
                 if (response) {
                     this.sharedDatasetService.totalBookingsCollector = 0;
-                    //this.bidPriceCalcsService.adjustPieceColorForBookingUpdates(this.sharedDatasetService.selectedElement);
-
-                    // this.sharedDatasetService.adjustedCurvePoints = [];
                     this.sharedDatasetService.influenceInput.next([1.00, 'mult', 0]);
                     this.sharedDatasetService.influenceInput.next([0, 'addSub', 1]);
+
                     this.sharedDatasetService.modifierCollection = [];
                     this.sharedDatasetService.selectedElement = [];
                     this.sharedDatasetService.applyDataChanges();
@@ -163,7 +151,6 @@ export class ContinousBidPricingComponent {
                     }
                     this.createChartDraggingElement(true);
                 }
-
             })
 
 
@@ -172,21 +159,18 @@ export class ContinousBidPricingComponent {
 
                 if (this.myChart) {
 
-                    this.barSeriesValuesColors = this.bidPriceCalcsService.adjustPieceColorForBookingUpdates();
-
-                    //console.log(' AU VISUAIZATION ((((((((  bucketDetailsBehaviorSubject$ createChartElement  this.barSeriesValuesColors ', this.barSeriesValuesColors)
+                    // console.log(' AU VISUAIZATION ((((((((  bucketDetailsBehaviorSubject$ createChartDraggingElement  ')
                     if (this.showAllCurves) {
                         this.sharedDatasetService.interpolateBidPriceCurvePoints = this.bidPriceCalcsService.generateInterpolatedCurvePoints();
                     }
 
-                    setTimeout(() => {
+                    // setTimeout(() => {
+                    this.createChartDraggingElement(true);
+                    this.myChart.setOption({
+                        series: this.setChartSeries()
+                    })
 
-                        this.createChartDraggingElement(true);
-                        this.myChart.setOption({
-                            series: this.setChartSeries()
-                        })
-                    }, 0);
-
+                    //}, 100);
 
                 }
             })
@@ -219,6 +203,8 @@ export class ContinousBidPricingComponent {
 
     // on window resize
     public refreshChartVisual = () => {
+
+        console.log(' AU refreshChartVisual ((((((((  bucketDetailsBehaviorSubject$ createChartDraggingElement  ')
         this.createChartDraggingElement(true);
     }
 
@@ -252,77 +238,31 @@ export class ContinousBidPricingComponent {
 
 
 
-
-
     // No need to reset axis's 
     // Called once at start
     public setChartSeries(): any[] {
 
-        let colorSeries = [];
-        let IndexSeries = [];
-        let myColor;
-        //this.sharedDatasetService.maxAuValue = this.sharedDatasetService.nonDiscreteBuckets[0].Aus;
-        let colorIncrementor = 0 ///self.sharedDatasetService.dynamicBidPrices[0];
-
-        let chartObj = {
-            value: 0,
-            itemStyle: {
-                color: ''
-            }
-        };
-
-
         let mySeries = [
 
-            // {
-            //     id: 'e',
-            //     type: 'line',
-            //     z: 1,
-            //     animation: false,
-            //     silent: false,
-            //     showSymbol: false,
-            //     selectedMode: false,
-            //     symbolSize: 0,
-            //     areaStyle: {
-            //         color: 'rgba(0,0,0,.8)'
-            //     },
-            //     lineStyle: {
-            //         type: 'solid',
-            //         color: this.themeSelect === 'dark' ? 'rgba(220, 220, 0, 1)' : originalCurveColor(1),
-            //         width: this.themeSelect === 'dark' ? 2 : 2
-            //     },
-            //     data: this.sharedDatasetService.dynamicBidPrices
-            // },
-
-            // {
-            //     id: 'f',
-            //     type: 'bar',
-            //     animation: false,
-            //     animationDuration: 1,
-            //     showBackground: false,
-            //     colorBy: 'series',
-            //     silent: true,
-            //     z: 2,
-            //     data: this.sharedDatasetService.dynamicBidPrices.map((point: any, i: number) => {
-
-            //         if (!colorSeries.includes(point)) {
-
-            //             colorSeries.push(point)
-            //             colorIncrementor += 1;
-            //         }
-            //         chartObj = {
-            //             value: point,
-            //             itemStyle: {
-            //                 color: this.sharedDatasetService.colorRange[colorIncrementor]
-            //             }
-            //         }
-
-            //         return chartObj;
-            //     }),
-
-            //     markArea: this.setMarkArea(0)
-
-            // },
+            {
+                id: 'e',
+                type: 'line',
+                z: 1,
+                animation: false,
+                silent: false,
+                showSymbol: false,
+                selectedMode: false,
+                symbolSize: 0,
+                areaStyle: {
+                    color: 'rgba(0,0,0,.8)'
+                },
+                lineStyle: {
+                    type: 'solid',
+                    color: this.themeSelect === 'dark' ? 'rgba(220, 220, 0, 1)' : originalCurveColor(1),
+                    width: this.themeSelect === 'dark' ? 2 : 2
+                },
+                data: this.sharedDatasetService.dynamicBidPrices
+            },
             {
                 id: 'f',
                 type: 'bar',
@@ -332,15 +272,7 @@ export class ContinousBidPricingComponent {
                 colorBy: 'series',
                 silent: true,
                 z: 2,
-                data: this.barSeriesValuesColors.map(serie => {
-                    return {
-                        value: serie.value,
-                        itemStyle: {
-                            color: serie.barColor
-
-                        }
-                    }
-                }),
+                data: this.sharedDatasetService.dynamicChartObject,
                 markArea: this.setMarkArea(0)
             },
 
@@ -370,8 +302,6 @@ export class ContinousBidPricingComponent {
                 markPoint: this.markPoint()
             },
         ]
-        //  console.log('|||||||||||||||||||   mySeries ', mySeries)
-        //console.log('this.colorSeries ', colorSeries, ' IndexSeries ', IndexSeries)
         return mySeries;
     }
 
@@ -404,8 +334,6 @@ export class ContinousBidPricingComponent {
         this.sharedDatasetService.selectedElement.sort(compareNumbers);
         this.sharedDatasetService.multiSelectedNodeSubject$.next(this.sharedDatasetService.selectedElement);
 
-        // setChartDragPoints();
-        // this.createChartDraggingElement()
     }
 
     public setChartInstance = () => {
@@ -494,7 +422,7 @@ export class ContinousBidPricingComponent {
     // Re-generates chart elements
     public createChartDraggingElement(redrawChartPoints: boolean): void {
 
-        //  console.log('||||||  AU Visualize createChartDraggingElement ')
+        // console.log('||||||  AU Visualize createChartDraggingElement ')
         const self = this;
 
         // console.log('self ', self, ' selectedElement ')
@@ -510,19 +438,27 @@ export class ContinousBidPricingComponent {
 
         const onPointDragging = function (dataIndex) {
 
-            // let xValue = 0;
+            let xValue = 0;
             let dragPosition: any = [0, 0];
 
-            // console.log('this.position ', this.position)
             dragPosition = self.myChart.convertFromPixel({ gridIndex: 0 }, this.position);
-
+            dragPosition[1] = 0;
+            //console.log('11111 ', dragPosition[1])
             // let xValue = self.sharedDatasetService.maxAuValue - Math.round((dragPosition[0]))
-            let xValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
+            xValue = self.sharedDatasetService.maxAuValue - Math.round(Math.floor(dragPosition[0]));
 
             const target = dataIndex;
-            if (xValue < 1) { xValue = 0; };
+
             if (xValue === self.sharedDatasetService.maxAuValue) { xValue = self.sharedDatasetService.maxAuValue };
-            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.bucketDetails[target].Aus, target, xValue);
+
+            if (xValue < 1) { xValue = 0; };
+            xValue = Math.round(xValue)
+
+            self.sharedDatasetService.nonDiscreteBuckets[target].Aus = Math.round(self.sharedDatasetService.nonDiscreteBuckets[target].Aus)
+            console.log('\n\n -----------  target ', self.sharedDatasetService.nonDiscreteBuckets[target].Aus, ' xValue ', xValue)
+
+
+            self.sharedDatasetService.calculateBidPriceForAu(self.sharedDatasetService.nonDiscreteBuckets[target].Aus, target, xValue);
             // updatePosition();
         }
 
@@ -536,83 +472,85 @@ export class ContinousBidPricingComponent {
 
         const setChartDragPoints = () => {
 
-            let placeTemp = 0;
-            let xPlace = 0;
-            let scaleHandles = [];
-            let stackValues = [];
-            let activeItems: any = {};
+            if (self.myChart) {
+                let placeTemp = 0;
+                let xPlace = 0;
+                let scaleHandles = [];
+                let stackValues = [];
+                let activeItems: any = {};
 
-            self.myChart.setOption({
-                graphic: echarts.util.map(self.sharedDatasetService.nonDiscreteBuckets, function (item: any, dataIndex) {
+                self.myChart.setOption({
+                    graphic: echarts.util.map(self.sharedDatasetService.nonDiscreteBuckets, function (item: any, dataIndex) {
 
-                    let stacker = 120 - dataIndex;
-                    stackValues.push(stacker);
-                    //xPlace = (placeTemp += item.protections);
+                        let stacker = 120 - dataIndex;
+                        stackValues.push(stacker);
+                        //xPlace = (placeTemp += item.protections);
 
-                    let dragPoint = 0;
+                        let dragPoint = 0;
 
-                    // if (dataIndex !== 0) {
-                    scaleHandles = [xPlace, dragPoint];
-                    // }
+                        // if (dataIndex !== 0) {
+                        scaleHandles = [xPlace, dragPoint];
+                        // }
 
-                    // console.log('Letter ', self.sharedDatasetService.nonDiscreteBuckets[dataIndex].letter, '       ||||||| dragPoint ', self.sharedDatasetService.nonDiscreteBuckets[dataIndex].protections)
+                        // console.log('Letter ', self.sharedDatasetService.nonDiscreteBuckets[dataIndex].letter, '       ||||||| dragPoint ', self.sharedDatasetService.nonDiscreteBuckets[dataIndex].protections)
 
-                    if (self.sharedDatasetService.nonDiscreteBuckets[dataIndex - 1] &&
-                        item.Aus === self.sharedDatasetService.maxAuValue &&
-                        self.sharedDatasetService.nonDiscreteBuckets[dataIndex - 1].Aus === self.sharedDatasetService.maxAuValue) {
-                        stackValues[dataIndex] = stackValues[dataIndex - 1] + 2;
-                    }
+                        if (self.sharedDatasetService.nonDiscreteBuckets[dataIndex - 1] &&
+                            item.Aus === self.sharedDatasetService.maxAuValue &&
+                            self.sharedDatasetService.nonDiscreteBuckets[dataIndex - 1].Aus === self.sharedDatasetService.maxAuValue) {
+                            stackValues[dataIndex] = stackValues[dataIndex - 1] + 2;
+                        }
 
-                    //console.log('item ', item.letter, ' dataIndex ', dataIndex)
-                    //console.log('xPlace ', xPlace)
+                        //console.log('item ', item.letter, ' dataIndex ', dataIndex)
+                        //console.log('xPlace ', xPlace)
 
-                    activeItems = {
-                        type: 'group',
-                        position: self.myChart.convertToPixel({ gridIndex: 0 }, scaleHandles),
-                        draggable: true,
-                        ondrag: echarts.util.curry(onPointDragging, dataIndex),
-                        onclick: echarts.util.curry(selectElement, dataIndex),
-                        children: [
-                            {
-                                type: 'circle',
-                                z: stackValues[dataIndex],
-                                shape: {
-                                    r: dataIndex > 0 ? 12 : 0
+                        activeItems = {
+                            type: 'group',
+                            position: self.myChart.convertToPixel({ gridIndex: 0 }, scaleHandles),
+                            draggable: true,
+                            ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                            onclick: echarts.util.curry(selectElement, dataIndex),
+                            children: [
+                                {
+                                    type: 'circle',
+                                    z: stackValues[dataIndex],
+                                    shape: {
+                                        r: dataIndex > 0 ? 12 : 0
+                                    },
+                                    style: {
+                                        fill: dataIndex === 0 ? 'transparent' : self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'red' : 'rgba(255,255,255,1)',
+                                        stroke: dataIndex > 0 ? 'black' : 'transparent',
+                                        shadowBlur: 10,
+                                        shadowOffsetX: -1,
+                                        shadowOffsetY: -1,
+                                        shadowColor: dataIndex > 0 ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
+                                    },
                                 },
-                                style: {
-                                    fill: dataIndex === 0 ? 'transparent' : self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'red' : 'rgba(255,255,255,1)',
-                                    stroke: dataIndex > 0 ? 'black' : 'transparent',
-                                    shadowBlur: 10,
-                                    shadowOffsetX: -1,
-                                    shadowOffsetY: -1,
-                                    shadowColor: dataIndex > 0 ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
-                                },
-                            },
-                            {
-                                type: 'text',
-                                z: stackValues[dataIndex],
-                                x: -12,
-                                y: -12,
-                                style: {
-                                    text: dataIndex > 0 ? `${item.letter}` : ``,
-                                    textPosition: 'inside',
-                                    padding: 6,
-                                    fill: !self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'black' : 'white',
-                                    fontSize: '15px',
-                                    fontWeight: 'bold'
-                                },
-                            }
-                        ]
-                    }
-                    // }
-                    xPlace = (placeTemp += self.sharedDatasetService.nonDiscreteBuckets[dataIndex].protections);
-                    // console.log('activeItems ', xPlace)
-                    if (dataIndex === 0) {
-                        activeItems = null
-                    }
-                    return activeItems;
+                                {
+                                    type: 'text',
+                                    z: stackValues[dataIndex],
+                                    x: -12,
+                                    y: -12,
+                                    style: {
+                                        text: dataIndex > 0 ? `${item.letter}` : ``,
+                                        textPosition: 'inside',
+                                        padding: 6,
+                                        fill: !self.sharedDatasetService.selectedElement.includes(dataIndex) ? 'black' : 'white',
+                                        fontSize: '15px',
+                                        fontWeight: 'bold'
+                                    },
+                                }
+                            ]
+                        }
+                        // }
+                        xPlace = (placeTemp += self.sharedDatasetService.nonDiscreteBuckets[dataIndex].protections);
+                        // console.log('activeItems ', xPlace)
+                        if (dataIndex === 0) {
+                            activeItems = null
+                        }
+                        return activeItems;
+                    })
                 })
-            })
+            }
         }
 
         if (redrawChartPoints) {
