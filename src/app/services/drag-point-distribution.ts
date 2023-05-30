@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { BucketDetails } from '../models/dashboard.model';
 
 @Injectable({
     providedIn: 'root',
@@ -8,12 +7,9 @@ import { BucketDetails } from '../models/dashboard.model';
 export class DragPointDistributionService {
 
     public bucketDetailsFromShared;
-
-    constructor() {
-
-        // console.log('DragPointDistributionService constructor ')
-        // this.bucketDetailsFromShared = bucketDetails;
-    }
+    private upFinished = false;
+    private downFinished = false;
+    constructor() { }
 
 
     public applyDragBuckets(buckets, direction: any): void {
@@ -21,26 +17,37 @@ export class DragPointDistributionService {
     }
 
 
-    // Multiple nodes selected
-    public dragSelectedNodes(selected, points, dir: string, target): void {
+    // // Multiple nodes selected
+    // public dragSelectedNodes(selected, points, dir: string, target): void {
 
-        //  console.log('DragPointDistributionService  ', ' selected ', selected, ' target ', target, ' dir ', dir)
+    //     // console.log('DragPointDistributionService ', ' selected ', selected[selected.length - 1], ' target ', target, ' dir ', dir)
 
-        selected.forEach((se: number) => {
+    //     selected.forEach((se: number, i) => {
 
-            const bucketInfo = points[se];
+    //         const bucketInfo = points[se];
 
-            //  console.log('dragSelectedNodes dir ', se, ' bucketInfo ', bucketInfo)
+    //         //  console.log(' Aus  ', points[selected[0]].Aus, ' points ', points[selected[0]].letter, ' v ', points[selected[selected.length - 1]].letter, ' Aus ', points[selected[selected.length - 1]].Aus)
 
-            if (dir === 'up') {
+    //         if (dir === 'up') {
+    //             //console.log('  Up ', bucketInfo.Aus)
+    //             // if (points[selected[0]].Aus < 190) {
+    //             bucketInfo.Aus += 1;
+    //             // }
 
-                bucketInfo.Aus += 1;
-                //  console.log('Up: bucketInfo:  ', bucketInfo.letter, ' Aus ', bucketInfo.Aus, ' targetAu ',)
 
-            } else {
-                ///   console.log('Down bucketInfo:  ', bucketInfo.letter, ' Aus ', bucketInfo.Aus, ' targetAu ',)
-                bucketInfo.Aus -= 1;
-            }
-        })
-    }
+    //         } else {
+    //             // if (points[selected[selected.length - 1]].Aus > 0) {
+    //             bucketInfo.Aus -= 1;
+    //             // }
+    //         }
+
+
+
+
+    //         //console.log('DragPointDistributionService  ', ' bucketInfo ', bucketInfo.Aus)
+
+    //     })
+    // }
 }
+
+

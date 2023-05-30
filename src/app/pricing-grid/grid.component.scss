@@ -1,7 +1,6 @@
 // Global screen width adjuster
-@import '../../styles/configuration.scss';
-@import 'src/styles/selection-frame';
-
+@import "../../styles/configuration.scss";
+@import "src/styles/selection-frame";
 
 .flex-basis-main {
   display: flex;
@@ -21,59 +20,15 @@
   .header {
     z-index: 100;
     width: 100%;
-    height: 70px !important;
+    //min-height: 40px !important;
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: space-between;
 
     .booking-container {
       display: flex;
       flex-wrap: wrap;
       width: 180px;
-    }
-
-    .header-body {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      align-items: center;
-
-      .logo-flight-nfo {
-        flex-wrap: nowrap;
-        padding: 10px;
-
-        .accelya-text-img {
-          width: 10px;
-          height: 20px;
-          display: flex;
-        }
-      }
-
-      .flight-specifics {
-        align-items: center;
-        flex-basis: initial;
-      }
-
-      .cabin-pos-details {
-        align-items: center;
-        flex-basis: initial;
-      }
-
-      .flight-statistics {
-        display: flex;
-        flex-direction: row;
-
-        .status-col-to-row {
-          display: flex;
-          flex-direction: row;
-
-          // @media(max-width: 1050px) {
-          //   flex-direction: column;
-          //   align-items: center;
-          // }
-        }
-      }
     }
   }
 
@@ -116,7 +71,6 @@
       &.dark-mode {
         background-color: $brand-primary-background;
         color: white !important;
-
       }
     }
 
@@ -129,7 +83,7 @@
       border-left: 1px solid rgb(126, 126, 126);
 
       &.dark-mode {
-        background-color: #100C2A;
+        background-color: #100c2a;
       }
 
       &.light-mode {
@@ -139,11 +93,8 @@
     }
   }
 
-
-
   .pricing-window {
     width: $screen-width-modifier;
-
   }
 
   .influence-aus {
@@ -154,9 +105,7 @@
     margin-bottom: 15px;
   }
 
-
   .sa-au-window {
-
     .sa-open {
       width: 70%;
     }
@@ -165,27 +114,6 @@
       width: 90%;
     }
   }
-}
-
-#myProgress {
-  width: 100px;
-  border-radius: 4px;
-  margin-top: 2px;
-  border: 1px solid rgb(150, 150, 150);
-  background-color: rgb(16, 16, 17);
-}
-
-#myBar {
-  width: 5%;
-  border-radius: 3px;
-  height: 16px;
-  background-color: $brand-link-blue-text;
-  text-align: center;
-  line-height: 14px;
-  font-weight: 600;
-  font-size: 11px;
-  border: 1px solid rgb(49, 98, 190);
-  color: white;
 }
 
 .tail-img-sm {
@@ -198,7 +126,6 @@
   color: white;
 }
 
-
 .flight-frame {
   //padding-top: 9px;
   min-width: 400px;
@@ -209,12 +136,11 @@
   // border-top: 1px solid rgba(47, 94, 235, 0.35);
 }
 
-
 .logo-circle {
   padding: 2px 7px;
   display: flex;
 
-  @media(max-width: 400px) {
+  @media (max-width: 400px) {
     display: none;
   }
 }
@@ -226,7 +152,6 @@
   display: flex;
   align-items: center;
   font-size: 13px;
-
 
   .label-text {
     font-size: 10px;
@@ -269,45 +194,24 @@
   color: $brand-off-white-lt;
 }
 
-.navy-background {
-
-  background-color: $brand-primary-background;
-  color: $brand-off-white-lt;
-
-  &.corner-radius {
-    border-radius: 8px;
-  }
-
-  &.top-corner-radius {
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
-  }
-}
-
-
-
 .cursor-pointer {
   z-index: 102;
   cursor: pointer;
 }
 
-
-
-
 ::ng-deep .ng-select-container {
-
   color: white !important;
   background-color: $brand-primary-background !important;
   border-radius: 2px;
   border: 1px solid hsla(150, 75%, 50%, 0.5) !important;
-  min-height: .85rem !important;
-  max-height: 1.1rem !important;
-  padding: 0 3px;
+  min-height: 0.85rem !important;
+  max-height: 1rem !important;
+  padding: 0 2px;
   align-items: center;
-  font-size: 13px !important;
+  font-size: 11px !important;
 
   .ng-option {
-    font-size: 13px !important;
+    font-size: 11px !important;
   }
 
   &:hover {
@@ -315,28 +219,25 @@
   }
 }
 
-
 .label-btn {
   display: block;
   background: $brand-primary-background;
   color: hsla(215, 0%, 100%, 1);
   border: 1px solid hsla(150, 75%, 50%, 0.5);
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 11px;
   text-align: center;
+  min-width: 70px;
   position: relative;
-  //padding-right: 5px !important;
-  //padding-left: 5px;
   text-decoration: none;
 
   &:hover {
     border: 1px solid hsla(150, 75%, 50%, 1);
   }
-
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: "Material Icons";
   font-weight: bold !important;
   font-style: normal;
   font-size: 22px !important;
@@ -373,15 +274,13 @@ section {
   flex-flow: row wrap;
 }
 
-
-
 label {
   display: block;
   background: $brand-primary-background;
   border: 1px solid hsla(150, 75%, 50%, 0.5);
   border-radius: 4px;
   width: 120px;
-  padding: .14rem 0 .16rem;
+  padding: 0.14rem 0 0.16rem;
   text-align: center;
   font-size: 13px;
   position: relative;
@@ -400,7 +299,6 @@ label {
 
   &.dark-blue {
     background: $brand-primary-background;
-
   }
 
   &:hover {
@@ -411,13 +309,12 @@ label {
 input[type="radio"] {
   display: none;
 
-
-  &:not(:disabled)~label {
+  &:not(:disabled) ~ label {
     cursor: pointer;
     //background: red;
   }
 
-  &:disabled~label {
+  &:disabled ~ label {
     color: hsla(150, 5%, 75%, 1);
     border-color: hsla(150, 5%, 75%, 1);
     background: gray;
@@ -426,12 +323,12 @@ input[type="radio"] {
   }
 }
 
-input[type=radio]:not(:checked)~label {
+input[type="radio"]:not(:checked) ~ label {
   // background: $brand-primary-background;
   color: white;
 }
 
-input[type="radio"]:checked+label {
+input[type="radio"]:checked + label {
   background: #0d6efd;
 
   // &:disabled~label {
@@ -448,14 +345,31 @@ input[type="radio"]:checked+label {
   // &:active~label {
   //   background: red;
   // }
-
 }
-
-
-
 
 @media only screen and (max-width: 700px) {
   section {
     flex-direction: column;
   }
+}
+
+#myProgress {
+  width: 100px;
+  border-radius: 4px;
+  margin-top: 2px;
+  border: 1px solid rgb(150, 150, 150);
+  background-color: rgb(16, 16, 17);
+}
+
+#myBar {
+  width: 5%;
+  border-radius: 3px;
+  height: 16px;
+  background-color: $brand-link-blue-text;
+  text-align: center;
+  line-height: 14px;
+  font-weight: 600;
+  font-size: 11px;
+  border: 1px solid rgb(49, 98, 190);
+  color: white;
 }

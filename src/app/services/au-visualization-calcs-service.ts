@@ -73,7 +73,7 @@ export class BidPriceCalcsService {
             if (rangeArray.length === 0) {
                 testIncr++;
                 for (let m = 0; m < this.sharedDatasetService.nonDiscreteBuckets[testIncr].protections; m++) {
-                    // console.log('testIncr ', testIncr, ' protections ', this.sharedDatasetService.bucketDetails[testIncr])
+                    console.log('testIncr ', testIncr, ' protections ', this.sharedDatasetService.bucketDetails[testIncr])
                     replacementEls.push(this.sharedDatasetService.nonDiscreteBuckets[0].fare);
                 }
             }
@@ -92,61 +92,6 @@ export class BidPriceCalcsService {
         return result;
     }
 
-
-
-    // // Set up bar colors 
-    public adjustPieceColorAndValue(buckets): any[] {
-        let test = [];
-        for (let e = 0; e < buckets.protections; e++) {
-            this.sharedDatasetService.dynamicBidPrices.push(buckets.fare)
-            const chartObj = {
-                value: buckets.fare,
-                itemStyle: {
-                    color: buckets.color
-                }
-            }
-            test.push(chartObj)
-        }
-        return test;
-    }
-
-
-
-    public returnProtectionValues(set): any {
-
-        let colorSeries = [];
-
-        let chartObj = {
-            value: 0,
-            itemStyle: {
-                color: ''
-            }
-        };
-
-        for (let p = 0; p < set.protections; p++) {
-
-            return chartObj = {
-                value: set.fare,
-                itemStyle: {
-                    color: set.color
-                }
-            }
-
-        }
-        //console.log('colorSeries ', chartObj)
-        return chartObj
-    }
-
-
-    public adjustPieceColorForBookingUpdates() {
-        this.sharedDatasetService.dynamicBidPrices = [];
-        this.sharedDatasetService.dynamicChartObject = [];
-        this.sharedDatasetService.nonDiscreteBuckets.map((pc, i) => {
-            pc.color = this.sharedDatasetService.colorRange[i];
-            const fareHolder = this.adjustPieceColorAndValue(pc)
-            this.sharedDatasetService.dynamicChartObject.push(...fareHolder)
-        })
-    }
 
 
 

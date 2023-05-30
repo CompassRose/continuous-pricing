@@ -46,14 +46,14 @@
          "fare": 86,
          "protections": 0,
          "Aus": 125,
-         "bookings": 0,
+         "bookings": 3,
          "discrete": false
      }, {
          "letter": "K",
          "fare": 74,
          "protections": 0,
          "Aus": 115,
-         "bookings": 0,
+         "bookings": 4,
          "discrete": false
      }, {
          "letter": "L",
@@ -67,33 +67,33 @@
          "fare": 54,
          "protections": 0,
          "Aus": 85,
-         "bookings": 0,
+         "bookings": 5,
          "discrete": false
      }, {
          "letter": "N",
          "fare": 44,
          "protections": 0,
          "Aus": 60,
-         "bookings": 0,
+         "bookings": 3,
          "discrete": false
      }, {
          "letter": "O",
          "fare": 34,
          "protections": 0,
          "Aus": 40,
-         "bookings": 0,
+         "bookings": 3,
          "discrete": false
      }, {
          "letter": "P",
          "fare": 29,
          "protections": 0,
          "Aus": 20,
-         "bookings": 0,
+         "bookings": 4,
          "discrete": false
      }, {
          "letter": "Q",
          "fare": 24,
-         "protections": 0,
+         "protections": 2,
          "Aus": 60,
          "bookings": 0,
          "discrete": true

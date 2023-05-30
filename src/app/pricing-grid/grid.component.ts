@@ -144,6 +144,7 @@ export class ContinousPricingComponent implements OnInit {
     // console.log('XXXXXX  flightSelectControl ', flightSpecifics[index])
 
     this.selectedFlightKey = flightSpecifics.masterKey;
+
     this.sharedDatasetService.setFlightClient(index);
 
 
@@ -210,8 +211,6 @@ export class ContinousPricingComponent implements OnInit {
 
 
 
-
-
     this.bookingControlService.bookingSlider$
       .subscribe(response => {
         // console.log('BOOK response ', response)
@@ -237,6 +236,18 @@ export class ContinousPricingComponent implements OnInit {
 
     const ctrlLeft = shortcut([
       KeyCode.ControlLeft,
+    ]).pipe(sequence());
+
+    const ctrlRight = shortcut([
+      KeyCode.ControlRight,
+    ]).pipe(sequence());
+
+    const arwRight = shortcut([
+      KeyCode.ArrowRight,
+    ]).pipe(sequence());
+
+    const arwLeft = shortcut([
+      KeyCode.ArrowLeft,
     ]).pipe(sequence());
 
     const key1 = shortcut([
@@ -283,6 +294,9 @@ export class ContinousPricingComponent implements OnInit {
       //controlAlt,
       //  abc,
       ctrlLeft,
+      ctrlRight,
+      arwRight,
+      arwLeft
       // key1,
       // key2,
       // key4,
@@ -294,9 +308,13 @@ export class ContinousPricingComponent implements OnInit {
     ).pipe(map((arr) => {
       // console.log('arr ', arr)
       return arr.map((a) => {
+        // console.log('a ', a)
         if (this.sharedDatasetService.selectedMetric !== 0) {
           this.lastSelectedMetric = this.sharedDatasetService.selectedMetric;
         }
+        // if(a.arwRight){
+
+        // }
         if (a.ctrlKey) {
           if (this.sharedDatasetService.selectedMetric === 0) {
             this.lastSelectedMetric = 0
