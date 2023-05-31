@@ -128,6 +128,20 @@ export interface BucketDetails {
   color?: string;
 }
 
+
+
+export interface CompetitiveFareDetails {
+  odMasterkey: number;
+  carrier: string;
+  fare: number;
+  origin: string;
+  destination: string;
+  flightNumber: number;
+  departureDate: string;
+  departureTime: string;
+  cabinNumber: number;
+}
+
 export interface xAxisTextValue {
   value?: string | undefined;
   textStyle?: textColor | undefined;

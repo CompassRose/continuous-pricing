@@ -9,7 +9,7 @@ import { PathToAssets } from '../dashboard-constants';
 import { environment } from 'src/environments/environment.prod';
 import { ThemeControlService } from '../services/theme-control.service';
 import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visualization.service';
-import { BidPriceInfluencers, BucketDetails, FlightClientDetails } from '../models/dashboard.model';
+import { BucketDetails, FlightClientDetails, CompetitiveFareDetails } from '../models/dashboard.model';
 
 
 export function animationFrame({
@@ -77,15 +77,10 @@ export class ContinousPricingComponent implements OnInit {
 
   public selectedFlightIndex = 0;
   public selectedCabinIndex = 2;
-
-
   public pointsDeSelected = false;
-  // public pointSelected = false;
-
   public apiFlightCollectiontSubject$ = new BehaviorSubject<FlightClientDetails[]>([]);
-
   public apiBucketCollectionSubject$ = new BehaviorSubject<BucketDetails[]>([]);
-
+  public apiCompetitiveFaresSubject$ = new BehaviorSubject<CompetitiveFareDetails[]>([]);
 
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
@@ -103,6 +98,7 @@ export class ContinousPricingComponent implements OnInit {
           const flightCollection = response[0] as FlightClientDetails[];
           this.sharedDatasetService.apiBucketDetails = response[1] as BucketDetails[][];
           this.sharedDatasetService.bucketDetails = this.sharedDatasetService.apiBucketDetails[0] as BucketDetails[];
+          this.sharedDatasetService.competitiveFareValues = response[2] as CompetitiveFareDetails[];
           window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
           window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
           this.sharedDatasetService.updatedClientFlight$.next(flightCollection[0]);
@@ -123,7 +119,6 @@ export class ContinousPricingComponent implements OnInit {
 
   public cabinSelection(ev) {
     this.selectedCabinIndex = ev.id;
-    //console.log('cabinSelection ', ev, ' this.selectedCabinIndex ', this.selectedCabinIndex)
   }
 
 
@@ -133,40 +128,27 @@ export class ContinousPricingComponent implements OnInit {
     this.sharedDatasetService.totalBookingsCollector = 0;
 
     const index = this.sharedDatasetService.allFlightValues.findIndex(mk => {
-      // console.log('mk ', mk, '\n fsm ', flightSpecifics)
       return mk.masterKey === flightSpecifics.masterKey
     });
 
     this.selectedFlightIndex = index;
-
     this.selectedFlightValues = this.sharedDatasetService.allFlightValues[index];
-
-    // console.log('XXXXXX  flightSelectControl ', flightSpecifics[index])
-
     this.selectedFlightKey = flightSpecifics.masterKey;
-
     this.sharedDatasetService.setFlightClient(index);
-
-
-
-    // this.bookingControlService.tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails];
-    // this.bookingControlService.bookingSlider$.next(this.sharedDatasetService.totalBookingsCollector);
 
   }
 
 
-
   public deselectAllPoints() {
-    //console.log('           ..............  deselectAllPoints deselectAllPoints ', this.pointsDeSelected);
     this.pointsDeSelected = !this.pointsDeSelected;
     this.sharedDatasetService.multiSelectedNodeSubject$.next([]);
   }
 
   /**
- * @return Two element array, elem 1 is FlightClientDetails, elem 2 is BidPriceInfluencers[]
+ * @return Three element array, elem 0 is FlightClientDetails, elem 1 is BidPriceInfluencers[] elem 2 is CompetitiveFareDetails[]
  */
 
-  public combineAndSendLatestValues(): Observable<(FlightClientDetails[] | BucketDetails[])[]> {
+  public combineAndSendLatestValues(): Observable<(FlightClientDetails[] | BucketDetails[] | CompetitiveFareDetails[])[]> {
 
     // debounce time insures enough time to get all new values,
     // switchMap: higher order observable that unsubscribes after return...
@@ -175,12 +157,11 @@ export class ContinousPricingComponent implements OnInit {
     // noinspection UnnecessaryLocalVariableJS
     const returnVal: Observable<(FlightClientDetails[] | BucketDetails[])[]> =
       combineLatest(
-        [this.apiFlightCollectiontSubject$, this.apiBucketCollectionSubject$]
+        [this.apiFlightCollectiontSubject$, this.apiBucketCollectionSubject$, this.apiCompetitiveFaresSubject$]
       ).pipe(
         debounceTime(20),
-        switchMap(([flight, buckets]) => {
-          // console.log('??? ', [flight, buckets])
-          return of([flight, buckets])
+        switchMap(([flight, buckets, compFares]) => {
+          return of([flight, buckets, compFares])
         })
       );
     return returnVal;
@@ -192,20 +173,20 @@ export class ContinousPricingComponent implements OnInit {
 
     this.dashboardApi.apiBucketValues()
       .subscribe((flightBuckets: any) => {
-        // console.log('/////////  flight ', flightBuckets)
-
         this.apiBucketCollectionSubject$.next(flightBuckets);
-        // this.sharedDatasetService.setFlightClient(0);
-
       })
 
 
     this.dashboardApi.apiFlightClientValues()
       .subscribe((flights: FlightClientDetails[]) => {
-
-        // console.log('flight ', flights)
         this.apiFlightCollectiontSubject$.next(flights);
         this.selectedFlightValues = flights[0];
+      })
+
+
+    this.dashboardApi.apiCompetitiveFareClientValues()
+      .subscribe((compFares: CompetitiveFareDetails[]) => {
+        this.apiCompetitiveFaresSubject$.next(compFares);
       })
 
 
@@ -213,7 +194,6 @@ export class ContinousPricingComponent implements OnInit {
 
     this.bookingControlService.bookingSlider$
       .subscribe(response => {
-        // console.log('BOOK response ', response)
         this.sharedDatasetService.generateInverseDetails();
       })
 

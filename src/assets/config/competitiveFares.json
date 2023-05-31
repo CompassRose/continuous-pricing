@@ -1,0 +1,32 @@
+[{
+        "odMasterkey": 286020,
+        "carrier": "0B",
+        "fare": 19.99,
+        "origin":"TRN",
+        "destination":"CTA",
+        "flightNumber": 4001,
+        "departureDate":"2020-12-14T00:00:00",
+        "departureTime":"1900-01-01T08:20:00",
+        "cabinNumber": 3
+    }, {
+        "odMasterkey": 286020,
+        "carrier":"FR",
+        "fare": 23.9,
+        "origin":"TRN",
+        "destination":"CTA",
+        "flightNumber": 1030,
+        "departureDate":"2020-12-14T00:00:00",
+        "departureTime":"1900-01-01T13:05:00",
+        "cabinNumber": 3
+    }, {
+        "odMasterkey": 286020,
+        "carrier":"V7",
+        "fare": 49.99,
+        "origin":"TRN",
+        "destination":"CTA",
+        "flightNumber": 1468,
+        "departureDate":"2020-12-14T00:00:00",
+        "departureTime":"1900-01-01T11:20:00",
+        "cabinNumber": 3
+    }
+]

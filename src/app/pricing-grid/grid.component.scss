@@ -20,7 +20,7 @@
   .header {
     z-index: 100;
     width: 100%;
-    //min-height: 40px !important;
+    max-height: 55px !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -104,21 +104,11 @@
     align-items: center;
     margin-bottom: 15px;
   }
-
-  .sa-au-window {
-    .sa-open {
-      width: 70%;
-    }
-
-    .sa-collapsed {
-      width: 90%;
-    }
-  }
 }
 
 .tail-img-sm {
-  width: 58px;
-  height: 54px;
+  width: 45px;
+  height: 43px;
 }
 
 .flight-header-main {
@@ -219,15 +209,83 @@
   }
 }
 
+input[type="radio"] {
+  display: none;
+
+  &:not(:disabled) ~ label {
+    cursor: pointer;
+    padding: 0.16rem 0 !important;
+    width: 105px !important;
+  }
+
+  &:disabled ~ label {
+    color: hsla(150, 5%, 75%, 1);
+    border-color: hsla(150, 5%, 75%, 1);
+    background: gray;
+    width: 105px !important;
+    padding: 0 0 !important;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+input[type="radio"]:not(:checked) ~ label {
+  color: white;
+}
+
+input[type="radio"]:checked + label {
+  background: #0d6efd;
+  width: 105px !important;
+  padding: 0 0 !important;
+  color: hsla(215, 0%, 100%, 1);
+}
+
+label {
+  display: block;
+  background: $brand-primary-background;
+  border: 1px solid hsla(150, 75%, 50%, 0.5);
+  border-radius: 3px;
+  width: 105px;
+  padding: 0.16rem 0;
+  text-align: center;
+  font-size: 11px;
+  position: relative;
+
+  &:disabled {
+    padding: 0rem 0;
+  }
+
+  &.red {
+    background: red;
+  }
+
+  &.blue {
+    background: #0d6efd;
+  }
+
+  &.gray {
+    background: gray;
+  }
+
+  &.dark-blue {
+    background: $brand-primary-background;
+  }
+
+  &:hover {
+    border: 1px solid hsla(150, 75%, 50%, 1);
+  }
+}
+
 .label-btn {
   display: block;
   background: $brand-primary-background;
   color: hsla(215, 0%, 100%, 1);
   border: 1px solid hsla(150, 75%, 50%, 0.5);
-  border-radius: 4px;
+  border-radius: 3px;
   font-size: 11px;
   text-align: center;
-  min-width: 70px;
+  min-width: 65px;
+  padding: 0.16rem 0;
   position: relative;
   text-decoration: none;
 
@@ -272,79 +330,6 @@ h1 {
 section {
   display: flex;
   flex-flow: row wrap;
-}
-
-label {
-  display: block;
-  background: $brand-primary-background;
-  border: 1px solid hsla(150, 75%, 50%, 0.5);
-  border-radius: 4px;
-  width: 120px;
-  padding: 0.14rem 0 0.16rem;
-  text-align: center;
-  font-size: 13px;
-  position: relative;
-
-  &.red {
-    background: red;
-  }
-
-  &.blue {
-    background: #0d6efd;
-  }
-
-  &.gray {
-    background: gray;
-  }
-
-  &.dark-blue {
-    background: $brand-primary-background;
-  }
-
-  &:hover {
-    border: 1px solid hsla(150, 75%, 50%, 1);
-  }
-}
-
-input[type="radio"] {
-  display: none;
-
-  &:not(:disabled) ~ label {
-    cursor: pointer;
-    //background: red;
-  }
-
-  &:disabled ~ label {
-    color: hsla(150, 5%, 75%, 1);
-    border-color: hsla(150, 5%, 75%, 1);
-    background: gray;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-}
-
-input[type="radio"]:not(:checked) ~ label {
-  // background: $brand-primary-background;
-  color: white;
-}
-
-input[type="radio"]:checked + label {
-  background: #0d6efd;
-
-  // &:disabled~label {
-  //   background: #0d6efd;
-  // }
-
-  color: hsla(215, 0%, 100%, 1);
-
-  // &:not(:active)~label {
-  //   cursor: pointer;
-  //   background: #0d6efd;
-  // }
-
-  // &:active~label {
-  //   background: red;
-  // }
 }
 
 @media only screen and (max-width: 700px) {

@@ -192,10 +192,7 @@ export class AuAvailabilityComponent {
                 z: 6,
                 animation: false,
                 data: this.sharedDatasetService.nonDiscreteBuckets.map((item, i) => {
-
-                    // item.discrete ? false : true
                     const showLabels: boolean = (item.Aus - item.protections) < 20 ? false : true;
-                    // console.log('showLabels ', showLabels, ' --- ', item.Aus - item.protections)
                     const test = item.protections > 0 && !item.discrete ? item.protections : 0;
                     return {
                         value: test,
@@ -207,7 +204,6 @@ export class AuAvailabilityComponent {
                             formatter: (params) => {
                                 let active;
                                 const auDiff = Math.round(this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].protections - this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].bookings);
-                                //console.log('params.dataIndex, letter ', self.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].letter, ' auDiff ', auDiff)
                                 active = auDiff > 0 ? auDiff : '' // > self.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].bookings ? Math.round(self.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].protections) : '';
                                 return active;
                             },
@@ -241,29 +237,22 @@ export class AuAvailabilityComponent {
                 })
             },
 
-            // {
-            //     type: 'bar',
-            //     name: 'Bookings',
-            //     barGap: '-100%',
-            //     //stack: 'total',
-            //     barWidth: '90%',
-            //     z: 8,
-            //     animation: false,
-            //     data: self.sharedDatasetService.nonDiscreteBuckets.map((item, i) => {
-            //         return item.bookings;
-            //     }),
-            //     itemStyle: {
-            //         color: 'rgb(55, 165, 55)',
-            //         decal: {
-            //             symbol: 'rect',
-            //             color: 'rgba(0, 0, 0, 0.12)',
-            //             dashArrayX: [1, 0],
-            //             dashArrayY: [4, 2],
-            //             symbolSize: 1,
-            //             rotation: Math.PI / 6
-            //         }
-            //     },
-            // },
+            {
+                type: 'bar',
+                name: 'Bookings',
+                barGap: '-100%',
+                //stack: 'total',
+                barWidth: '70%',
+                z: 8,
+                animation: false,
+                data: this.sharedDatasetService.nonDiscreteBuckets.map((item, i) => {
+                    return item.bookings;
+                }),
+                itemStyle: {
+                    color: 'rgba(240, 0, 0, 1)',
+                },
+            },
+            // 
             {
                 type: 'bar',
                 stack: 'total',
@@ -277,62 +266,46 @@ export class AuAvailabilityComponent {
                 animation: false,
 
                 data: this.sharedDatasetService.bucketDetails.map((item, i) => {
-                    // console.log('item ', item)
                     const diff = item.Aus - this.sharedDatasetService.totalBookingsCollector;
-                    const test = diff > 0 ? Math.round(diff) : '';
-                    const fareString = `${test}<br>${Math.round(item.protections - item.bookings)}`
+                    const auElement = diff > 0 ? Math.round(diff) : '';
 
-
+                    // const fareString = `${auElement}<br>${Math.round(item.protections - item.bookings)}`
+                    const showProtections = !item.discrete ? item.protections : '';
                     return {
-                        value: test,
+                        value: auElement,
                         label: {
                             show: true,
-                            // formatter: () => {
-                            //     return `${fareString}`
-                            // },
-
                             formatter: () => {
-                                return `{a|${test}}\n{b|${item.protections - item.bookings}}`;
+                                return `{a|${auElement}}\n{b|${showProtections}}`;
                             },
                             lineHeight: 20,
                             rich: {
                                 a: {
                                     align: 'center',
-                                    //height: 5,
                                     fontSize: 12,
                                     padding: [0, 0, -12, 0],
-                                    // width: 70,
                                     fontWeight: 'normal',
                                     color: this.themeSelect === 'dark' ? 'white' : 'black',
                                 },
                                 b: {
                                     align: 'center',
-                                    //height: 5,
                                     padding: [0, 0, 0, 0],
                                     fontSize: 13,
                                     fontWeight: 'bold',
-                                    color: '#981D97',
+                                    color: 'rgb(205, 40, 165)',
                                 },
                             },
-
-                            // color: this.themeSelect === 'dark' ? 'white' : 'black',
-                            // fontSize: 12,
-                            // fontWeight: 'normal',
-                            offset: i === 0 ? [0, 6] : [0, -4],
+                            offset: item.discrete ? [0, 14] : i === 0 ? [0, 6] : [0, -2],
                             position: 'top'
                         },
                         itemStyle: {
                             color: this.themeSelect === 'dark' ? this.sharedDatasetService.colorRange[i] : item.discrete ? 'rgba(80,80,80,1)' : blueRamp16[i],
-                            //borderColor: 'transparent',
-                            //borderWidth: 0,
-                            // borderType: 'solid',
                             shadowColor: 'rgba(0,0,0,0.2)',
                             shadowBlur: 3,
                             shadowOffsetX: -2,
-                            //shadowOffsetY: -2,
                             decal: {
                                 symbol: 'rect',
-                                color: !item.discrete ? 'rgba(39, 39, 255, 0.1)' : 'rgba(70,70,70, 0)',
+                                color: !item.discrete ? 'rgba(39, 39, 255, 0.1)' : 'rgba(70,70,70, 0.25)',
                                 dashArrayX: [3, 0],
                                 dashArrayY: [4, 2],
                                 symbolSize: 1,
@@ -349,14 +322,11 @@ export class AuAvailabilityComponent {
                     }
                 }),
             }]
-        // console.log('Avail mySeries ', mySeries, '\n\n')
-        return mySeries
+        return mySeries;
     }
 
 
     public setChartInstance = () => {
-
-        // console.log('          setChartInstance')
 
         this.myChart.setOption({
 
@@ -365,85 +335,83 @@ export class AuAvailabilityComponent {
                 left: 55,
                 right: 20,
                 top: 25,
-                bottom: 15
+                bottom: 45
             },
-            // tooltip: {
-            //     show: false,
-            //     backgroundColor: 'rgba(255, 255, 255, 1)',
-            //     borderWidth: 1,
-            //     borderColor: 'Blue',
-            //     extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
-            //     padding: [5, 10],
-            //     axisPointer: {
-            //         trigger: 'line',
-            //     },
-            //     textStyle: {
-            //         fontSize: 14,
-            //         color: '#000'
-            //     },
-            //     formatter: (params) => {
-            //         const calc = this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].Aus - this.sharedDatasetService.totalBookingsCollector;
-            //         const saValue = calc > 0 ? `<br>Sa: ${calc}` : ``;
-            //         return `Class: ${this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].letter}<br>Fare: ${this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].fare}<br>Aus: ${this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].Aus}${saValue}`;
-            //     }
-            // },
-            // legend: {
-            //     show: true,
-            //     selectedMode: false,
-            //     textStyle: {
-            //         fontSize: 13,
-            //         //lineHeight: 45,
-            //         //height: 33,
-            //     },
-            //     itemWidth: 30,
-            //     itemHeight: 14,
-            //     right: 80,
-            //     data: [
-            //         {
-            //             name: 'SA',
-            //             icon: 'rect',
-            //             itemStyle: {
-            //                 color: 'rgb(65, 65, 255)', //'#0000A0',  //rgba(32, 96, 248, 1)
-            //                 borderColor: 'transparent',
-            //                 borderWidth: 0,
-            //                 borderType: 'solid',
-            //                 decal: {
-            //                     symbol: 'rect',
-            //                     color: 'rgba(39, 39, 255, 0.32)',
-            //                     dashArrayX: [3, 0],
-            //                     dashArrayY: [4, 2],
-            //                     symbolSize: 1,
-            //                     rotation: Math.PI / 6
-            //                 }
-            //             }
-            //         },
-            //         {
-            //             name: 'Protections',
-            //             icon: 'rect',
-            //             itemStyle: {
-            //                 color: '#981D97',
-            //                 opacity: 1,
-            //                 decal: {
-            //                     symbol: 'rect',
-            //                     color: 'rgba(0, 0, 0, 0.1)',
-            //                     dashArrayX: [1, 0],
-            //                     dashArrayY: [4, 4],
-            //                     symbolSize: 1,
-            //                     rotation: Math.PI / 6
-            //                 },
-            //             }
-            //         },
-            //         {
-            //             name: 'Bookings',
-            //             icon: 'rect'
-            //         },]
-            // },
+            tooltip: {
+                show: false,
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+                borderWidth: 1,
+                borderColor: 'Blue',
+                extraCssText: 'box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);',
+                padding: [5, 10],
+                axisPointer: {
+                    trigger: 'line',
+                },
+                textStyle: {
+                    fontSize: 14,
+                    color: '#000'
+                },
+                formatter: (params) => {
+                    const calc = this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].Aus - this.sharedDatasetService.totalBookingsCollector;
+                    const saValue = calc > 0 ? `<br>Sa: ${calc}` : ``;
+                    return `Class: ${this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].letter}<br>Fare: ${this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].fare}<br>Aus: ${this.sharedDatasetService.nonDiscreteBuckets[params.dataIndex].Aus}${saValue}`;
+                }
+            },
+            legend: {
+                show: false,
+                selectedMode: false,
+                textStyle: {
+                    fontSize: 13
+                },
+                itemWidth: 30,
+                itemHeight: 14,
+                right: 80,
+                data: [
+                    {
+                        name: 'SA',
+                        icon: 'rect',
+                        itemStyle: {
+                            color: 'rgb(65, 65, 255)',
+                            borderColor: 'transparent',
+                            borderWidth: 0,
+                            borderType: 'solid',
+                            decal: {
+                                symbol: 'rect',
+                                color: 'rgba(39, 39, 255, 0.32)',
+                                dashArrayX: [3, 0],
+                                dashArrayY: [4, 2],
+                                symbolSize: 1,
+                                rotation: Math.PI / 6
+                            }
+                        }
+                    },
+                    {
+                        name: 'Protections',
+                        icon: 'rect',
+                        itemStyle: {
+                            color: '#981D97',
+                            opacity: 1,
+                            decal: {
+                                symbol: 'rect',
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                dashArrayX: [1, 0],
+                                dashArrayY: [4, 4],
+                                symbolSize: 1,
+                                rotation: Math.PI / 6
+                            },
+                        }
+                    },
+                    {
+                        name: 'Bookings',
+                        icon: 'rect'
+                    },]
+            },
             yAxis: [
                 {
                     type: 'value',
-                    id: 0,
                     name: 'Seats',
                     position: 'left',
+                    id: 0,
                     nameLocation: 'middle',
                     nameRotate: 90,
                     nameGap: 35,
@@ -458,19 +426,18 @@ export class AuAvailabilityComponent {
                         show: true
                     },
                     axisLabel: {
-                        fontSize: 11
+                        fontSize: 10
                     },
                     data: this.sharedDatasetService.bucketDetails.map((bp, i) => {
                         return bp.Aus;
                     }),
-                },
-            ],
+                }],
             xAxis: [
                 {
                     show: false,
                     type: 'category',
                     axisLabel: {
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: 'bold',
                     },
                     inverse: false,
@@ -482,8 +449,39 @@ export class AuAvailabilityComponent {
                         return item.letter;
                     }),
                 },
-            ],
+                {
+                    show: true,
+                    type: 'category',
+                    name: 'Bookings',
+                    nameLocation: 'middle',
+                    nameGap: 25,
+                    nameTextStyle: {
+                        fontSize: 13,
+                        fontWeight: 'normal'
+                    },
 
+                    inverse: false,
+                    position: 'bottom',
+                    axisTick: {
+                        show: true,
+                    },
+
+                    data: this.sharedDatasetService.bucketDetails.map((item, i) => {
+
+                        let booksValue = `${item.bookings}`;
+                        return {
+                            value: booksValue,
+                            textStyle: {
+                                color: 'rgb(255, 5, 5)',
+                                fontSize: 13,
+                                fontWeight: 'bold',
+
+                            }
+                        }
+
+                    }),
+                }
+            ],
             series: []
         })
     }
@@ -508,13 +506,16 @@ export class AuAvailabilityComponent {
             dragPosition = self.myChart.convertFromPixel('grid', pos);
             yValue = Math.round(dragPosition[1]);
 
-            if (yValue === 0) { yValue = 0; }
+            if (yValue <= 0) { yValue = 0; }
+            if (yValue > self.sharedDatasetService.maxAuValue) {
+                yValue = self.sharedDatasetService.maxAuValue
+            }
             if (dataIndex >= self.sharedDatasetService.nonDiscreteBuckets.length) {
                 self.sharedDatasetService.bucketDetails[dataIndex].Aus = yValue;
-                // console.log('>>>>> dataIndex ', dataIndex, ' bucketDetails ', self.sharedDatasetService.bucketDetails[dataIndex])
+                //console.log('>>>>> dataIndex ', dataIndex, ' bucketDetails ', self.sharedDatasetService.bucketDetails[dataIndex])
                 self.sharedDatasetService.applyDataChanges()
             } else {
-                if (yValue > self.sharedDatasetService.maxAuValue) { yValue = self.sharedDatasetService.maxAuValue }
+                //console.log('>>>>> yValue ', yValue)
                 self.sharedDatasetService.calculateBidPriceForAu(dataIndex, yValue, self.sharedDatasetService.dragDirection);
             }
         }
@@ -528,7 +529,7 @@ export class AuAvailabilityComponent {
                     const handles = [item.letter, item.Aus];
                     activeItems = {
                         type: 'group',
-                        position: self.myChart.convertToPixel('grid', handles),
+                        position: self.myChart.convertToPixel({ gridIndex: 0 }, handles),
                         draggable: true,
                         ondrag: function (dx, dy) {
 
@@ -540,7 +541,6 @@ export class AuAvailabilityComponent {
                                     self.sharedDatasetService.dragDirection = 'down';
                                 }
                             }
-                            // console.log('|||||||||||||  dragDirection ', self.dragDirection)
                             onPointDragging(dataIndex, [0, this.y]);
                         },
                         children: [
@@ -579,7 +579,6 @@ export class AuAvailabilityComponent {
                     if (dataIndex === 0) {
                         activeItems = null
                     }
-                    // console.log('activeItems ', activeItems)
                     return activeItems;
                 })
             })

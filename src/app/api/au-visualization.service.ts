@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional, InjectionToken } from '@angular/core';
-import { BidPriceInfluencers, BucketDetails, FlightClientDetails } from '../models/dashboard.model';
+import { BucketDetails, FlightClientDetails, CompetitiveFareDetails } from '../models/dashboard.model';
 
 import { map, mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
 import { Observable, throwError as _observableThrow, from, catchError, of as _observableOf, BehaviorSubject } from 'rxjs';
@@ -13,7 +13,6 @@ export const BASE_LOCALHOST_5000 = "http://localhost:5000";
 
 
 import {
-  BidPriceInfluencesClient,
   FlightClient,
   LegBidPriceInfluences
 } from "./bidPrice_client";
@@ -83,7 +82,7 @@ export class AirlineConfigClient {
   discrete: boolean;
 
   init(_data?: AirlineConfig) {
-    /// console.log('_data ', _data)
+    console.log('_data ', _data)
     if (_data) {
       this.letter = _data["letter"];
       this.fare = _data["fare"];
@@ -229,11 +228,13 @@ export class BidPriceAspNetService {
   readonly airportCodes_URL = './assets/csv/airports_small.csv';
   private flightClient: FlightClient;
   private airlineConfigClient: AirlineConfigClient;
+  private competitiveFareDetails: CompetitiveFareDetails
   private bpService: IBidPriceService;
 
   // public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
 
   public readonly bucketUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/bucketConfigs.json';
+  public readonly competetiveFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/competitiveFares.json';
   public readonly flightClientUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/flightClient.json';
 
   public apiTarget;
@@ -241,7 +242,23 @@ export class BidPriceAspNetService {
 
   constructor(@Inject(HttpClient) protected http: HttpClient, private sanitizer: DomSanitizer) {
     this.apiTarget = sanitizer.bypassSecurityTrustResourceUrl(this.bucketUrl);
-    this.airlineConfigClient = new AirlineConfigClient(this.http, this.apiTarget.changingThisBreaksApplicationSecurity);
+    ///this.airlineConfigClient = new AirlineConfigClient(this.http, this.apiTarget.changingThisBreaksApplicationSecurity);
+    //this.competitiveFareDetails = new CompetitiveFareDetails(this.http, this.apiTarget.changingThisBreaksApplicationSecurity);
+  }
+
+
+  public apiCompetitiveFareClientValues(): Observable<FlightClientDetails[]> {
+
+    return this.http.get(this.competetiveFaresUrl)
+      .pipe(
+        map((response: any) => {
+          return response;
+        }),
+        catchError(error => {
+          throw error;
+        }),
+      );
+
   }
 
 
@@ -250,7 +267,6 @@ export class BidPriceAspNetService {
     return this.http.get(this.flightClientUrl)
       .pipe(
         map((response: any) => {
-          // console.log('API response ', response)
           return response;
         }),
         catchError(error => {
@@ -266,7 +282,6 @@ export class BidPriceAspNetService {
     return this.http.get(this.bucketUrl)
       .pipe(
         map((response: any) => {
-          //console.log('API response ', response)
           return response;
         }),
         catchError(error => {

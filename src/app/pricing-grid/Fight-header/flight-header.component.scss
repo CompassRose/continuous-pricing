@@ -1,16 +1,5 @@
-@import 'src/styles/configuration';
-@import 'src/styles/fonts';
-
-.tail-img-sm {
-  width: 54px;
-  height: 48px;
-}
-
-.flight-header-main {
-  margin: 0 auto;
-  color: white;
-}
-
+@import "src/styles/configuration";
+@import "src/styles/fonts";
 
 .flight-frame {
   //padding-top: 9px;
@@ -22,12 +11,11 @@
   // border-top: 1px solid rgba(47, 94, 235, 0.35);
 }
 
-
 .logo-circle {
   padding: 2px 7px;
   display: flex;
 
-  @media(max-width: 400px) {
+  @media (max-width: 400px) {
     display: none;
   }
 }

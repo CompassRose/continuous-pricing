@@ -1,11 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@ng-select/ng-select/themes/default.theme.css";
-@import './styles/configuration.scss';
+@import "./styles/configuration.scss";
 @import "styles/fonts";
 
 $body-background: rgb(201, 211, 219);
 //$font-family: "'Crimson Pro', sans-serif"; //"OpenSans-Semibold";
-
 
 html,
 body {
@@ -15,7 +14,6 @@ body {
   font-weight: 400;
   font-size: 16px;
   background-color: $body-background !important;
-
 }
 
 .horiz-centered-flex {
@@ -32,6 +30,9 @@ body {
   .align-right {
     align-self: flex-end;
   }
+  .minus-margin {
+    margin-bottom: -5px;
+  }
 }
 
 .contrast-blue-background {
@@ -44,9 +45,8 @@ body {
   color: $brand-primary-text;
 }
 
-
 * {
-  box-sizing: border-box
+  box-sizing: border-box;
 }
 
 .mat-slide-toggle {
@@ -99,7 +99,6 @@ body {
   border-radius: 0 4px 4px 0;
 }
 
-
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -137,7 +136,6 @@ input::-webkit-inner-spin-button {
 
   &.dark-mode {
     background-color: $brand-primary-background;
-
   }
 }
 
@@ -152,7 +150,7 @@ input::-webkit-inner-spin-button {
 
 .mat-slider.mat-slider-horizontal .mat-slider-track-wrapper {
   height: 6px;
-  border-radius: 10px
+  border-radius: 10px;
 }
 
 .mat-slider-track-background {

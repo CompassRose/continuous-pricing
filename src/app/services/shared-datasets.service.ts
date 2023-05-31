@@ -1,12 +1,12 @@
 
 import { Injectable } from '@angular/core';
 import { BucketDetails, InverseFareDetails } from '../models/dashboard.model';
-import { Observable, BehaviorSubject, Subject, of } from 'rxjs';
-import { debounceTime, pairwise, map } from 'rxjs/operators';
-import { distinctUntilChanged, tap, filter, scan } from 'rxjs/operators';
+import { BehaviorSubject, Subject, of } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { distinctUntilChanged, tap, filter } from 'rxjs/operators';
 import { DragPointDistributionService } from '../services/drag-point-distribution';
 
-import { FlightClientDetails, BarSeries, BidPriceInfluencers } from '../models/dashboard.model';
+import { FlightClientDetails, BarSeries, BidPriceInfluencers, CompetitiveFareDetails } from '../models/dashboard.model';
 import { ColorManagerService } from './color-manager-service';
 
 @Injectable({
@@ -125,6 +125,8 @@ export class SharedDatasetService {
 
     public dynamicChartObject: BarSeries[] = [];
 
+    public competitiveFareValues: CompetitiveFareDetails[] = [];
+
     constructor(private colorManagerService: ColorManagerService) {
 
         this.dragPointCalculations = new DragPointDistributionService();
@@ -140,7 +142,7 @@ export class SharedDatasetService {
             )
             .subscribe((node) => {
 
-                if (node.length > 0) {
+                if (node.length > 1) {
                     this.setGroupingMethod(0);
                     this.dragGrouping[0].name = 'Multiple';
                 } else {
@@ -249,7 +251,7 @@ export class SharedDatasetService {
         this.selectedMetric = idx;
         let state = false;
         // console.log('this.selectedMetric ', this.selectedMetric)
-        if (this.selectedElement.length > 0) {
+        if (this.selectedElement.length > 1) {
             state = true;
             this.dragGrouping.forEach((dg, i) => {
                 if (i === 0) {
@@ -373,7 +375,7 @@ export class SharedDatasetService {
         let returnGroupColors = [];
         for (let b = bucket.protections; b > 0; b--) {
             let returnColor;
-            returnColor = b > bucket.bookings ? bucket.color : 'red'
+            returnColor = b > bucket.bookings ? bucket.color : bucket.color
             returnGroupColors.push(returnColor)
         }
         return returnGroupColors
@@ -403,7 +405,7 @@ export class SharedDatasetService {
                 this.allAus.push(bd.Aus)
             }
         })
-        console.log('this.allAus ', this.allAus)
+        //console.log('this.allAus ', this.allAus)
         this.adjustPieceColorForBookingUpdates();
 
         setTimeout(() => {
@@ -417,7 +419,7 @@ export class SharedDatasetService {
     // Returns Bucket Seat count for protection
     public protectionMyLevel(idx: number): number {
         const nextBucketValue = (idx === (this.nonDiscreteBuckets.length - 1)) ? 0 : this.nonDiscreteBuckets[idx + 1].Aus;
-        // console.log('idx ', idx, ' nextBucketValue. ', Math.round(this.nonDiscreteBuckets[idx].Aus - nextBucketValue), ' LETTER ', this.nonDiscreteBuckets[idx].letter)
+        //console.log('idx ', idx, ' nextBucketValue. ', Math.round(this.nonDiscreteBuckets[idx].Aus - nextBucketValue), ' LETTER ', this.nonDiscreteBuckets[idx].letter)
         const diff = Math.round(this.nonDiscreteBuckets[idx].Aus - nextBucketValue);
 
         return (diff > 0) ? diff : 0;
@@ -460,7 +462,7 @@ export class SharedDatasetService {
             metric = 'nonDiscreteBuckets';
             auMetric = 'currAus';
         }
-        console.log('\n     PRE  direction ', direction, ' bucketIdx ', bucketIdx, ' auMetric ', auMetric, ' metric ', metric)
+        // console.log('\n     PRE  direction ', direction, ' bucketIdx ', bucketIdx, ' auMetric ', auMetric, ' metric ', metric)
 
         let targetBp: number;
 
@@ -475,11 +477,12 @@ export class SharedDatasetService {
 
         if (targetAu >= this[auMetric][bucketIdx]) {
 
-            // console.log(' UPPPP SE >>> targetAu ', targetAu, ' this[auMetric][bucketIdx] ', this[auMetric][bucketIdx]);
+            // console.log(' ALONE SE >>> targetAu ', targetAu, ' this[auMetric][bucketIdx] ', this[auMetric][bucketIdx]);
             for (let i = bucketIdx; i > 0; i--) {
                 const bucketInfo = this[metric][i];
                 // if (this[metric][bucketIdx].protections > this[metric][bucketIdx].bookings) {
                 if (bucketInfo.fare < targetBp) {
+                    // console.log(' ALONE SE >>> targetAu ', targetAu, ' this[auMetric][bucketIdx] ', this[auMetric][bucketIdx], ' direction ', direction);
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'up');
                     }
@@ -500,8 +503,10 @@ export class SharedDatasetService {
 
             // if (this[metric][bucketIdx].protections > this[metric][bucketIdx].bookings) {
             for (let i = bucketIdx; i < this[metric].length; i++) {
+
                 const bucketInfo = this[metric][i];
                 if (bucketInfo.fare >= targetBp) {
+                    // console.log(' - Along For the ride i ', i, ' bucketIdx ', bucketIdx, ' auMetric][bucketIdx] ', this[auMetric][i]);
                     if (this.dragGrouping[this.selectedMetric] !== undefined && this.dragGrouping[this.selectedMetric].id !== 0) {
                         this.justifyDistributionFromDrag(bucketIdx, targetAu, 'down');
                     }

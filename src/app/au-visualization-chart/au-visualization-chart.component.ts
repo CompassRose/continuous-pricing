@@ -340,10 +340,7 @@ export class ContinousBidPricingComponent {
 
     public setChartInstance = () => {
 
-        console.log('\n\n\n Calling INIT Chart setChartInstance ')
         this.sharedDatasetService.maxAuValue = this.sharedDatasetService.nonDiscreteBuckets[0].Aus;
-
-        // if (!self.myChart) {
 
         this.myChart.setOption({
 
@@ -351,8 +348,8 @@ export class ContinousBidPricingComponent {
                 show: false,
                 left: 60,
                 right: 20,
-                top: 40,
-                bottom: 40
+                top: 15,
+                bottom: 35
             },
             // backgroundColor: 'rgba(205,225,245,1)',
             xAxis: {
@@ -403,9 +400,8 @@ export class ContinousBidPricingComponent {
                         fontSize: 14,
                         fontWeight: 'normal'
                     },
-                    // position: 'left',
                     showGrid: false,
-                    max: this.sharedDatasetService.nonDiscreteBuckets[0].fare + 5,
+                    max: this.sharedDatasetService.nonDiscreteBuckets[0].fare + 20,
                     interval: this.sharedDatasetService.nonDiscreteBuckets[0].fare < 400 ? 20 : this.sharedDatasetService.nonDiscreteBuckets[0].fare > 1000 ? 350 : 35,
                     scale: false,
                     splitLine: {
@@ -424,23 +420,15 @@ export class ContinousBidPricingComponent {
 
     // Re-generates chart elements
     public createChartDraggingElement(redrawChartPoints: boolean): void {
-        //console.log('XXXXXXXXXXXXXXXXX  createChartDraggingElement ', redrawChartPoints)
         const self = this;
-
         const updatePosition = () => {
-            /// console.log('updatePosition ')
             setChartDragPoints();
         };
         let xValue;
-        let previousDrag = 0;
 
         const onPointDragging = function (dataIndex: number, pos: number[], item: number) {
 
-            // console.log('self.previousDrag  ', self.previousDrag)
-
             self.dragPosition = self.myChart.convertFromPixel('grid', pos);
-
-            // console.log(' self.dragPosition[0] ', self.dragPosition[0])
 
             self.sharedDatasetService.lastDataIndex = Math.round(JSON.parse(JSON.stringify(pos[0])));
 
@@ -450,24 +438,8 @@ export class ContinousBidPricingComponent {
 
             if (xValue < 1) { xValue = 0; };
 
-            // if (self.sharedDatasetService.selectedElement.length > 1) {
-            //     xValue = item
-            //     // console.log('item ', item, ' xValue ', xValue, '\nlastDataIndex ', self.sharedDatasetService.lastDataIndex, '\nselectedElement \n', self.sharedDatasetService.nonDiscreteBuckets[self.sharedDatasetService.selectedElement[0]].letter, ' prot 0 ',
-            //     //     self.sharedDatasetService.nonDiscreteBuckets[self.sharedDatasetService.selectedElement[0]].Aus,
-            //     //     '\n', self.sharedDatasetService.nonDiscreteBuckets[self.sharedDatasetService.selectedElement[1]].letter, ' prot 1 ', self.sharedDatasetService.nonDiscreteBuckets[self.sharedDatasetService.selectedElement[1]].Aus,
-
-            //     //     '\n lastMultiselectDataIndex ', self.lastMultiselectDataIndex
-            //     // )
-
-            //     if (self.previousDrag > self.dragPosition[0]) {
-            //         //self.lastMultiselectDataIndex = xValue - 1;
-            //         self.sharedDatasetService.dragDirection = 'up'
-            //     } else {
-            //         //self.lastMultiselectDataIndex = xValue + 1;
-            //         self.sharedDatasetService.dragDirection = 'down'
-            //     }
-            // }
             // console.log('xValue ', xValue, ' protections ', self.sharedDatasetService.nonDiscreteBuckets[dataIndex].protections, ' book ', self.sharedDatasetService.nonDiscreteBuckets[dataIndex].bookings)
+
             self.sharedDatasetService.calculateBidPriceForAu(dataIndex, xValue, self.sharedDatasetService.dragDirection);
             self.previousDrag = JSON.parse(JSON.stringify(self.dragPosition[0]));
         }
@@ -482,9 +454,9 @@ export class ContinousBidPricingComponent {
         };
 
 
+
         let xPlace = 0;
         const setChartDragPoints = function () {
-            // console.log('setChartDragPoints ')
             let stackValues = [];
             let activeItems: any = {};
             let placeTemp = 0;
@@ -612,7 +584,8 @@ export class ContinousBidPricingComponent {
                         color: '#001871',
                         borderColor: i > 0 ? 'rgba(105,105,115,0.8)' : 'transparent',
                         borderWidth: 0.5,
-                        offset: [0, 3],
+                        position: 'insideTop',
+                        offset: [0, -5],
                     },
                 }, {
                     itemStyle: {
