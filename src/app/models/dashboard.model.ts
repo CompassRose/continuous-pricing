@@ -1,24 +1,17 @@
 
 
 export interface FlightClientDetails {
-  masterKey?: number;
-  prevYearMasterKey?: number | undefined;
+  odMasterKey?: number;
+  flightline?: string;
   airlineCode?: string | undefined;
   origin?: string | undefined;
-  fullOrigin?: string;
   destination?: string | undefined;
-  fullDestination?: string | undefined;
-  equipment?: string | undefined;
   flightNumber?: number;
-  departureDateTime?: Date;
+  departureDate?: string;
+  departureTime?: string;
+  arrivalTime?: string;
   arrivalDateTime?: Date;
-  lid?: number;
-  capacity?: number;
-  cabinDetails?: CabinDetails[] | undefined;
-  bookings?: number[] | undefined;
 }
-
-
 
 export interface CabinDetails {
   cabinLetter?: string | undefined;
@@ -128,11 +121,39 @@ export interface BucketDetails {
   color?: string;
 }
 
+export interface FlightObject {
+  airlineCode: string;
+  cabinContinuousFares: CabinContinuousFares[];
+  departureDate: string;
+  departureTime: string;
+  flightline: string;
+  oDmasterKey: number
+}
 
+export interface CabinContinuousFares {
+  ODMasterkey: number;
+  bucketStructure: BucketStructure[];
+  cabinLetter: string;
+  competitiveFares: CompetitiveFareDetails[];
+  lid: number;
+  priceVector: number[];
+}
+
+export interface BucketStructure {
+  adjustedAu: number;
+  bk: number;
+  currentAu: number;
+  fare: number;
+  index: number;
+  protections?: number;
+  isDiscrete: boolean;
+  letter: string;
+  color?: string;
+}
 
 export interface CompetitiveFareDetails {
   odMasterkey: number;
-  carrier: string;
+  carrier?: string;
   fare: number;
   origin: string;
   destination: string;

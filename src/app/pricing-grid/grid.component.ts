@@ -9,8 +9,11 @@ import { PathToAssets } from '../dashboard-constants';
 import { environment } from 'src/environments/environment.prod';
 import { ThemeControlService } from '../services/theme-control.service';
 import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visualization.service';
-import { BucketDetails, FlightClientDetails, CompetitiveFareDetails } from '../models/dashboard.model';
+import { FlightClientDetails, BucketStructure, FlightObject, CompetitiveFareDetails } from '../models/dashboard.model';
 
+import { DateFormatterPipe } from '../shared/pipes/dateModifierPipe';
+
+const dateModifierPipe = new DateFormatterPipe();
 
 export function animationFrame({
   requestAnimationFrame,
@@ -73,39 +76,61 @@ export class ContinousPricingComponent implements OnInit {
   public influencesExpanded = true;
 
   public selectedFlightKey: number // = 1294409;
-  public selectedFlightValues: any = {};
+
+  public selectedFlightValues: FlightClientDetails;
 
   public selectedFlightIndex = 0;
-  public selectedCabinIndex = 2;
+  public selectedCabinIndex: number;
   public pointsDeSelected = false;
-  public apiFlightCollectiontSubject$ = new BehaviorSubject<FlightClientDetails[]>([]);
-  public apiBucketCollectionSubject$ = new BehaviorSubject<BucketDetails[]>([]);
-  public apiCompetitiveFaresSubject$ = new BehaviorSubject<CompetitiveFareDetails[]>([]);
 
+  public apiActiveFlightSubject$ = new BehaviorSubject<FlightClientDetails>(null);
+  public apiBucketCollectionSubject$ = new BehaviorSubject<BucketStructure[]>([]);
+  public apiCompetitiveFaresSubject$ = new BehaviorSubject<CompetitiveFareDetails[]>([]);
+  public apiContinuousFaresSubject$ = new BehaviorSubject<FlightObject>(null);
+
+  public continuousFareObject: any;
+  public derivedOrigin: string;
+  public derivedDestination: string;
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
     public dashboardApi: BidPriceAspNetService,
     public bookingControlService: BookingControlService,
     public themeControlService: ThemeControlService,
     public sharedDatasetService: SharedDatasetService) {
+  }
 
+  // Called onStart and from flight dropdown
+  public flightSelectControl(flightSpecifics) {
 
-    this.combineAndSendLatestValues()
-      .subscribe((response: any[]) => {
+    this.sharedDatasetService.totalBookingsCollector = 0;
 
-        if (response[0].length > 0) {
-          this.sharedDatasetService.allFlightValues = response[0];
-          const flightCollection = response[0] as FlightClientDetails[];
-          this.sharedDatasetService.apiBucketDetails = response[1] as BucketDetails[][];
-          this.sharedDatasetService.bucketDetails = this.sharedDatasetService.apiBucketDetails[0] as BucketDetails[];
-          this.sharedDatasetService.competitiveFareValues = response[2] as CompetitiveFareDetails[];
-          window.localStorage.setItem('archivedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
-          window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
-          this.sharedDatasetService.updatedClientFlight$.next(flightCollection[0]);
-          this.flightSelectControl(response[0][0]);
-        }
-      })
+    //console.log('\n\n --------------   this.sharedDatasetService.allFlightValues ', this.sharedDatasetService.allFlightValues, ' flightSpecifics ', flightSpecifics)
 
+    const flightNum = this.sharedDatasetService.allNewFlightValues.flightline.split(' ');
+    this.selectedFlightKey = this.sharedDatasetService.allNewFlightValues.oDmasterKey;
+
+    const formattedDepDate = dateModifierPipe.transform(flightSpecifics.departureDate, 'date');
+    const formattedDepTime = dateModifierPipe.transform(flightSpecifics.departureTime, 'time');
+    const formattedArrivalTime = dateModifierPipe.transform(flightSpecifics.departureTime, 'time');
+
+    //console.log('formattedDepDate ', formattedDepDate, ' formattedDepTime ', formattedDepTime)
+
+    this.selectedFlightValues = {
+      flightline: flightSpecifics.flightline,
+      odMasterKey: flightSpecifics.odMasterKey,
+      origin: flightNum[0].substring(0, 3),
+      flightNumber: Number(flightNum[1]),
+      destination: flightNum[0].substring(3),
+      departureDate: formattedDepDate,
+      departureTime: formattedDepTime,
+      arrivalTime: formattedArrivalTime,
+      airlineCode: flightSpecifics.airlineCode
+    }
+
+    this.sharedDatasetService.selectedCabinIndex = flightSpecifics.cabinContinuousFares.length - 1;
+    this.sharedDatasetService.cabinOptions = flightSpecifics.cabinContinuousFares;
+    this.apiActiveFlightSubject$.next(this.selectedFlightValues);
+    this.cabinSelection(flightSpecifics.cabinContinuousFares[flightSpecifics.cabinContinuousFares.length - 1]);
 
   }
 
@@ -116,26 +141,14 @@ export class ContinousPricingComponent implements OnInit {
   }
 
 
-
   public cabinSelection(ev) {
-    this.selectedCabinIndex = ev.id;
-  }
-
-
-  // Called onStart and from flight dropdown
-  public flightSelectControl(flightSpecifics) {
-
-    this.sharedDatasetService.totalBookingsCollector = 0;
-
-    const index = this.sharedDatasetService.allFlightValues.findIndex(mk => {
-      return mk.masterKey === flightSpecifics.masterKey
+    console.log(' ev ', ev)
+    const foundIdx = this.sharedDatasetService.cabinOptions.findIndex(x => {
+      return x.cabinLetter === ev.cabinLetter;
     });
-
-    this.selectedFlightIndex = index;
-    this.selectedFlightValues = this.sharedDatasetService.allFlightValues[index];
-    this.selectedFlightKey = flightSpecifics.masterKey;
-    this.sharedDatasetService.setFlightClient(index);
-
+    console.log('cabinSelection ', foundIdx)
+    this.sharedDatasetService.selectedCabinIndex = foundIdx;
+    this.sharedDatasetService.changeCabinSelection(foundIdx);
   }
 
 
@@ -144,58 +157,43 @@ export class ContinousPricingComponent implements OnInit {
     this.sharedDatasetService.multiSelectedNodeSubject$.next([]);
   }
 
-  /**
- * @return Three element array, elem 0 is FlightClientDetails, elem 1 is BidPriceInfluencers[] elem 2 is CompetitiveFareDetails[]
- */
-
-  public combineAndSendLatestValues(): Observable<(FlightClientDetails[] | BucketDetails[] | CompetitiveFareDetails[])[]> {
-
-    // debounce time insures enough time to get all new values,
-    // switchMap: higher order observable that unsubscribes after return...
-    //    and if there is a fast hover it cancels current operation and starts new evaluation
-
-    // noinspection UnnecessaryLocalVariableJS
-    const returnVal: Observable<(FlightClientDetails[] | BucketDetails[])[]> =
-      combineLatest(
-        [this.apiFlightCollectiontSubject$, this.apiBucketCollectionSubject$, this.apiCompetitiveFaresSubject$]
-      ).pipe(
-        debounceTime(20),
-        switchMap(([flight, buckets, compFares]) => {
-          return of([flight, buckets, compFares])
-        })
-      );
-    return returnVal;
-  }
 
   public ngOnInit() {
 
+    //
+    // Returns All of the selected Fllight Inforamtion
+    //
 
-
-    this.dashboardApi.apiBucketValues()
-      .subscribe((flightBuckets: any) => {
-        this.apiBucketCollectionSubject$.next(flightBuckets);
+    this.dashboardApi.apiContinuousFareClientValues()
+      .pipe(
+        debounceTime(20),
+        switchMap((allFlightValues: FlightObject) => {
+          return of(allFlightValues)
+        })
+      )
+      .subscribe((flightObject: FlightObject) => {
+        this.sharedDatasetService.allNewFlightValues = flightObject as FlightObject;
+        this.sharedDatasetService.competitiveFareValues = flightObject.cabinContinuousFares[flightObject.cabinContinuousFares.length - 1].competitiveFares;
+        this.flightSelectControl(flightObject);
       })
 
 
-    this.dashboardApi.apiFlightClientValues()
-      .subscribe((flights: FlightClientDetails[]) => {
-        this.apiFlightCollectiontSubject$.next(flights);
-        this.selectedFlightValues = flights[0];
-      })
+    // this.dashboardApi.apiFlightClientValues()
+    //   .subscribe((flights: FlightClientDetails) => {
+    //     this.apiFlightCollectiontSubject$.next(flights);
+    //     this.selectedFlightValues = flights[0];
+    //   })
 
+    // this.dashboardApi.apiCompetitiveFareClientValues()
+    //   .subscribe((compFares: CompetitiveFareDetails[]) => {
+    //     this.apiCompetitiveFaresSubject$.next(compFares);
+    //   })
 
-    this.dashboardApi.apiCompetitiveFareClientValues()
-      .subscribe((compFares: CompetitiveFareDetails[]) => {
-        this.apiCompetitiveFaresSubject$.next(compFares);
-      })
+    // this.bookingControlService.bookingSlider$
+    //   .subscribe(response => {
+    //     this.sharedDatasetService.generateInverseDetails();
+    //   })
 
-
-
-
-    this.bookingControlService.bookingSlider$
-      .subscribe(response => {
-        this.sharedDatasetService.generateInverseDetails();
-      })
 
     const cmdJ = merge(
       shortcut([KeyCode.MetaRight, KeyCode.KeyJ]),
@@ -320,9 +318,7 @@ export class ContinousPricingComponent implements OnInit {
   }
 
 
-
   public collapseInfluences() {
-    //console.log('collapseInfluences ', this.influencesExpanded)
     this.influencesExpanded = !this.influencesExpanded;
   }
 };

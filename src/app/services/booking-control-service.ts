@@ -10,7 +10,7 @@ import { SharedDatasetService } from './shared-datasets.service';
 
 export class BookingControlService {
 
-    public tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetails]
+    public tempBucketHolderStatic = [...this.sharedDatasetService.bucketDetailsFromApi]
 
     public bookingSlider$ = new Subject<any>();
 
@@ -52,17 +52,17 @@ export class BookingControlService {
 
                     this.sharedDatasetService.totalBookingsCollector = event;
                     let counter = 0;
-                    let activeElement = this.sharedDatasetService.bucketDetails.length - 1;
+                    let activeElement = this.sharedDatasetService.bucketDetailsFromApi.length - 1;
                     // console.log('Pipe event activeElement ', activeElement, ' totalBookingsCollector ', this.sharedDatasetService.totalBookingsCollector, ' maxAuValue ', this.sharedDatasetService.maxAuValue)
                     this.loadFactorFillPercent(event);
 
                     for (let b = 0; b < this.tempBucketHolderStatic.length; b++) {
-                        collObj[b].bookings = 0;
+                        collObj[b].bk = 0;
                         collObj[b].protections = this.tempBucketHolderStatic[b].protections;
                     }
 
                     for (let i = 0; i < this.sharedDatasetService.totalBookingsCollector; i++) {
-                        collObj[activeElement].bookings += 1;
+                        collObj[activeElement].bk += 1;
                         counter++;
                         if (counter === collObj[activeElement].protections) {
                             activeElement > 0 ? activeElement -= 1 : 0;
@@ -71,7 +71,7 @@ export class BookingControlService {
                         //   console.log('Bookings collObj ', collObj)
                     }
 
-                    this.sharedDatasetService.bucketDetails = collObj;
+                    this.sharedDatasetService.bucketDetailsFromApi = collObj;
                     //  console.log('Pipe event this.sharedDatasetService.bucketDetails ', this.sharedDatasetService.bucketDetails)
                     //this.sharedDatasetService.bucketDetailsBehaviorSubject$.next(false);
                 }

@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional, InjectionToken } from '@angular/core';
-import { BucketDetails, FlightClientDetails, CompetitiveFareDetails } from '../models/dashboard.model';
+import { BucketDetails, FlightClientDetails, CompetitiveFareDetails, FlightObject } from '../models/dashboard.model';
 
 import { map, mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
 import { Observable, throwError as _observableThrow, from, catchError, of as _observableOf, BehaviorSubject } from 'rxjs';
@@ -234,6 +234,7 @@ export class BidPriceAspNetService {
   // public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
 
   public readonly bucketUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/bucketConfigs.json';
+  public readonly continuousFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/continuousFares.json';
   public readonly competetiveFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/competitiveFares.json';
   public readonly flightClientUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/flightClient.json';
 
@@ -246,6 +247,22 @@ export class BidPriceAspNetService {
     //this.competitiveFareDetails = new CompetitiveFareDetails(this.http, this.apiTarget.changingThisBreaksApplicationSecurity);
   }
 
+
+
+  public apiContinuousFareClientValues(): Observable<FlightObject> {
+
+    return this.http.get(this.continuousFaresUrl)
+      .pipe(
+        map((response: FlightObject) => {
+          // console.log('FlightObject ', response)
+          return response;
+        }),
+        catchError(error => {
+          throw error;
+        }),
+      );
+
+  }
 
   public apiCompetitiveFareClientValues(): Observable<FlightClientDetails[]> {
 
@@ -263,7 +280,6 @@ export class BidPriceAspNetService {
 
 
   public apiFlightClientValues(): Observable<FlightClientDetails[]> {
-
     return this.http.get(this.flightClientUrl)
       .pipe(
         map((response: any) => {
@@ -273,23 +289,22 @@ export class BidPriceAspNetService {
           throw error;
         }),
       );
-
   }
 
 
-  public apiBucketValues(): Observable<BucketDetails[][]> {
+  // public apiBucketValues(): Observable<BucketDetails[][]> {
 
-    return this.http.get(this.bucketUrl)
-      .pipe(
-        map((response: any) => {
-          return response;
-        }),
-        catchError(error => {
-          throw error;
-        }),
-      );
+  //   return this.http.get(this.bucketUrl)
+  //     .pipe(
+  //       map((response: any) => {
+  //         return response;
+  //       }),
+  //       catchError(error => {
+  //         throw error;
+  //       }),
+  //     );
 
-  }
+  // }
 
   public flight_Get(): Observable<BucketDetails[]> {
     return this.bpService.flight_Get();

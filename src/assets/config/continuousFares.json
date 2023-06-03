@@ -1,0 +1,303 @@
+{
+	"oDmasterKey": 442449,
+	"airlineCode":"IB",
+	"flightline":"BIOMAD 443",
+	"departureDate":"2022-11-03T00:00:00",
+	"departureTime":"1900-01-01T06:45:00",
+	"cabinContinuousFares": [
+		{
+			"ODMasterkey": 442449,
+			"cabinLetter":"J",
+			"lid": 16,
+			"bucketStructure": [
+				{
+					"index": 1,
+					"letter":"J",
+					"currentAu": 16,
+					"adjustedAu": 16,
+					"bk": 0,
+					"fare": 442.0,
+					"isDiscrete": false
+				},
+				{
+					"index": 2,
+					"letter":"C",
+					"currentAu": 15,
+					"adjustedAu": 16,
+					"bk": 0,
+					"fare": 337.0,
+					"isDiscrete": false
+				},
+				{
+					"index": 3,
+					"letter":"D",
+					"currentAu": 15,
+					"adjustedAu": 15,
+					"bk": 0,
+					"fare": 289.5,
+					"isDiscrete": false
+				},
+				{
+					"index": 4,
+					"letter":"R",
+					"currentAu": 4,
+					"adjustedAu": 15,
+					"bk": 0,
+					"fare": 245.75,
+					"isDiscrete": false
+				},
+				{
+					"index": 5,
+					"letter":"I",
+					"currentAu": 3,
+					"adjustedAu": 11,
+					"bk": 4,
+					"fare": 145.75,
+					"isDiscrete": false
+				},
+				{
+					"index": 6,
+					"letter":"U",
+					"currentAu": 0,
+					"adjustedAu": 0,
+					"bk": 0,
+					"fare": 78.0,
+					"isDiscrete": true
+				}
+			],
+			"priceVector": [
+				360.0,
+				275.0,
+				221.0,
+				176.0,
+				144.0,
+				115.0,
+				82.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0,
+				70.0
+			],
+			"competitiveFares": []
+		},
+		{
+			"ODMasterkey": 442449,
+			"cabinLetter":"Y",
+			"lid": 200,
+			"bucketStructure": [
+				{
+					"index": 11,
+					"letter":"Y",
+					"currentAu": 200,
+					"adjustedAu": 200,
+					"bk": 6,
+					"fare": 409.0,
+					"isDiscrete": false
+				},
+				{
+					"index": 12,
+					"letter":"B",
+					"currentAu": 187,
+					"adjustedAu": 189,
+					"bk": 0,
+					"fare": 299.5,
+					"isDiscrete": false
+				},
+				{
+					"index": 13,
+					"letter":"H",
+					"currentAu": 185,
+					"adjustedAu": 188,
+					"bk": 1,
+					"fare": 274.25,
+					"isDiscrete": false
+				},
+				{
+					"index": 14,
+					"letter":"K",
+					"currentAu": 181,
+					"adjustedAu": 184,
+					"bk": 4,
+					"fare": 235.75,
+					"isDiscrete": false
+				},
+				{
+					"index": 15,
+					"letter":"M",
+					"currentAu": 173,
+					"adjustedAu": 176,
+					"bk": 4,
+					"fare": 199.0,
+					"isDiscrete": false
+				},
+				{
+					"index": 16,
+					"letter":"L",
+					"currentAu": 164,
+					"adjustedAu": 167,
+					"bk": 4,
+					"fare": 164.25,
+					"isDiscrete": false
+				},
+				{
+					"index": 17,
+					"letter":"V",
+					"currentAu": 155,
+					"adjustedAu": 158,
+					"bk": 3,
+					"fare": 132.75,
+					"isDiscrete": false
+				},
+				{
+					"index": 18,
+					"letter":"S",
+					"currentAu": 132,
+					"adjustedAu": 133,
+					"bk": 9,
+					"fare": 105.5,
+					"isDiscrete": false
+				},
+				{
+					"index": 19,
+					"letter":"G",
+					"currentAu": 132,
+					"adjustedAu": 124,
+					"bk": 18,
+					"fare": 38.0,
+					"isDiscrete": false
+				},
+				{
+					"index": 20,
+					"letter":"N",
+					"currentAu": 105,
+					"adjustedAu": 106,
+					"bk": 27,
+					"fare": 81.5,
+					"isDiscrete": false
+				},
+				{
+					"index": 21,
+					"letter":"Q",
+					"currentAu": 78,
+					"adjustedAu": 79,
+					"bk": 13,
+					"fare": 63.25,
+					"isDiscrete": false
+				},
+				{
+					"index": 22,
+					"letter":"O",
+					"currentAu": 60,
+					"adjustedAu": 61,
+					"bk": 26,
+					"fare": 45.0,
+					"isDiscrete": false
+				},
+				{
+					"index": 23,
+					"letter":"A",
+					"currentAu": 40,
+					"adjustedAu": 40,
+					"bk": 39,
+					"fare": 23.375,
+					"isDiscrete": false
+				},
+				{
+					"index": 24,
+					"letter":"X",
+					"currentAu": 0,
+					"adjustedAu": 0,
+					"bk": 1,
+					"fare": 20.0,
+					"isDiscrete": true
+				},
+				{
+					"index": 25,
+					"letter":"F",
+					"currentAu": 12,
+					"adjustedAu": 0,
+					"bk": 0,
+					"fare": 0.0,
+					"isDiscrete": true
+				},
+				{
+					"index": 26,
+					"letter":"Z",
+					"currentAu": 5,
+					"adjustedAu": 0,
+					"bk": 0,
+					"fare": 0.0,
+					"isDiscrete": true
+				}
+			],
+			"priceVector": [
+				1010.0,
+				650.0,
+				600.0,
+				550.0,
+				500.0
+			],
+			"competitiveFares": [{
+             "odMasterkey": 286020,
+             "carrier":"0B",
+             "fare": 19.99,
+             "origin":"TRN",
+             "destination":"CTA",
+             "flightNumber": 4001,
+             "departureDate":"2020-12-14T00:00:00",
+             "departureTime":"1900-01-01T08:20:00",
+             "cabinNumber": 3
+                }, {
+              "odMasterkey": 286020,
+              "carrier":"FR",
+              "fare": 23.9,
+              "origin":"TRN",
+              "destination":"CTA",
+              "flightNumber": 1030,
+              "departureDate":"2020-12-14T00:00:00",
+              "departureTime":"1900-01-01T13:05:00",
+              "cabinNumber": 3
+                }, {
+              "odMasterkey": 286020,
+              "carrier":"V7",
+              "fare": 49.99,
+              "origin":"TRN",
+              "destination":"CTA",
+              "flightNumber": 1468,
+              "departureDate":"2020-12-14T00:00:00",
+              "departureTime":"1900-01-01T11:20:00",
+              "cabinNumber": 3
+                }
+            ]
+		}
+	]
+}
