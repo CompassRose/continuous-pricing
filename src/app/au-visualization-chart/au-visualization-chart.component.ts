@@ -50,14 +50,12 @@ export class ContinousBidPricingComponent {
     public previousDrag: number;
 
     public lastMultiselectDataIndex = 0;
-    //public lastDataIndex = 0;
-    //public dragDirection: string = '';
+
 
     @Input()
     set gridPointsDeSelected(state: boolean) {
 
         if (this.sharedDatasetService.selectedElement.length > 0) {
-            // console.log('gridPointsDeSelected ', state)
             this.sharedDatasetService.selectedElement = [];
             this.sharedDatasetService.setGroupingMethod(0);
             this.sharedDatasetService.multiSelectedNodeSubject$.next([])
@@ -146,7 +144,7 @@ export class ContinousBidPricingComponent {
 
                     this.sharedDatasetService.modifierCollection = [];
                     this.sharedDatasetService.selectedElement = [];
-                    this.sharedDatasetService.applyDataChanges();
+                    this.sharedDatasetService.applyDataChanges(1);
                     this.sharedDatasetService.setGroupingMethod(0);
 
                     if (this.showAllCurves) {
@@ -266,6 +264,7 @@ export class ContinousBidPricingComponent {
                 },
                 data: this.sharedDatasetService.dynamicBidPrices
             },
+
             {
                 id: 'f',
                 type: 'bar',
@@ -276,9 +275,9 @@ export class ContinousBidPricingComponent {
                 silent: true,
                 z: 2,
                 data: this.sharedDatasetService.dynamicChartObject,
-                //markArea: this.setMarkArea(0),
-                //markPoint: this.markPoint(),
-                //markLine: this.bidPriceCalcsService.markVerticalLineSellingValues(),
+                markArea: this.setMarkArea(0),
+                markPoint: this.markPoint(),
+                markLine: this.bidPriceCalcsService.markVerticalLineSellingValues(),
             },
 
             {
@@ -403,7 +402,7 @@ export class ContinousBidPricingComponent {
                         fontWeight: 'normal'
                     },
                     showGrid: false,
-                    max: this.sharedDatasetService.bucketDetailsFromApi[0].fare + 20,
+                    max: this.sharedDatasetService.bucketDetailsFromApi[0].fare + 30,
                     interval: this.sharedDatasetService.bucketDetailsFromApi[0].fare < 400 ? 20 : this.sharedDatasetService.bucketDetailsFromApi[0].fare > 1000 ? 350 : 35,
                     scale: false,
                     splitLine: {
@@ -547,44 +546,9 @@ export class ContinousBidPricingComponent {
         }
     }
 
-    public generateContrastingFontColors(bgColor: string): string {
-
-        const getRGB = (c) => {
-            return parseInt(c, 16) || c
-        }
-
-        const getsRGB = (c) => {
-            return getRGB(c) / 255 <= 0.03928
-                ? getRGB(c) / 255 / 12.92
-                : Math.pow((getRGB(c) / 255 + 0.055) / 1.055, 2.4)
-        }
-
-        const getLuminance = (hexColor) => {
-            return (
-                0.2126 * getsRGB(hexColor.substr(1, 2)) +
-                0.7152 * getsRGB(hexColor.substr(3, 2)) +
-                0.0722 * getsRGB(hexColor.substr(-2))
-            )
-        }
-
-        const getContrast = (f, b) => {
-            const L1 = getLuminance(f)
-            const L2 = getLuminance(b)
-            return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)
-        }
-
-        const whiteContrast = getContrast(bgColor, '#ffffff')
-        const blackContrast = getContrast(bgColor, '#000000')
-
-        return whiteContrast > blackContrast ? '#ffffff' : '#000000'
-
-    }
 
     // Sets Fare class regions on top of chart
     public setMarkArea(index: number) {
-
-
-
 
         let itemDiscreteFalse;
 
@@ -601,7 +565,7 @@ export class ContinousBidPricingComponent {
                             padding: [4, 5, 1, 5],
                             fontSize: 12,
                             fontWeight: 'bold',
-                            color: this.generateContrastingFontColors(item.color),
+                            color: this.bidPriceCalcsService.generateContrastingFontColors(item.color),
                             borderColor: i > 0 ? 'rgba(105,105,115,0.8)' : 'transparent',
                             borderWidth: 0.5,
                             position: 'insideTop',
@@ -733,45 +697,48 @@ export class ContinousBidPricingComponent {
 
         let coordinatesForMarkPoint = [];
         let sellingValues: any = {};
-        let sellingPoint = null;
-        let activeColor = 'blue';
-        sellingPoint = 120;
+
+        let sellingPoint = this.sharedDatasetService.dynamicBidPrices.length > 130 ? 120 : 10;
+
         coordinatesForMarkPoint = [sellingPoint, this.sharedDatasetService.dynamicBidPrices[sellingPoint]];
 
         sellingValues = this.bidPriceCalcsService.findMatchingBucketForBidPrice(this.sharedDatasetService.dynamicBidPrices[sellingPoint]);
 
-        console.log('PPPPPPPPPPPPPPPPP    ', this.sharedDatasetService.dynamicBidPrices[sellingPoint])
-        activeColor = 'blue';
-        this.markPointContainer = {
-            clickable: false,
-            animation: false,
-            data: [
-                {
-                    coord: coordinatesForMarkPoint,
-                    symbol: 'circle',
-                    symbolSize: this.sharedDatasetService.totalBookingsCollector > 0 ? 25 : 25,
-                    itemStyle: {
-                        color: sellingValues.color,
-                        borderColor: 'white',
-                        borderWidth: 1,
-                    },
-                    label: {
-                        show: true,
-                        offset: [0, 1],
-                        formatter: () => {
-                            return '{a|' + sellingValues.letter + '}';
+        if (this.sharedDatasetService.dynamicBidPrices[sellingPoint]) {
+            this.markPointContainer = {
+                clickable: false,
+                animation: false,
+                data: [
+                    {
+                        coord: coordinatesForMarkPoint,
+                        symbol: 'circle',
+                        symbolSize: this.sharedDatasetService.totalBookingsCollector > 0 ? 25 : 25,
+                        itemStyle: {
+                            color: sellingValues.color,
+                            borderColor: 'white',
+                            borderWidth: 1,
                         },
-                        rich: {
-                            a: {
-                                align: 'center',
-                                fontSize: 12,
-                                color: 'white'
+                        label: {
+                            show: true,
+                            offset: [0, 1],
+                            formatter: () => {
+                                return '{a|' + sellingValues.letter + '}';
                             },
-                        },
+                            rich: {
+                                a: {
+                                    align: 'center',
+                                    fontWeight: 'bold',
+                                    fontSize: 13,
+                                    color: this.bidPriceCalcsService.generateContrastingFontColors(sellingValues.color)
+                                },
+                            },
+                        }
                     }
-                }
-            ]
-        };
+                ]
+            };
+
+        }
+        // console.log('this.markPointContainer ', this.markPointContainer)
         return this.markPointContainer;
     }
 }

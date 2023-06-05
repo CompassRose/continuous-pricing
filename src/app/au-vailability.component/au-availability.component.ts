@@ -20,7 +20,7 @@ export class AuAvailabilityComponent {
     public selectedElement = [];
     public allSeriesData: number[][] = [];
     public themeSelect = '';
-
+    public totalBuckets: any[] = [];
 
 
     // @Input()
@@ -177,7 +177,7 @@ export class AuAvailabilityComponent {
                 barWidth: '70%',
                 z: 6,
                 animation: false,
-                data: this.sharedDatasetService.bucketDetailsFromApi.map((item, i) => {
+                data: this.totalBuckets.map((item, i) => {
                     const showLabels: boolean = (item.adjustedAu - item.protections) < 20 ? false : true;
                     const test = item.protections > 0 && !item.isDiscrete ? item.protections : 0;
                     return {
@@ -225,7 +225,7 @@ export class AuAvailabilityComponent {
                 barWidth: '70%',
                 z: 8,
                 animation: false,
-                data: this.sharedDatasetService.bucketDetailsFromApi.map((item, i) => {
+                data: this.totalBuckets.map((item, i) => {
                     return item.bk;
                 }),
                 itemStyle: {
@@ -236,6 +236,7 @@ export class AuAvailabilityComponent {
 
                 },
             },
+
             {
                 type: 'bar',
                 stack: 'total',
@@ -248,7 +249,7 @@ export class AuAvailabilityComponent {
                 z: 2,
                 animation: false,
 
-                data: this.sharedDatasetService.bucketDetailsFromApi.map((item, i) => {
+                data: this.totalBuckets.map((item, i) => {
                     const diff = item.adjustedAu - this.sharedDatasetService.totalBookingsCollector;
                     const auElement = diff > 0 ? Math.round(diff) : '';
                     const showProtections = !item.isDiscrete ? item.protections : '';
@@ -310,7 +311,7 @@ export class AuAvailabilityComponent {
 
 
     public setChartInstance = () => {
-
+        this.totalBuckets = [...this.sharedDatasetService.bucketDetailsFromApi, ...this.sharedDatasetService.discreteBucketsFromApi]
         this.myChart.setOption({
 
             grid: {
@@ -429,7 +430,7 @@ export class AuAvailabilityComponent {
                     axisTick: {
                         show: true,
                     },
-                    data: this.sharedDatasetService.bucketDetailsFromApi.map((item, i) => {
+                    data: this.totalBuckets.map((item, i) => {
                         return item.letter;
                     }),
                 },
@@ -451,7 +452,7 @@ export class AuAvailabilityComponent {
                         show: true,
                     },
 
-                    data: this.sharedDatasetService.bucketDetailsFromApi.map((item, i) => {
+                    data: this.totalBuckets.map((item, i) => {
 
                         let booksValue = `${item.bk}`;
                         return {
@@ -483,6 +484,7 @@ export class AuAvailabilityComponent {
 
 
         const onPointDragging = function (dataIndex, pos) {
+
             let yValue = 0;
             let dragPosition: any = [0, 0];
             dragPosition = self.myChart.convertFromPixel('grid', pos);
@@ -493,11 +495,14 @@ export class AuAvailabilityComponent {
                 yValue = self.sharedDatasetService.maxAuValue
             }
 
-            console.log('dataIndex ', dataIndex, ' length ', self.sharedDatasetService.currAus.length)
+            console.log('||||||||||  dataIndex ', dataIndex, ' length ', self.sharedDatasetService.currAus.length)
             if (dataIndex >= self.sharedDatasetService.currAus.length) {
 
-                self.sharedDatasetService.bucketDetailsFromApi[dataIndex].adjustedAu = yValue;
-                self.sharedDatasetService.applyDataChanges();
+                self.totalBuckets[dataIndex].adjustedAu = yValue;
+                setTimeout(() => {
+                    self.sharedDatasetService.bucketDetailsBehaviorSubject$.next(true);
+                }, 0);
+                //self.sharedDatasetService.applyDataChanges(dataIndex);
             } else {
                 self.sharedDatasetService.calculateBidPriceForAu(dataIndex, yValue, self.sharedDatasetService.dragDirection);
             }
@@ -506,8 +511,10 @@ export class AuAvailabilityComponent {
 
 
         const setChartDragPoints = function () {
+
+            // console.log('totalBuckets ', self.totalBuckets)
             self.myChart.setOption({
-                graphic: echarts.util.map(self.sharedDatasetService.bucketDetailsFromApi, (item, dataIndex) => {
+                graphic: echarts.util.map(self.totalBuckets, (item, dataIndex) => {
                     let activeItems = {};
                     const handles = [item.letter, item.adjustedAu];
                     activeItems = {

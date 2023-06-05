@@ -19,6 +19,38 @@ export class BidPriceCalcsService {
     constructor(private sharedDatasetService: SharedDatasetService) { }
 
 
+    public generateContrastingFontColors(bgColor: string): string {
+
+        const getRGB = (c) => {
+            return parseInt(c, 16) || c
+        }
+
+        const getsRGB = (c) => {
+            return getRGB(c) / 255 <= 0.03928
+                ? getRGB(c) / 255 / 12.92
+                : Math.pow((getRGB(c) / 255 + 0.055) / 1.055, 2.4)
+        }
+
+        const getLuminance = (hexColor) => {
+            return (
+                0.2126 * getsRGB(hexColor.substr(1, 2)) +
+                0.7152 * getsRGB(hexColor.substr(3, 2)) +
+                0.0722 * getsRGB(hexColor.substr(-2))
+            )
+        }
+
+        const getContrast = (f, b) => {
+            const L1 = getLuminance(f)
+            const L2 = getLuminance(b)
+            return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)
+        }
+
+        const whiteContrast = getContrast(bgColor, '#ffffff')
+        const blackContrast = getContrast(bgColor, '#000000')
+
+        return whiteContrast > blackContrast ? '#ffffff' : '#000000'
+
+    }
     // Generates Bid Price Curve from adjustments
     public generateInterpolatedCurvePoints(): number[] {
 
@@ -113,18 +145,20 @@ export class BidPriceCalcsService {
     // Places lines vertically with labels on top of chart signifying fare call regions
     public markVerticalLineSellingValues() {
 
-        let sellingPoint = 120;
+        let sellingPoint = this.sharedDatasetService.dynamicBidPrices.length > 130 ? 120 : 10;
         if (sellingPoint < 0) {
             sellingPoint = 0;
         }
 
-        const baseCurve = this.sharedDatasetService.dynamicBidPrices;
         const fc = this.findMatchingBucketForBidPrice(this.sharedDatasetService.dynamicBidPrices[sellingPoint]);
-        const fareClass = `${this.sharedDatasetService.competitiveFareValues[0].carrier}`;
 
+        const yPos = this.sharedDatasetService.bucketDetailsFromApi[0].fare - this.sharedDatasetService.competitiveFareValues[0].fare
+
+
+        const fareClass = `${this.sharedDatasetService.competitiveFareValues[0].carrier}`;
         // Vertical Active Class/Value Selling Line
 
-        const tester = {
+        const yMarkLine = {
             name: 'current',
             id: 'clicked',
             clickable: false,
@@ -134,60 +168,63 @@ export class BidPriceCalcsService {
             symbolSize: 14,
             lineStyle: {
                 type: 'dashed',
-                color: 'rgba(170,170,0,1)',
+                color: 'rgba(170,190,0,1)',
                 width: 2,
-            },
-            label: {
-                name: 'testLabel',
-                id: 'clickedLabel',
-                position: 'end',
-                show: true,
-                distance: [0, -120],
-                formatter: () => {
-                    return `{a|${fareClass}: ${baseCurve[sellingPoint]}}`
-                },
-                rich: {
-                    a: {
-                        align: 'center',
-                        padding: [6, 3, 3, 3],
-                        width: 50,
-                        fontSize: 13,
-                        fontWeight: 'normal',
-                        borderColor: 'rgb(200,200,200)',
-                        backgroundColor: fc.color,
-                        borderWidth: 1,
-                        borderRadius: 3,
-                        color: 'white',
-                    },
-                },
             },
             data: [
                 {
-                    xAxis: sellingPoint
-                },
-                {
-                    symbol: 'diamond',
-                    symbolSize: 12,
-                    yAxis: this.sharedDatasetService.dynamicBidPrices[sellingPoint],
+                    xAxis: sellingPoint,
 
+                    coord: [this.sharedDatasetService.dynamicBidPrices[sellingPoint], yPos],
                     label: {
-                        show: false,
                         name: 'testLabel',
-                        id: 'test',
-                        position: 'end',
-                        distance: [-50, 0],
-                        fontSize: 11,
-                        borderRadius: 2,
-                        color: '#e7e7e7',
-                        padding: [4, 6, 2, 8],
-                        borderColor: 'blue',
-                        backgroundColor: 'blue',
-                        borderWidth: 0
-                    }
-                }
+                        id: 'clickedLabel',
+                        position: 'start',
+                        show: true,
+                        distance: [0, -yPos],
+                        formatter: () => {
+                            return `{a|${fareClass}: ${this.sharedDatasetService.competitiveFareValues[0].fare}}`
+                        },
+
+                        rich: {
+                            a: {
+                                align: 'center',
+                                padding: [6, 10, 3, 10],
+                                width: 50,
+                                fontSize: 12,
+                                fontWeight: 'bold',
+                                borderColor: 'rgb(200,200,200)',
+                                backgroundColor: fc.color,
+                                borderWidth: 1,
+                                borderRadius: 3,
+                                color: this.generateContrastingFontColors(fc.color),
+                            },
+                        },
+                    },
+                },
+                // {
+                //     symbol: 'diamond',
+                //     symbolSize: 12,
+                //     yAxis: this.sharedDatasetService.competitiveFareValues[0].fare,
+
+                //     label: {
+                //         show: true,
+                //         name: 'testLabel',
+                //         id: 'test',
+                //         position: 'end',
+                //         distance: [-this.sharedDatasetService.competitiveFareValues[0].fare, 0],
+                //         fontSize: 11,
+                //         borderRadius: 2,
+                //         color: '#e7e7e7',
+                //         padding: [4, 6, 2, 8],
+                //         borderColor: 'blue',
+                //         backgroundColor: 'blue',
+                //         borderWidth: 0
+                //     }
+                // }
             ]
         }
-        return tester;
+        return yMarkLine;
     }
 
     public updateBucketDetails(selectedElements, args) {

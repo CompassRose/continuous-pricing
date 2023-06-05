@@ -61,111 +61,111 @@ export class ApiException extends Error {
 }
 
 
-@Injectable()
-export class AirlineConfigClient {
-  private http: HttpClient;
-  private baseUrl: string;
-  //private airlineConfigClient: AirlineConfigClient;
+// @Injectable()
+// export class AirlineConfigClient {
+//   private http: HttpClient;
+//   private baseUrl: string;
+//   //private airlineConfigClient: AirlineConfigClient;
 
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-  public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
+//   protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+//   public apiTarget = 'https://i6iozocg1e.execute-api.us-west-2.amazonaws.com/jsons/bucketConfigs';
 
-  constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
-    this.http = http;
-  }
+//   constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+//     this.http = http;
+//   }
 
-  letter: string;
-  fare: number;
-  protections: number;
-  Aus: number;
-  bookings: number;
-  discrete: boolean;
+//   letter: string;
+//   fare: number;
+//   protections: number;
+//   Aus: number;
+//   bookings: number;
+//   discrete: boolean;
 
-  init(_data?: AirlineConfig) {
-    console.log('_data ', _data)
-    if (_data) {
-      this.letter = _data["letter"];
-      this.fare = _data["fare"];
-      this.protections = _data["protections"];
-      this.Aus = _data["Aus"];
-      this.bookings = _data["bookings"];
-      this.discrete = _data["discrete"]
-    }
-  }
-
-
-  static fromJS(data: any): AirlineConfig {
-    data = typeof data === 'object' ? data : {};
-    let result = new AirlineConfig();
-    result.init(data);
-    return result;
-  }
-  /**
-   * @return Success.
-   */
-  get(): Observable<AirlineConfig> {
-    let url_ = this.apiTarget
-    url_ = url_.replace(/[?&]$/, "");
+//   init(_data?: AirlineConfig) {
+//     console.log('_data ', _data)
+//     if (_data) {
+//       this.letter = _data["letter"];
+//       this.fare = _data["fare"];
+//       this.protections = _data["protections"];
+//       this.Aus = _data["Aus"];
+//       this.bookings = _data["bookings"];
+//       this.discrete = _data["discrete"]
+//     }
+//   }
 
 
-    let options_: any = {
-      observe: "response",
-      responseType: "blob",
-      headers: new HttpHeaders({
-        "Accept": "text/plain; charset=utf-8"
-      })
-    };
-
-    // let options_: any = {
-    //   observe: "response",
-    //   responseType: "blob",
-    //   headers: new HttpHeaders({
-    //     "Accept": "application/json"
-    //   })
-    // };
-
-    return this.http.request("get", url_, options_)
-      .pipe(_observableMergeMap((response_: any) => {
-
-        return this.processGet(response_);
-      })).pipe(_observableCatch((response_: any) => {
-        // console.log('||||||||||||||||||    url_ ', url_, ' options_ ', options_, ' response_ ', response_)
-        if (response_ instanceof HttpResponseBase) {
-          try {
-            return this.processGet(response_ as any);
-          } catch (e) {
-            return _observableThrow(e) as any as Observable<AirlineConfig>;
-          }
-        } else
-          return _observableThrow(response_) as any as Observable<AirlineConfig>;
-      }));
-  }
-
-  protected processGet(response: HttpResponseBase): Observable<AirlineConfig> {
-    const status = response.status;
-    const responseBlob =
-      response instanceof HttpResponse ? response.body :
-        (response as any).error instanceof Blob ? (response as any).error : undefined;
-
-    let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); } }
-    // console.log('_headers ', _headers)
-    if (status === 200) {
-      return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-        let result200: any = null;
-        let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = AirlineConfig.fromJS(resultData200);
-        return _observableOf(result200);
-      }));
-    } else if (status !== 200 && status !== 204) {
-      return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-        return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-      }));
-    }
-    return _observableOf<AirlineConfig>(null as any);
-  }
+//   static fromJS(data: any): AirlineConfig {
+//     data = typeof data === 'object' ? data : {};
+//     let result = new AirlineConfig();
+//     result.init(data);
+//     return result;
+//   }
+//   /**
+//    * @return Success.
+//    */
+//   get(): Observable<AirlineConfig> {
+//     let url_ = this.apiTarget
+//     url_ = url_.replace(/[?&]$/, "");
 
 
-}
+//     let options_: any = {
+//       observe: "response",
+//       responseType: "blob",
+//       headers: new HttpHeaders({
+//         "Accept": "text/plain; charset=utf-8"
+//       })
+//     };
+
+//     // let options_: any = {
+//     //   observe: "response",
+//     //   responseType: "blob",
+//     //   headers: new HttpHeaders({
+//     //     "Accept": "application/json"
+//     //   })
+//     // };
+
+//     return this.http.request("get", url_, options_)
+//       .pipe(_observableMergeMap((response_: any) => {
+
+//         return this.processGet(response_);
+//       })).pipe(_observableCatch((response_: any) => {
+//         // console.log('||||||||||||||||||    url_ ', url_, ' options_ ', options_, ' response_ ', response_)
+//         if (response_ instanceof HttpResponseBase) {
+//           try {
+//             return this.processGet(response_ as any);
+//           } catch (e) {
+//             return _observableThrow(e) as any as Observable<AirlineConfig>;
+//           }
+//         } else
+//           return _observableThrow(response_) as any as Observable<AirlineConfig>;
+//       }));
+//   }
+
+//   protected processGet(response: HttpResponseBase): Observable<AirlineConfig> {
+//     const status = response.status;
+//     const responseBlob =
+//       response instanceof HttpResponse ? response.body :
+//         (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+//     let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); } }
+//     // console.log('_headers ', _headers)
+//     if (status === 200) {
+//       return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+//         let result200: any = null;
+//         let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+//         result200 = AirlineConfig.fromJS(resultData200);
+//         return _observableOf(result200);
+//       }));
+//     } else if (status !== 200 && status !== 204) {
+//       return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+//         return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+//       }));
+//     }
+//     return _observableOf<AirlineConfig>(null as any);
+//   }
+
+
+// }
 
 function throwException(message: string, status: number, response: string, headers: { [key: string]: any; }, result?: any): Observable<any> {
   console.log('throwException ', message, ' status ', status, ' response ', response, ' headers ', headers)
@@ -227,7 +227,6 @@ export class BidPriceAspNetService {
 
   readonly airportCodes_URL = './assets/csv/airports_small.csv';
   private flightClient: FlightClient;
-  private airlineConfigClient: AirlineConfigClient;
   private competitiveFareDetails: CompetitiveFareDetails
   private bpService: IBidPriceService;
 
@@ -236,7 +235,8 @@ export class BidPriceAspNetService {
   public readonly bucketUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/bucketConfigs.json';
   public readonly continuousFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/continuousFares.json';
   public readonly competetiveFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/competitiveFares.json';
-  public readonly flightClientUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/flightClient.json';
+  /// Broken
+  public readonly flightClientUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/flightDetails.json';
 
   public apiTarget;
 
@@ -248,13 +248,12 @@ export class BidPriceAspNetService {
   }
 
 
-
   public apiContinuousFareClientValues(): Observable<FlightObject> {
 
-    return this.http.get(this.continuousFaresUrl)
+    return this.http.get(this.flightClientUrl)
       .pipe(
         map((response: FlightObject) => {
-          // console.log('FlightObject ', response)
+          console.log('FlightObject ', response)
           return response;
         }),
         catchError(error => {
@@ -292,20 +291,6 @@ export class BidPriceAspNetService {
   }
 
 
-  // public apiBucketValues(): Observable<BucketDetails[][]> {
-
-  //   return this.http.get(this.bucketUrl)
-  //     .pipe(
-  //       map((response: any) => {
-  //         return response;
-  //       }),
-  //       catchError(error => {
-  //         throw error;
-  //       }),
-  //     );
-
-  // }
-
   public flight_Get(): Observable<BucketDetails[]> {
     return this.bpService.flight_Get();
   }
@@ -315,71 +300,6 @@ export class BidPriceAspNetService {
     return this.bpService.flight_Post(masterKey, bidPriceInfluences);
   }
 
-
-  //  LegFlightDetailsClient
-  public getFlightClient(masterKey: number): Observable<FlightClient> {
-    return this.flightClient.getByMasterKey(masterKey)
-      .pipe(
-        map((response: any) => {
-          return response;
-        }),
-        catchError(error => {
-          throw error;
-        })
-      );
-  }
-
-
-  // Returns O and D city names from local airport csv file
-  public findAirportCodes(or, dest): Observable<any[]> {
-    return this.http
-      .get(this.airportCodes_URL, { responseType: 'text' })
-      .pipe(map(res => {
-        return this.findOandDAirportCodesJSON(res, or, dest);
-      }));
-  }
-
-  private findOandDAirportCodesJSON(csv, o, d) {
-    const lines = csv.split(/[\r\n]+/);
-
-    for (let i = 0; i < lines.length; i++) {
-      lines[i] = lines[i].replace(/\s/, '');
-    }
-
-    const result = [];
-    const headers = lines[0].split(',');
-
-    const test = headers.findIndex(code => code === 'iata_code')
-
-    for (let i = test; i < lines.length; i++) {
-      const obj = {};
-
-      const currentline = lines[i].split(',');
-
-      for (let j = 0; j < headers.length; j++) {
-        if (headers[j] !== 'coordinates') {
-          obj[headers[j].toString()] = currentline[j];
-        } else {
-          let temp3 = currentline[2].replace(/['"]+/g, '')
-          let temp4 = currentline[3].replace(/['"|/\s/]+/g, '')
-
-          temp3 = Math.round((+temp3 * 100) / 100)
-          temp4 = Math.round((+temp4 * 100) / 100)
-          const tester = [];
-          tester.push(temp4, temp3);
-          obj[headers[j]] = tester;
-        }
-      }
-      if (obj['iata_code'] === o) {
-        result[0] = (obj);
-      }
-
-      if (obj['iata_code'] === d) {
-        result[1] = (obj);
-      }
-    }
-    return result;
-  }
 }
 
 @Injectable({
@@ -393,16 +313,7 @@ export class BidPriceWebViewService implements IBidPriceService {
   readonly mockFlightClient = './assets/config/bucketConfigs.json';
 
   constructor(@Inject(HttpClient) protected http: HttpClient, sanitizer: DomSanitizer) {
-
-    // if (!this.hasBidPriceBridge()) {
-    //   this.bidPriceBridge = window.chrome.webview.hostObjects.bidPrice;
-    // } else {
-    //   throw Error("Could not find bidPrice bridge object 'window.chrome.webview.hostObjects.bidPrice'");
-    // }
-
     getClientForEnvironment(http, sanitizer)
-
-
   }
 
   public flight_Get(): Observable<BucketDetails[]> {

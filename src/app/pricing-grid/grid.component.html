@@ -14,12 +14,13 @@
           src="{{pathToAssets}}accelyaTextLogo.jpg"
         />
       </div>
-      <section class="font-14 fw-600 ms-3 d-flex align-items-center">
+      <section class="font-14 fw-600 ms-1 d-flex align-items-center">
         <div class="d-flex align-items-center no-wrap ms-2">
           {{apiAirlineFlight.airlineCode}}: {{apiAirlineFlight.flightline}}:
         </div>
-        <div class="font-12 d-flex align-items-center no-wrap ms-2">
+        <div class="font-11 d-flex align-items-center no-wrap ms-3">
           {{apiAirlineFlight.departureDate}}: {{apiAirlineFlight.departureTime}}
+          - {{apiAirlineFlight.arrivalTime}}
         </div>
       </section>
     </section>
@@ -73,6 +74,11 @@
         </div>
       </div>
     </section>
+
+    <!-- <button type="button" class="material-icons icon-btn">
+      <mat-icon>settings</mat-icon>
+    </button> -->
+
     <section>
       <div class="d-flex align-items-center me-2">
         <div class="noselect font-12 fw-600 me-2">Color:</div>
@@ -100,7 +106,7 @@
       <!-- <div *ngIf="frameRateCounterState"
       class="font-13 fw-600">FPS: {{fps$ | async}}</div> -->
 
-      <div class="font-11 fw-600 me-3">
+      <div class="font-11 fw-600 me-2">
         v:{{currentApplicationVersion}}
       </div>
     </section>
@@ -152,27 +158,29 @@
             <section>
               <div class="d-flex align-items-center me-2">
                 <div
-                  *ngIf="selectedCabinIndex"
+                  *ngIf="sharedDatasetService.selectedCabinIndex"
                   class="noselect font-12 fw-600 me-2"
                 >
                   Cabin:
                 </div>
                 <div
                   class="ng-select.primary-background"
-                  *ngIf="sharedDatasetService.cabinOptions"
+                  *ngIf="(apiActiveCabinSubject$ | async) as activeCabin"
                 >
                   <ng-select
                     class="custom-select me-2"
                     title="Select Cabin"
-                    [(ngModel)]="sharedDatasetService.cabinOptions[sharedDatasetService.selectedCabinIndex]"
                     (change)="cabinSelection($event)"
                     [clearable]="false"
                     [searchable]="false"
+                    [ngModel]="activeCabin.cabinLetter"
                     [items]="sharedDatasetService.cabinOptions"
-                    [bindLabel]="'name'"
+                    [bindLabel]="'cabinLetter'"
                   >
                     <ng-template ng-option-tmp let-item="item">
-                      <div>{{ item.cabinLetter }}</div>
+                      <div>
+                        {{ item.cabinLetter }}
+                      </div>
                     </ng-template>
                   </ng-select>
                 </div>
@@ -270,7 +278,7 @@
           >
             <button
               type="button"
-              class="label-btn icon-button"
+              class="material-icons icon-btn"
               *ngIf="influencesExpanded"
             >
               <mat-icon>chevron_left</mat-icon>
@@ -304,7 +312,7 @@
           >
             <button
               type="button"
-              class="label-btn icon-button me-3"
+              class="material-icons icon-btn me-2"
               *ngIf="!influencesExpanded"
             >
               <mat-icon>chevron_right</mat-icon>

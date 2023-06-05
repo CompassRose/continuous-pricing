@@ -298,13 +298,14 @@ label {
   }
 }
 
+.mat-icon {
+}
+
 .material-icons {
   font-family: "Material Icons";
   font-weight: bold !important;
   font-style: normal;
-  font-size: 22px !important;
-
-  //line-height: 1;
+  font-size: 19px !important;
   letter-spacing: normal;
   text-transform: none;
   display: inline-block;
@@ -313,18 +314,36 @@ label {
   direction: ltr;
   -webkit-font-smoothing: antialiased;
   height: 24px !important;
-  width: 24px;
+  width: 24px !important;
 }
 
-.icon-button {
-  padding: 2px 4px 0px 2px;
+.icon-btn {
+  display: block;
+  background: $brand-primary-background;
+  color: hsla(215, 0%, 100%, 1);
+  border: 1px solid hsla(150, 75%, 50%, 0.5);
+  border-radius: 3px;
+  font-size: 11px;
+  text-align: center;
+  min-width: 35px;
+  padding: 0.16rem 0;
+  position: relative;
+  text-decoration: none;
 
-  i-bs {
-    color: white;
-    // font-size: 13px;
-    //font-weight: 600;
+  &:hover {
+    border: 1px solid hsla(150, 75%, 50%, 1);
   }
 }
+
+// .icon-button {
+//   padding: 0px 0px 0px 0px;
+
+//   // i-bs {
+//   //   color: white;
+//   //   // font-size: 13px;
+//   //   //font-weight: 600;
+//   // }
+// }
 
 h1 {
   color: hsla(215, 5%, 10%, 1);
@@ -333,6 +352,7 @@ h1 {
 
 section {
   display: flex;
+  align-items: center;
   flex-flow: row wrap;
 }
 

@@ -9,7 +9,7 @@ import { PathToAssets } from '../dashboard-constants';
 import { environment } from 'src/environments/environment.prod';
 import { ThemeControlService } from '../services/theme-control.service';
 import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visualization.service';
-import { FlightClientDetails, BucketStructure, FlightObject, CompetitiveFareDetails } from '../models/dashboard.model';
+import { FlightClientDetails, BucketStructure, FlightObject, CompetitiveFareDetails, CabinContinuousFares } from '../models/dashboard.model';
 
 import { DateFormatterPipe } from '../shared/pipes/dateModifierPipe';
 
@@ -84,13 +84,11 @@ export class ContinousPricingComponent implements OnInit {
   public pointsDeSelected = false;
 
   public apiActiveFlightSubject$ = new BehaviorSubject<FlightClientDetails>(null);
-  public apiBucketCollectionSubject$ = new BehaviorSubject<BucketStructure[]>([]);
-  public apiCompetitiveFaresSubject$ = new BehaviorSubject<CompetitiveFareDetails[]>([]);
-  public apiContinuousFaresSubject$ = new BehaviorSubject<FlightObject>(null);
+  public apiActiveCabinSubject$ = new BehaviorSubject<CabinContinuousFares>(null);
 
-  public continuousFareObject: any;
   public derivedOrigin: string;
   public derivedDestination: string;
+
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
     public dashboardApi: BidPriceAspNetService,
@@ -104,20 +102,20 @@ export class ContinousPricingComponent implements OnInit {
 
     this.sharedDatasetService.totalBookingsCollector = 0;
 
-    //console.log('\n\n --------------   this.sharedDatasetService.allFlightValues ', this.sharedDatasetService.allFlightValues, ' flightSpecifics ', flightSpecifics)
+    // console.log(' flightSpecifics ', flightSpecifics)
 
     const flightNum = this.sharedDatasetService.allNewFlightValues.flightline.split(' ');
     this.selectedFlightKey = this.sharedDatasetService.allNewFlightValues.oDmasterKey;
 
     const formattedDepDate = dateModifierPipe.transform(flightSpecifics.departureDate, 'date');
     const formattedDepTime = dateModifierPipe.transform(flightSpecifics.departureTime, 'time');
-    const formattedArrivalTime = dateModifierPipe.transform(flightSpecifics.departureTime, 'time');
+    const formattedArrivalTime = dateModifierPipe.transform(flightSpecifics.arrivalTime, 'time');
 
-    //console.log('formattedDepDate ', formattedDepDate, ' formattedDepTime ', formattedDepTime)
+    // console.log('formattedDepDate ', formattedDepDate, ' formattedDepTime ', formattedDepTime, 'formattedArrivalTime ', formattedArrivalTime)
 
     this.selectedFlightValues = {
       flightline: flightSpecifics.flightline,
-      odMasterKey: flightSpecifics.odMasterKey,
+      odMasterKey: flightSpecifics.oDmasterKey,
       origin: flightNum[0].substring(0, 3),
       flightNumber: Number(flightNum[1]),
       destination: flightNum[0].substring(3),
@@ -126,9 +124,13 @@ export class ContinousPricingComponent implements OnInit {
       arrivalTime: formattedArrivalTime,
       airlineCode: flightSpecifics.airlineCode
     }
-
+    //console.log('selectedFlightValues ', this.selectedFlightValues)
     this.sharedDatasetService.selectedCabinIndex = flightSpecifics.cabinContinuousFares.length - 1;
+
     this.sharedDatasetService.cabinOptions = flightSpecifics.cabinContinuousFares;
+
+    this.apiActiveCabinSubject$.next(this.sharedDatasetService.cabinOptions[this.sharedDatasetService.selectedCabinIndex]);
+
     this.apiActiveFlightSubject$.next(this.selectedFlightValues);
     this.cabinSelection(flightSpecifics.cabinContinuousFares[flightSpecifics.cabinContinuousFares.length - 1]);
 
@@ -141,13 +143,27 @@ export class ContinousPricingComponent implements OnInit {
   }
 
 
+  /// Works in shared- datasets
   public cabinSelection(ev) {
-    console.log(' ev ', ev)
+
+    let savedCabinValuesPh;
     const foundIdx = this.sharedDatasetService.cabinOptions.findIndex(x => {
       return x.cabinLetter === ev.cabinLetter;
     });
-    console.log('cabinSelection ', foundIdx)
+
+
+    console.log('cabinSelection ', foundIdx, ' this.selectedFlightValues.odMasterKey ', this.selectedFlightValues.odMasterKey);
+
     this.sharedDatasetService.selectedCabinIndex = foundIdx;
+
+    if (JSON.parse(window.localStorage.getItem('savedCabinCollection'))) {
+      savedCabinValuesPh = JSON.parse(window.localStorage.getItem('savedCabinCollection'));
+    }
+
+    if (this.sharedDatasetService.cabinOptions[foundIdx].cabinLetter === ev.cabinLetter) {
+      console.log('\n\n\n TRUE  savedCabTrueinValuesPh ', savedCabinValuesPh)
+    }
+
     this.sharedDatasetService.changeCabinSelection(foundIdx);
   }
 
@@ -168,6 +184,7 @@ export class ContinousPricingComponent implements OnInit {
       .pipe(
         debounceTime(20),
         switchMap((allFlightValues: FlightObject) => {
+          console.log('allFlightValues ', allFlightValues)
           return of(allFlightValues)
         })
       )
@@ -177,22 +194,6 @@ export class ContinousPricingComponent implements OnInit {
         this.flightSelectControl(flightObject);
       })
 
-
-    // this.dashboardApi.apiFlightClientValues()
-    //   .subscribe((flights: FlightClientDetails) => {
-    //     this.apiFlightCollectiontSubject$.next(flights);
-    //     this.selectedFlightValues = flights[0];
-    //   })
-
-    // this.dashboardApi.apiCompetitiveFareClientValues()
-    //   .subscribe((compFares: CompetitiveFareDetails[]) => {
-    //     this.apiCompetitiveFaresSubject$.next(compFares);
-    //   })
-
-    // this.bookingControlService.bookingSlider$
-    //   .subscribe(response => {
-    //     this.sharedDatasetService.generateInverseDetails();
-    //   })
 
 
     const cmdJ = merge(

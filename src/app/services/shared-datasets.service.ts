@@ -1,12 +1,10 @@
 
 import { Injectable } from '@angular/core';
-import { BucketDetails, InverseFareDetails } from '../models/dashboard.model';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { distinctUntilChanged, tap, filter } from 'rxjs/operators';
 import { DragPointDistributionService } from '../services/drag-point-distribution';
-
-import { FlightClientDetails, BarSeries, CabinContinuousFares, BidPriceInfluencers, FlightObject, CompetitiveFareDetails, BucketStructure } from '../models/dashboard.model';
+import { FlightClientDetails, BarSeries, CabinContinuousFares, InverseFareDetails, BidPriceInfluencers, FlightObject, CompetitiveFareDetails, BucketStructure } from '../models/dashboard.model';
 import { ColorManagerService } from './color-manager-service';
 
 @Injectable({
@@ -58,6 +56,7 @@ export class SharedDatasetService {
 
     public showCompetitorsFlag = false;
 
+
     public multiSelectedNodeSubject$ = new BehaviorSubject<number[]>([]);
 
     public modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
@@ -96,8 +95,9 @@ export class SharedDatasetService {
     // Activates deselect button
     public pointsOnn$ = new BehaviorSubject<boolean>(false);
 
-    public cabinOptions: any = [];
+    public cabinOptions: CabinContinuousFares[] = [];
 
+    public selectedCabinIndex: number;
 
     public dragGrouping: any = [
         { name: 'Single', id: 0, active: true, disabled: false },
@@ -107,11 +107,10 @@ export class SharedDatasetService {
     ];
 
 
-    public apiCabinCollection: CabinContinuousFares[];
-
-    public bucketCollectionFromApi: BucketStructure[][] = [];
 
     public bucketDetailsFromApi: BucketStructure[] = [];
+
+    public discreteBucketsFromApi: BucketStructure[] = [];
 
     public selectedColorRange = 0;
 
@@ -121,7 +120,6 @@ export class SharedDatasetService {
 
     public competitiveFareValues: CompetitiveFareDetails[];
 
-    public selectedCabinIndex: number;
 
     constructor(private colorManagerService: ColorManagerService) {
 
@@ -156,11 +154,12 @@ export class SharedDatasetService {
             .subscribe(response => {
 
                 if (response) {
+                    console.log('RESET RESET')
                     this.modifierObj = { mult: 1.00, addSub: 0, partialMax: '' };
                     this.totalBookingsCollector = 0;
                     this.selectedMetric = 0;
                     this.setGroupingMethod(0);
-                    // console.log('resetDefaultSubject ', this.dragGrouping)
+                    console.log('resetDefaultSubject ', this.dragGrouping)
                     this.metricGroupSubject$.next(this.dragGrouping);
                 }
             });
@@ -208,27 +207,31 @@ export class SharedDatasetService {
     }
 
 
-
     public changeCabinSelection(idx: number) {
 
-        console.log('idx ', idx, ' cabinOptions ', this.cabinOptions[idx])
-
-        const tempArray = [];
+        this.competitiveFareValues = this.cabinOptions[idx].competitiveFares;
+        const bucketArray = [];
+        this.discreteBucketsFromApi = [];
 
         this.cabinOptions[idx].bucketStructure.map((bd, i) => {
-            if (bd.letter !== 'G') {
-                tempArray.push(bd);
+
+            if (bd.letter !== 'G' && !bd.isDiscrete) {
+                bucketArray.push(bd);
+            }
+
+            if (bd.isDiscrete) {
+                this.discreteBucketsFromApi.push(bd)
             }
         })
-        const getBucketColors = this.setConcatedBucketDetails(tempArray);
-        this.setFlightClient(getBucketColors);
+
+        console.log('getBucketColors ', bucketArray)
+        this.setFlightClient(bucketArray);
     }
 
 
 
     // From Color Dropdown and at app start
     public getColorValues(choice: any): void {
-        // console.log(' \n\n\ngetColorValues ', choice)
         this.selectedColorRange = choice.id;
         this.colorRange = this.allColors[choice.id].value;
         this.colorRangeSelection$.next(this.allColors[choice.id])
@@ -268,43 +271,32 @@ export class SharedDatasetService {
     // Updates Flight Behavior Subject and triggers return FlightClient with setting cabin to Economy(Y)
     public setFlightClient(buckets): void {
 
-        this.bucketCollectionFromApi = [];
-
-        // const tempSavedCollection = JSON.parse(window.localStorage.getItem('savedBucketCollection'));
-
         this.bucketDetailsFromApi = buckets;
+
+        console.log('this.bucketDetailsFromApi ', this.bucketDetailsFromApi);
 
         this.maxAuValue = this.bucketDetailsFromApi[0].adjustedAu;
 
         this.inverseFareValues = this.generateInverseDetails();
 
         setTimeout(() => {
-            this.applyDataChanges();
+            this.applyDataChanges(1);
             this.apiActiveBucketsSubject$.next(this.bucketDetailsFromApi);
         }, 0);
-
-
-        // window.localStorage.setItem('archivedCabinCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
-        // window.localStorage.setItem('savedCabinCollection', JSON.stringify(JSON.parse(JSON.stringify(this.sharedDatasetService.apiBucketDetails))));
-    }
-
-    // Removes Discrete buckets for AU Visualization Chart
-    public setConcatedBucketDetails(values): any {
-
-        // values.map((bs, i) => {
-        //     console.log('bs ', bs)
-        //     return !bs.isDiscrete ? this.colorRange[i] : 'blue';
-        // })
-        console.log('********************************* this.bucketDetailsFromApi ', values)
-        return values;
     }
 
 
     //  Reset Default button press -- buctDetails set from here, Subject in Components take care of 
     public resetFromArchivedBuckets(idx: number) {
-        const tempCollection = JSON.parse(window.localStorage.getItem('archivedBucketCollection'));
-        this.bucketDetailsFromApi = tempCollection[idx];
-        // this.setConcatedBucketDetails()
+
+        const tempCollection = JSON.parse(window.localStorage.getItem('bucketDetailsFromApi'));
+
+        const tempCabinCollection = JSON.parse(window.localStorage.getItem('savedCabinCollection'));
+
+        console.log('this.bucketDetailsFromApi ', tempCollection, ' tempCabinCollection ', tempCabinCollection)
+
+        this.bucketDetailsFromApi = tempCollection;
+
         this.resetDefaultSubject$.next(true);
     }
 
@@ -312,9 +304,26 @@ export class SharedDatasetService {
 
     //  Save changes button press
     public saveBucketSet(idx: number) {
-        const tempSavedCollection = JSON.parse(window.localStorage.getItem('savedBucketCollection'));
-        tempSavedCollection[idx] = this.bucketDetailsFromApi;
-        window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(tempSavedCollection))));
+
+        let savedCabinValuesPh;
+
+        if (JSON.parse(window.localStorage.getItem('savedCabinValues'))) {
+            savedCabinValuesPh = JSON.parse(window.localStorage.getItem('savedCabinValues'));
+        } else {
+            savedCabinValuesPh = window.localStorage.setItem('savedCabinCollection', JSON.stringify(JSON.parse(JSON.stringify(this.cabinOptions))));
+        }
+        console.log('savedCabinValuesPh ', savedCabinValuesPh)
+
+        //tempSavedCollection[idx] = this.bucketDetailsFromApi;
+
+        let concat = [];
+
+        if (this.discreteBucketsFromApi.length) {
+            concat = [...this.bucketDetailsFromApi, ...this.discreteBucketsFromApi]
+        }
+
+        window.localStorage.setItem('bucketDetailsFromApi', JSON.stringify(JSON.parse(JSON.stringify(concat))));
+        //  window.localStorage.setItem('savedBucketCollection', JSON.stringify(JSON.parse(JSON.stringify(tempSavedCollection))));
     }
 
 
@@ -323,32 +332,40 @@ export class SharedDatasetService {
         // console.log('\n\n***************************\n\n adjustPieceColorForBookingUpdates StARTED ')
         this.dynamicBidPrices = [];
         this.dynamicChartObject = [];
-        this.bucketDetailsFromApi.map((pc, i) => {
-            pc.color = this.colorRange[i];
-            const fareHolder = this.adjustPieceColorAndValue(pc)
-            this.dynamicChartObject.push(...fareHolder)
-        })
 
-        //  console.log('DYN length ', this.dynamicBidPrices.length)
+        this.bucketDetailsFromApi.map((pc, i) => {
+
+            // if (!pc.isDiscrete) {
+
+            pc.color = this.colorRange[i];
+            const fareHolder = this.adjustPieceColorAndValue(pc);
+            this.dynamicChartObject.push(...fareHolder);
+
+            // }
+            // console.log(' pc ', pc.letter, ' protections ', pc.protections)
+        })
     }
 
     // // Set up bar colors 
-    public adjustPieceColorAndValue(buckets): any[] {
-        let tempHolderAry = [];
-        let setMyGroupColors = this.setSeatColors(buckets)
+    public adjustPieceColorAndValue(bucket): any[] {
 
-        for (let e = 0; e <= buckets.protections - 1; e++) {
-            this.dynamicBidPrices.push(buckets.fare)
+        let tempHolderAry = [];
+        let setMyGroupColors = this.setSeatColors(bucket);
+        // console.log('letter ', bucket.letter, ' protections ', bucket.protections)
+
+        for (let e = 0; e < bucket.protections; e++) {
+            this.dynamicBidPrices.push(bucket.fare);
             const chartObj = {
-                value: buckets.fare,
+                value: bucket.fare,
                 itemStyle: {
                     color: setMyGroupColors[e]
                 }
             }
 
             tempHolderAry.push(chartObj)
+            //console.log('chartObj ', chartObj, ' tempHolderAry ', tempHolderAry.length)
         }
-
+        //console.log('DYN length ', this.dynamicBidPrices.length, ' dynamicChartObject ', tempHolderAry.length)
         return tempHolderAry;
     }
 
@@ -364,41 +381,43 @@ export class SharedDatasetService {
     }
 
 
-    public applyDataChanges() {
-        if (this.bucketDetailsFromApi.length) {
-            this.generateBucketValues();
+    public applyDataChanges(idx: number) {
+
+        if (idx === 1 || idx < this.currAus.length) {
+            // console.log(' Not Discrete  applyDataChanges ', idx, ' letter ', this.bucketDetailsFromApi[idx].letter)
+            this.generateBucketValues(idx);
         }
     }
 
 
     // Generates protections from Aus
-    public generateBucketValues() {
-        // console.log('generateBucketValues ')
+    public generateBucketValues(idx: number) {
+
         this.currAus = [];
-        this.allAus = [];
 
-
+        //  && bs.letter !== 'G'
         this.bucketDetailsFromApi.map((bs, i) => {
 
-            if (!bs.isDiscrete && bs.letter !== 'G') {
-                console.log('               bs ', bs.letter, ' isDiscrete ', bs.isDiscrete, ' Aus ', bs.adjustedAu)
-                this.currAus.push(bs.adjustedAu)
+            let myTest = 0;
+
+            if (!bs.isDiscrete) {
+                this.currAus.push(bs.adjustedAu);
+                myTest = this.protectionMyLevel(i);
+            } else {
+                myTest = 0;
+
             }
-            return bs.protections = this.protectionMyLevel(i);
+
+            //console.log('idx ', i, ' bs ', bs.letter, 'myTest ', myTest)
+            return bs.protections = myTest;
         })
 
-        this.bucketDetailsFromApi.forEach((bd, i) => {
-            if (i <= this.bucketDetailsFromApi.length) {
-                this.allAus.push(bd.adjustedAu)
-            }
-        })
-
-        console.log('this.currAus ', this.currAus, ' this.allAus ', this.allAus)
-
-        this.adjustPieceColorForBookingUpdates();
+        if (idx < this.currAus.length) {
+            //  console.log('idx ', idx, ' this.currAus.length ', this.currAus.length)
+            this.adjustPieceColorForBookingUpdates();
+        }
 
         setTimeout(() => {
-            //console.log(' generateBucketValues  ',)
             this.bucketDetailsBehaviorSubject$.next(true);
         }, 0);
     }
@@ -407,8 +426,28 @@ export class SharedDatasetService {
 
     // Returns Bucket Seat count for protection
     public protectionMyLevel(idx: number): number {
-        const nextBucketValue = (idx === (this.bucketDetailsFromApi.length - 1)) ? 0 : this.bucketDetailsFromApi[idx + 1].adjustedAu;
-        const diff = Math.round(this.bucketDetailsFromApi[idx].adjustedAu - nextBucketValue);
+        let diff
+
+        if (idx < this.currAus.length) {
+            //  console.log(' Set Protections ', this.bucketDetailsFromApi[idx].letter, '  --idx ', idx, ' length ', this.currAus[idx])
+
+            let tester = 0;
+            if (idx === (this.bucketDetailsFromApi.length - 1)) {
+                tester = 0;
+            } else {
+                tester = this.bucketDetailsFromApi[idx + 1].adjustedAu
+            }
+
+            //const nextBucketValue = (idx === (this.bucketDetailsFromApi.length - 1)) ? 0 : this.bucketDetailsFromApi[idx + 1].adjustedAu;
+
+            diff = Math.round(this.bucketDetailsFromApi[idx].adjustedAu - tester);
+
+
+        } else {
+
+            diff = this.bucketDetailsFromApi[idx].adjustedAu;
+            // console.log('Active ', this.bucketDetailsFromApi[idx].letter, '  --idx ', idx, ' diff ', diff)
+        }
 
         return (diff > 0) ? diff : 0;
     }
@@ -438,20 +477,7 @@ export class SharedDatasetService {
     // From Au bar scale drag up or down
     public calculateBidPriceForAu(bucketIdx: number, targetAu: number, direction: string) {
 
-        // console.log('\n  PRE targetAu ', targetAu, ' bucketIdx ', bucketIdx, ' length ', this.currAus.length)
-
-        let metric = 'bucketDetailsFromApi';
-        let auMetric = 'currAus';
-
-        if (bucketIdx >= this.currAus.length) {
-            //metric = 'bucketDetailsFromApi';
-            auMetric = 'allAus';
-
-        } else {
-            //metric = 'bucketDetailsFromApi';
-            auMetric = 'currAus';
-        }
-
+        // console.log('\n  PRE targetAu ', targetAu, ' bucketIdx ', bucketIdx, ' length ', this.dynamicBidPrices.length)
 
         let targetBp: number;
 
@@ -463,8 +489,9 @@ export class SharedDatasetService {
         }
 
         // How many handles to bring along on the way up -->
-        console.log('>===  --------- targetAu ', targetAu, ' auMetric ', this[auMetric][bucketIdx], ' auMetric ', auMetric)
-        if (targetAu >= this[auMetric][bucketIdx]) {
+        // console.log('>===  --------- targetAu ', targetAu, ' auMetric ', this.currAus[bucketIdx], ' targetBp ', targetBp)
+
+        if (targetAu >= this.currAus[bucketIdx]) {
 
             for (let i = bucketIdx; i > 0; i--) {
 
@@ -483,9 +510,9 @@ export class SharedDatasetService {
                                 this.bucketDetailsFromApi[se].adjustedAu = this.dragSelectedNodes(se, 'up');
                             })
                         } else {
-                            console.log('ELSE')
+                            // console.log('UP  ELSE')
                             if (!bucketInfo.isDiscrete) {
-                                console.log('ELSE ', bucketInfo.letter)
+                                //    console.log('UP ELSE ', bucketInfo.letter)
                                 bucketInfo.adjustedAu = targetAu;
                             }
 
@@ -495,7 +522,7 @@ export class SharedDatasetService {
             }
 
         } else {
-            console.log('\n BRING ALONG targetAu ', targetAu, ' <<< ', this[auMetric][bucketIdx])
+            // console.log('\n DOWN targetAu ', targetAu, ' <<< ', this.currAus[bucketIdx], ' targetBp ', targetBp)
 
             for (let i = bucketIdx; i < this.bucketDetailsFromApi.length; i++) {
 
@@ -509,18 +536,19 @@ export class SharedDatasetService {
                         if (this.selectedElement.length > 1) {
                             targetBp = this.bucketDetailsFromApi[this.selectedElement.length - 1].fare;
                             this.selectedElement.forEach((se: number, i: number) => {
-                                console.log(' Down     Aus ', this.bucketDetailsFromApi[se].adjustedAu, ' FC ', this.bucketDetailsFromApi[se].letter)
+                                //     console.log(' Down     Aus ', this.bucketDetailsFromApi[se].adjustedAu, ' FC ', this.bucketDetailsFromApi[se].letter)
                                 this.bucketDetailsFromApi[se].adjustedAu = this.dragSelectedNodes(se, 'down');
                             })
                         } else {
-                            console.log('ELSE ', bucketInfo.letter)
+                            //      console.log('Down ELSE ', bucketInfo.letter)
                             bucketInfo.adjustedAu = targetAu;
                         }
                     }
                 }
             }
         }
-        this.applyDataChanges();
+        // console.log('\n DOWN targetAu ', targetAu, ' <<< ', this.currAus, ' targetBp ', targetBp)
+        this.applyDataChanges(bucketIdx);
     }
 
 

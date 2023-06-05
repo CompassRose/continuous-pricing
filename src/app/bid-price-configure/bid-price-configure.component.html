@@ -124,8 +124,8 @@
           [searchable]="false"
           [disabled]="false"
           placeholder="None"
-          [items]="sharedDatasetService.buckets"
-          [bindLabel]="'bucketLetter'"
+          [items]="sharedDatasetService.bucketDetailsFromApi"
+          [bindLabel]="'letter'"
         >
           <ng-template ng-label-tmp let-itemMaxSelected="openClassSelected">
             <div class="d-flex">
@@ -137,8 +137,7 @@
               class="option-template-text d-flex"
               (click)="selectPartialMinFareClassFromDropdown(item,i, 5)"
             >
-              <span class="w-50">{{item}} </span>
-              <!-- <span class="me-auto">{{initialMinBuckets[i][adjustedFareHolder]}}</span> -->
+              <span class="w-50">{{item.letter}} </span>
             </div>
           </ng-template>
         </ng-select>
