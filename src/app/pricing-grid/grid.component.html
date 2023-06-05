@@ -157,10 +157,7 @@
             <!--  -->
             <section>
               <div class="d-flex align-items-center me-2">
-                <div
-                  *ngIf="sharedDatasetService.selectedCabinIndex"
-                  class="noselect font-12 fw-600 me-2"
-                >
+                <div class="noselect font-12 fw-600 me-2">
                   Cabin:
                 </div>
                 <div
@@ -187,6 +184,14 @@
               </div>
             </section>
             <section>
+              <button
+                type="button"
+                class="label-btn me-2 text-nowrap px-2"
+                (click)="toggleCompetitorsDetails()"
+                title="Show Competitors"
+              >
+                Show Competitors
+              </button>
               <button
                 type="button"
                 class="label-btn me-2 text-nowrap"

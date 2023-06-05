@@ -1,6 +1,5 @@
 import { Component, Input, AfterViewInit, HostListener } from '@angular/core';
 import * as echarts from 'echarts';
-import { BidPriceCalcsService } from '../services/au-visualization-calcs-service';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { ThemeControlService } from '../services/theme-control.service';
 import { blueRamp16 } from '../dashboard-constants';
@@ -45,8 +44,7 @@ export class AuAvailabilityComponent {
 
 
     constructor(public sharedDatasetService: SharedDatasetService,
-        public themeControlService: ThemeControlService,
-        public bidPriceCalcsService: BidPriceCalcsService) {
+        public themeControlService: ThemeControlService) {
 
         this.themeSelect = JSON.parse(window.localStorage.getItem('colorTheme'));
 
@@ -230,10 +228,17 @@ export class AuAvailabilityComponent {
                 }),
                 itemStyle: {
                     color: 'rgba(0, 160, 30, 1)',
-                    shadowColor: 'rgba(0,0,0,0.2)',
+                    shadowColor: 'rgba(0,0,0,0.7)',
                     shadowBlur: 3,
                     shadowOffsetX: -2,
-
+                    decal: {
+                        symbol: 'rect',
+                        color: 'rgba(39, 39, 255, 0.1)',
+                        dashArrayX: [3, 0],
+                        dashArrayY: [4, 2],
+                        symbolSize: 1,
+                        rotation: Math.PI / 6
+                    }
                 },
             },
 
@@ -319,7 +324,7 @@ export class AuAvailabilityComponent {
                 left: 55,
                 right: 20,
                 top: 25,
-                bottom: 45
+                bottom: 25
             },
             tooltip: {
                 show: false,
@@ -437,9 +442,9 @@ export class AuAvailabilityComponent {
                 {
                     show: true,
                     type: 'category',
-                    name: 'Bookings',
+                    name: '',
                     nameLocation: 'middle',
-                    nameGap: 25,
+                    //nameGap: 25,
                     nameTextStyle: {
                         color: 'rgb(0,200,0)',
                         fontSize: 11,
@@ -494,15 +499,11 @@ export class AuAvailabilityComponent {
             if (yValue > self.sharedDatasetService.maxAuValue) {
                 yValue = self.sharedDatasetService.maxAuValue
             }
-
-            console.log('||||||||||  dataIndex ', dataIndex, ' length ', self.sharedDatasetService.currAus.length)
             if (dataIndex >= self.sharedDatasetService.currAus.length) {
-
                 self.totalBuckets[dataIndex].adjustedAu = yValue;
                 setTimeout(() => {
                     self.sharedDatasetService.bucketDetailsBehaviorSubject$.next(true);
                 }, 0);
-                //self.sharedDatasetService.applyDataChanges(dataIndex);
             } else {
                 self.sharedDatasetService.calculateBidPriceForAu(dataIndex, yValue, self.sharedDatasetService.dragDirection);
             }
@@ -511,8 +512,6 @@ export class AuAvailabilityComponent {
 
 
         const setChartDragPoints = function () {
-
-            // console.log('totalBuckets ', self.totalBuckets)
             self.myChart.setOption({
                 graphic: echarts.util.map(self.totalBuckets, (item, dataIndex) => {
                     let activeItems = {};
@@ -522,7 +521,6 @@ export class AuAvailabilityComponent {
                         position: self.myChart.convertToPixel({ gridIndex: 0 }, handles),
                         draggable: true,
                         ondrag: function (dx, dy) {
-
                             if (self.sharedDatasetService.selectedElement.length < 2) {
 
                                 if (dx.target.x > self.sharedDatasetService.lastDataIndex) {
@@ -577,12 +575,6 @@ export class AuAvailabilityComponent {
             updatePosition();
         }
     }
-
-
-    private getTextColor(idx) {
-        return this.sharedDatasetService.bucketDetailsFromApi[idx].fare;
-    }
-
 
 }
 

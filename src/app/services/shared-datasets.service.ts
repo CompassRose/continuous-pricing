@@ -54,9 +54,6 @@ export class SharedDatasetService {
 
     public auPercentagesValues: number[] = [];
 
-    public showCompetitorsFlag = false;
-
-
     public multiSelectedNodeSubject$ = new BehaviorSubject<number[]>([]);
 
     public modifierObj = { mult: 1.00, addSub: 0, partialMax: '' } as BidPriceInfluencers;
@@ -98,6 +95,7 @@ export class SharedDatasetService {
     public cabinOptions: CabinContinuousFares[] = [];
 
     public selectedCabinIndex: number;
+
 
     public dragGrouping: any = [
         { name: 'Single', id: 0, active: true, disabled: false },
@@ -223,8 +221,6 @@ export class SharedDatasetService {
                 this.discreteBucketsFromApi.push(bd)
             }
         })
-
-        console.log('getBucketColors ', bucketArray)
         this.setFlightClient(bucketArray);
     }
 
@@ -270,13 +266,9 @@ export class SharedDatasetService {
 
     // Updates Flight Behavior Subject and triggers return FlightClient with setting cabin to Economy(Y)
     public setFlightClient(buckets): void {
-
         this.bucketDetailsFromApi = buckets;
-
-        console.log('this.bucketDetailsFromApi ', this.bucketDetailsFromApi);
-
+        // console.log('this.bucketDetailsFromApi ', this.bucketDetailsFromApi);
         this.maxAuValue = this.bucketDetailsFromApi[0].adjustedAu;
-
         this.inverseFareValues = this.generateInverseDetails();
 
         setTimeout(() => {
@@ -299,7 +291,6 @@ export class SharedDatasetService {
 
         this.resetDefaultSubject$.next(true);
     }
-
 
 
     //  Save changes button press
@@ -334,17 +325,12 @@ export class SharedDatasetService {
         this.dynamicChartObject = [];
 
         this.bucketDetailsFromApi.map((pc, i) => {
-
-            // if (!pc.isDiscrete) {
-
             pc.color = this.colorRange[i];
             const fareHolder = this.adjustPieceColorAndValue(pc);
             this.dynamicChartObject.push(...fareHolder);
-
-            // }
-            // console.log(' pc ', pc.letter, ' protections ', pc.protections)
         })
     }
+
 
     // // Set up bar colors 
     public adjustPieceColorAndValue(bucket): any[] {
@@ -352,7 +338,6 @@ export class SharedDatasetService {
         let tempHolderAry = [];
         let setMyGroupColors = this.setSeatColors(bucket);
         // console.log('letter ', bucket.letter, ' protections ', bucket.protections)
-
         for (let e = 0; e < bucket.protections; e++) {
             this.dynamicBidPrices.push(bucket.fare);
             const chartObj = {
@@ -361,13 +346,12 @@ export class SharedDatasetService {
                     color: setMyGroupColors[e]
                 }
             }
-
             tempHolderAry.push(chartObj)
-            //console.log('chartObj ', chartObj, ' tempHolderAry ', tempHolderAry.length)
         }
         //console.log('DYN length ', this.dynamicBidPrices.length, ' dynamicChartObject ', tempHolderAry.length)
         return tempHolderAry;
     }
+
 
 
     private setSeatColors(bucket): string[] {
@@ -381,10 +365,10 @@ export class SharedDatasetService {
     }
 
 
+
     public applyDataChanges(idx: number) {
 
         if (idx === 1 || idx < this.currAus.length) {
-            // console.log(' Not Discrete  applyDataChanges ', idx, ' letter ', this.bucketDetailsFromApi[idx].letter)
             this.generateBucketValues(idx);
         }
     }
@@ -394,22 +378,10 @@ export class SharedDatasetService {
     public generateBucketValues(idx: number) {
 
         this.currAus = [];
-
-        //  && bs.letter !== 'G'
         this.bucketDetailsFromApi.map((bs, i) => {
-
-            let myTest = 0;
-
-            if (!bs.isDiscrete) {
-                this.currAus.push(bs.adjustedAu);
-                myTest = this.protectionMyLevel(i);
-            } else {
-                myTest = 0;
-
-            }
-
+            this.currAus.push(bs.adjustedAu);
             //console.log('idx ', i, ' bs ', bs.letter, 'myTest ', myTest)
-            return bs.protections = myTest;
+            return bs.protections = this.protectionMyLevel(i);
         })
 
         if (idx < this.currAus.length) {
@@ -451,14 +423,6 @@ export class SharedDatasetService {
 
         return (diff > 0) ? diff : 0;
     }
-
-
-    public showCompetitors() {
-        this.showCompetitorsFlag = !this.showCompetitorsFlag;
-        this.bucketDetailsFromApi = JSON.parse(window.localStorage.getItem('archivedBuckets'));
-        this.resetDefaultSubject$.next(true)
-    }
-
 
 
     public resetInverseDetailsFromBookings() {

@@ -42,7 +42,7 @@ export const shortcut = (shortcut: KeyCode[]) => {
         keyEvents
             .pipe(
                 filter((event) => {
-                    console.log('createKeyPressStream  ', event.code, '  charCode ', charCode.valueOf())
+                    // console.log('createKeyPressStream  ', event.code, '  charCode ', charCode.valueOf())
                     if (event.code === charCode.valueOf()) {
                         //   console.log('   |||||||    createKeyPressStream  ', event.code, ' charCode ', charCode)
                     }
@@ -58,10 +58,10 @@ export const shortcut = (shortcut: KeyCode[]) => {
                 return arr.every((a) => {
                     // console.log('combineLatest UP ', a)
                     if (a.type === "keyup") {
-                        console.log('combineLatest UP ', a.ctrlKey)
+                        // console.log('combineLatest UP ', a.ctrlKey)
                         type = a.type
                     } else {
-                        console.log('combineLatest Down ', a.ctrlKey)
+                        // console.log('combineLatest Down ', a.ctrlKey)
                         type = a.type
                     }
                     return type

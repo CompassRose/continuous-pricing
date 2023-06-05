@@ -10,7 +10,6 @@ export interface FlightClientDetails {
   departureDate?: string;
   departureTime?: string;
   arrivalTime?: string;
-  arrivalDateTime?: Date;
 }
 
 export interface CabinDetails {

@@ -91,6 +91,13 @@ export class ContinousBidPricingComponent {
 
         this.themeSelect = JSON.parse(window.localStorage.getItem('colorTheme'));
 
+        this.bidPriceCalcsService.showCompetitionSubject$
+            .subscribe((res) => {
+                this.myChart.setOption({
+                    series: this.setChartSeries()
+                })
+            })
+
         this.sharedDatasetService.colorRangeSelection$
             .subscribe(range => {
                 if (range && this.myChart) {
@@ -245,25 +252,25 @@ export class ContinousBidPricingComponent {
 
         let mySeries = [
 
-            {
-                id: 'e',
-                type: 'line',
-                z: 1,
-                animation: false,
-                silent: false,
-                showSymbol: false,
-                selectedMode: false,
-                symbolSize: 0,
-                areaStyle: {
-                    color: 'rgba(0,0,0,.8)'
-                },
-                lineStyle: {
-                    type: 'solid',
-                    color: this.themeSelect === 'dark' ? 'rgba(220, 220, 0, 1)' : originalCurveColor(1),
-                    width: this.themeSelect === 'dark' ? 2 : 2
-                },
-                data: this.sharedDatasetService.dynamicBidPrices
-            },
+            // {
+            //     id: 'e',
+            //     type: 'line',
+            //     z: 1,
+            //     animation: false,
+            //     silent: false,
+            //     showSymbol: false,
+            //     selectedMode: false,
+            //     symbolSize: 0,
+            //     areaStyle: {
+            //         color: 'rgba(0,0,0,.8)'
+            //     },
+            //     lineStyle: {
+            //         type: 'solid',
+            //         color: this.themeSelect === 'dark' ? 'rgba(220, 220, 0, 1)' : originalCurveColor(1),
+            //         width: this.themeSelect === 'dark' ? 2 : 2
+            //     },
+            //     data: this.sharedDatasetService.dynamicBidPrices
+            // },
 
             {
                 id: 'f',
@@ -336,6 +343,7 @@ export class ContinousBidPricingComponent {
         this.sharedDatasetService.selectedElement.sort(compareNumbers);
         this.sharedDatasetService.multiSelectedNodeSubject$.next(this.sharedDatasetService.selectedElement);
     }
+
 
 
 

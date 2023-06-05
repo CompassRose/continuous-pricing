@@ -225,7 +225,6 @@ export interface IBidPriceService {
 
 export class BidPriceAspNetService {
 
-  readonly airportCodes_URL = './assets/csv/airports_small.csv';
   private flightClient: FlightClient;
   private competitiveFareDetails: CompetitiveFareDetails
   private bpService: IBidPriceService;
@@ -235,9 +234,11 @@ export class BidPriceAspNetService {
   public readonly bucketUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/bucketConfigs.json';
   public readonly continuousFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/continuousFares.json';
   public readonly competetiveFaresUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/competitiveFares.json';
-  /// Broken
+
   public readonly flightClientUrl: string = 'https://rms-json-continuous-price.s3.us-west-2.amazonaws.com/flightDetails.json';
 
+  //local file temporarily
+  public readonly flightDetailsFromLocal = './assets/config/flightDetails.json';
   public apiTarget;
 
 
@@ -253,7 +254,7 @@ export class BidPriceAspNetService {
     return this.http.get(this.flightClientUrl)
       .pipe(
         map((response: FlightObject) => {
-          console.log('FlightObject ', response)
+          // console.log('FlightObject ', response)
           return response;
         }),
         catchError(error => {
@@ -275,19 +276,6 @@ export class BidPriceAspNetService {
         }),
       );
 
-  }
-
-
-  public apiFlightClientValues(): Observable<FlightClientDetails[]> {
-    return this.http.get(this.flightClientUrl)
-      .pipe(
-        map((response: any) => {
-          return response;
-        }),
-        catchError(error => {
-          throw error;
-        }),
-      );
   }
 
 

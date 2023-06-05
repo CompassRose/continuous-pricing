@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Subject } from 'rxjs'
 import { BarSeries, BucketStructure } from '../models/dashboard.model';
 import { SharedDatasetService } from './shared-datasets.service';
 import { ConstraintType } from '../dashboard-constants';
@@ -14,11 +15,13 @@ export class BidPriceCalcsService {
     colorRange: string[] = [];
     public barSeries: BarSeries[] = [];
     public selectedIndex: number;
-
+    public showCompetitors: boolean = false;
+    public showCompetitionSubject$ = new Subject<boolean>();
 
     constructor(private sharedDatasetService: SharedDatasetService) { }
 
 
+    // Generates contrasting text/background color
     public generateContrastingFontColors(bgColor: string): string {
 
         const getRGB = (c) => {
@@ -120,6 +123,7 @@ export class BidPriceCalcsService {
                 }
             }
         }
+        // console.log('result ', result)
         return result;
     }
 
@@ -140,8 +144,6 @@ export class BidPriceCalcsService {
 
 
 
-
-
     // Places lines vertically with labels on top of chart signifying fare call regions
     public markVerticalLineSellingValues() {
 
@@ -153,7 +155,6 @@ export class BidPriceCalcsService {
         const fc = this.findMatchingBucketForBidPrice(this.sharedDatasetService.dynamicBidPrices[sellingPoint]);
 
         const yPos = this.sharedDatasetService.bucketDetailsFromApi[0].fare - this.sharedDatasetService.competitiveFareValues[0].fare
-
 
         const fareClass = `${this.sharedDatasetService.competitiveFareValues[0].carrier}`;
         // Vertical Active Class/Value Selling Line
@@ -180,7 +181,7 @@ export class BidPriceCalcsService {
                         name: 'testLabel',
                         id: 'clickedLabel',
                         position: 'start',
-                        show: true,
+                        show: this.showCompetitors ? true : false,
                         distance: [0, -yPos],
                         formatter: () => {
                             return `{a|${fareClass}: ${this.sharedDatasetService.competitiveFareValues[0].fare}}`

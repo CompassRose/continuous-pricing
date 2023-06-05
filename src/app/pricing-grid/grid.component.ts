@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { DOCUMENT } from "@angular/common";
-import { Subscription, map, merge, Observable, debounceTime, of, switchMap, BehaviorSubject, pairwise, scan, combineLatest, Subject } from 'rxjs';
+import { Subscription, map, merge, Observable, debounceTime, of, switchMap, BehaviorSubject, pairwise, scan } from 'rxjs';
 import { SharedDatasetService } from '../services/shared-datasets.service';
 import { BookingControlService } from '../services/booking-control-service';
 import { KeyCode } from './lib/keycodes';
@@ -12,6 +13,7 @@ import { BidPriceAspNetService, BidPriceWebViewService } from '../api/au-visuali
 import { FlightClientDetails, BucketStructure, FlightObject, CompetitiveFareDetails, CabinContinuousFares } from '../models/dashboard.model';
 
 import { DateFormatterPipe } from '../shared/pipes/dateModifierPipe';
+import { BidPriceCalcsService } from '../services/au-visualization-calcs-service';
 
 const dateModifierPipe = new DateFormatterPipe();
 
@@ -88,22 +90,23 @@ export class ContinousPricingComponent implements OnInit {
 
   public derivedOrigin: string;
   public derivedDestination: string;
+  public odMasterKey: number;
 
   constructor(
     @Inject(DOCUMENT) private readonly documentRef: Document,
     public dashboardApi: BidPriceAspNetService,
     public bookingControlService: BookingControlService,
+    public bidPriceCalcsService: BidPriceCalcsService,
     public themeControlService: ThemeControlService,
-    public sharedDatasetService: SharedDatasetService) {
+    public sharedDatasetService: SharedDatasetService,
+    private route: ActivatedRoute) {
   }
 
   // Called onStart and from flight dropdown
   public flightSelectControl(flightSpecifics) {
 
     this.sharedDatasetService.totalBookingsCollector = 0;
-
     // console.log(' flightSpecifics ', flightSpecifics)
-
     const flightNum = this.sharedDatasetService.allNewFlightValues.flightline.split(' ');
     this.selectedFlightKey = this.sharedDatasetService.allNewFlightValues.oDmasterKey;
 
@@ -124,16 +127,12 @@ export class ContinousPricingComponent implements OnInit {
       arrivalTime: formattedArrivalTime,
       airlineCode: flightSpecifics.airlineCode
     }
-    //console.log('selectedFlightValues ', this.selectedFlightValues)
+
     this.sharedDatasetService.selectedCabinIndex = flightSpecifics.cabinContinuousFares.length - 1;
-
     this.sharedDatasetService.cabinOptions = flightSpecifics.cabinContinuousFares;
-
     this.apiActiveCabinSubject$.next(this.sharedDatasetService.cabinOptions[this.sharedDatasetService.selectedCabinIndex]);
-
     this.apiActiveFlightSubject$.next(this.selectedFlightValues);
     this.cabinSelection(flightSpecifics.cabinContinuousFares[flightSpecifics.cabinContinuousFares.length - 1]);
-
   }
 
 
@@ -143,16 +142,20 @@ export class ContinousPricingComponent implements OnInit {
   }
 
 
+  public toggleCompetitorsDetails() {
+    this.bidPriceCalcsService.showCompetitors = !this.bidPriceCalcsService.showCompetitors;
+    this.bidPriceCalcsService.showCompetitionSubject$.next(this.bidPriceCalcsService.showCompetitors)
+  }
+
   /// Works in shared- datasets
   public cabinSelection(ev) {
-
     let savedCabinValuesPh;
     const foundIdx = this.sharedDatasetService.cabinOptions.findIndex(x => {
       return x.cabinLetter === ev.cabinLetter;
     });
 
 
-    console.log('cabinSelection ', foundIdx, ' this.selectedFlightValues.odMasterKey ', this.selectedFlightValues.odMasterKey);
+    // console.log('cabinSelection ', foundIdx, ' this.selectedFlightValues.odMasterKey ', this.selectedFlightValues.odMasterKey);
 
     this.sharedDatasetService.selectedCabinIndex = foundIdx;
 
@@ -161,7 +164,7 @@ export class ContinousPricingComponent implements OnInit {
     }
 
     if (this.sharedDatasetService.cabinOptions[foundIdx].cabinLetter === ev.cabinLetter) {
-      console.log('\n\n\n TRUE  savedCabTrueinValuesPh ', savedCabinValuesPh)
+      // console.log('\n\n\n TRUE  savedCabTrueinValuesPh ', savedCabinValuesPh)
     }
 
     this.sharedDatasetService.changeCabinSelection(foundIdx);
@@ -175,6 +178,18 @@ export class ContinousPricingComponent implements OnInit {
 
 
   public ngOnInit() {
+
+    //
+    // Returns Master Key fryom AirRm
+    //
+    this.route.paramMap
+      .subscribe((params: ParamMap) => {
+
+        if (this.odMasterKey !== +params.get('id')) {
+          this.odMasterKey = +params.get('id');
+          console.log('\n[[ From AirRm  odMasterKey ]] (', this.odMasterKey, ')\n\n')
+        }
+      });
 
     //
     // Returns All of the selected Fllight Inforamtion
